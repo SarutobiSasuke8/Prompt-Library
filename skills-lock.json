@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "skills": {
+    "aave-v3-liquidation-watcher-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "06ecda044bcbda192ec5b0e6738f5e9211a59ee15ce7311cf6f265ee83643911"
+    },
+    "amazon-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "cb16b195e5b5ea4ae7d18957aa66ab45c716ac506eb61ce719171b942f78080d"
+    },
+    "coinmarketcap-agent-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "468fd3c563834bce8bba063fdad2931b9972a966060cd31002dfc5bc6b75325d"
+    },
+    "cryptoquant-pro-2-10-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "e92cc7eafff1d77d2c418db77f5cb0b6cbea13c88d7efe6858c2023514a991bd"
+    },
+    "gas-war-sniper-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "256ff2e2ab9edea845cd17195ce663c9e6455c63397af2434d7f2960c93e4fb1"
+    },
+    "google-maps-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "8f188f024d2e6f72dd72fc317003c7e4b8cab5d012fb5cec6e8e9b5636acec2e"
+    },
+    "google-search-agent-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "8d21d2dfb9137851a6de0cb989ffd54c6ccaa01384ddafad4749fec579390168"
+    },
+    "instagram-agent-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "abf0a7e4056511e346295f86f1c96cd21d800a603f745cb437cca4ba8ad5150f"
+    },
+    "layerzero-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "eb9fde22e5f3fb59a054a0bdd2a75204d0cc66d0ba518fd244cf18ff2b250069"
+    },
+    "linkedin-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "d0ae6bc21d069fea6474ccd4c866c0930917a0cb2aafef99357f4bcdaab873b5"
+    },
+    "messari-btc-eth-tracker-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "8a7806bd8d96ab42e846a72bdc16487fd078a9ac8a602911ff70ece604281b34"
+    },
+    "predexon-prediction-market-agent-1-5-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "5e74dee265eb04b458af377fdb3241ae4bbe504904c67b98c75202e46cfdda7e"
+    },
+    "predexon-prediction-market-trading-1-5-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "1b92f484674fa5cde81b2c1ff45922d1b92cce24468e36000fb984721173ef14"
+    },
+    "squid-router-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "a391829dec52c98979bdef24a13187f86f129ce9c15d90c41192694a241ef2f1"
+    },
+    "teneo-agents": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "19da458d9923e2aea5b7f882b2e579b9e6997ebddbb88a9c723fa0092420886f"
+    },
+    "teneo-cli": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "5e82d15cad2f724788361186b968c5bd20ca76c2a5c11a86143d650c3d622696"
+    },
+    "tiktok-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "0c650ba19763e0b8df9932b29262b2b6c97901b398ae444184ec6f3dff5f7fdf"
+    },
+    "uniswap-monitor-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "cfbeb90f4af650a4aa998ffe679ff15a2597a95f59f92cf6b3d44b0a77ed89ae"
+    },
+    "vc-attention-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "14dabfc982a3f83a729c330c8226fa588cac535e433807d9973ef44866cfc15b"
+    },
+    "x-platform-agent-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "86d3dc8ccf15f2aea2f8a75d1b45dcddd379d024431e3eff4326a0ee64215327"
+    },
+    "youtube-teneo": {
+      "source": "TeneoProtocolAI/teneo-skills",
+      "sourceType": "github",
+      "computedHash": "75c75f0e9da1d9a597da25ff3edbd8fd4e7c8e98156d2e9dc3bcce68d2171021"
+    }
+  }
+}

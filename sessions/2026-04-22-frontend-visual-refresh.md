@@ -38,7 +38,9 @@ untouched:
   - prompt-library/ROADMAP.md
   - prompt-library/README.md
   - .github/workflows/deploy.yml
-commits: []                  # filled after commit
+commits:
+  - 135d1ec   # Polish frontend visuals within design-system constraints
+  - 53bc051   # Add sessions/ folder with YAML + Obsidian-style session log
 related:
   - [[phase-3-4-frontend]]
   - [[phase-5-deploy-docs]]

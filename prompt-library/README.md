@@ -207,10 +207,11 @@ that touches `prompt-library/**`.
 
 ### Workflow
 
-See [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml). It
-uploads only the `prompt-library/` subdirectory (the rest of the containing
-repo is unrelated tooling). If this project ever moves to its own dedicated
-repo, change the single `path` line — see the comment inside the workflow.
+See [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) at the
+**repo root** (not inside this folder). It uploads only the `prompt-library/`
+subdirectory as the Pages artifact. The rest of the containing repo is
+unrelated tooling. If this project ever moves to its own dedicated repo,
+change the single `path` line — see the comment inside the workflow.
 
 ---
 

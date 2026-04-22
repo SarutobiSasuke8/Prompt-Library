@@ -46,7 +46,7 @@ merged before the site goes live.
 - `prompt-library/README.md`   — public project doc
 - `prompt-library/CONTRIBUTING.md` — schema + quality bar + PR flow
 - `prompt-library/ROADMAP.md`  — v2 backend features parked here
-- `prompt-library/.github/workflows/deploy.yml` — Pages deploy
+- `.github/workflows/deploy.yml` — Pages deploy (lives at repo root, not under prompt-library/)
 
 ## Current state at a glance
 

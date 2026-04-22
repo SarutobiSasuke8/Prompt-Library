@@ -39,18 +39,19 @@ don't. Read `ROADMAP.md`. Backend features are parked until v1 has users.
 ## File layout
 
 ```
-prompt-library/
-├── index.html              # app shell + all runtime JS (inline)
-├── prompts.js              # CATEGORIES map + PROMPTS array — the data
-├── style.css               # all styles; dark theme, mobile-first
-├── add-prompt.html         # LOCAL capture utility, not linked from site
-├── CLAUDE.md               # this file
-├── README.md               # public-facing project doc
-├── CONTRIBUTING.md         # schema, quality bar, PR flow
-├── ROADMAP.md              # v1 checklist + v2 parking lot
-└── .github/
-    └── workflows/
-        └── deploy.yml      # GitHub Pages deploy on push to main
+<repo root>/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # GitHub Pages deploy on push to main (must live at repo root)
+└── prompt-library/
+    ├── index.html          # app shell + all runtime JS (inline)
+    ├── prompts.js          # CATEGORIES map + PROMPTS array — the data
+    ├── style.css           # all styles; dark theme, mobile-first
+    ├── add-prompt.html     # LOCAL capture utility, not linked from site
+    ├── CLAUDE.md           # this file
+    ├── README.md           # public-facing project doc
+    ├── CONTRIBUTING.md     # schema, quality bar, PR flow
+    └── ROADMAP.md          # v1 checklist + v2 parking lot
 ```
 
 ### Responsibility of each file
@@ -248,7 +249,9 @@ The filter chip auto-appears. No changes to `index.html` are needed.
 
 ## Deploying
 
-GitHub Actions workflow: `.github/workflows/deploy.yml`.
+GitHub Actions workflow: `.github/workflows/deploy.yml` — located at the
+**repo root**, not inside `prompt-library/`. GitHub Actions only recognizes
+workflow files at `<repo-root>/.github/workflows/`.
 
 - Trigger: push to `main` touching `prompt-library/**` or the workflow itself
 - Also has `workflow_dispatch` for manual runs

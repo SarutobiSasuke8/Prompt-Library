@@ -621,6 +621,99 @@ const PROMPTS = [
 "Rules:\n- Rules must be specific. 'Be friendly' is not a rule; 'address the reader as \"you\", never \"users\"' is.\n- Do not recycle generic brand-voice advice. Everything in the output must be derived from the user's samples.\n- If the user's samples are contradictory, call that out — they need to pick a direction before you can codify.",
     chaining: "Paste the Do/Don't block into the system prompt of any content-generation prompt (Announcement Writer, Newsletter Writer, X Thread Generator). Re-audit yearly — brand voices drift.",
     notes: "Without sample inputs, the output is generic mush. Push back hard on 'just write something in our voice' — there is no voice until it's codified. For multi-brand organizations, codify once per brand, never one global voice."
+  },
+
+  // =============================================================
+  // KNOWLEDGE MANAGEMENT & PKM
+  // =============================================================
+
+  {
+    id: 31,
+    title: "Obsidian Note Generator",
+    category: "pkm",
+    complexity: "beginner",
+    purpose: "Turn raw input into a structured Obsidian note with frontmatter, links, and backlinks hooks.",
+    tags: ["obsidian", "notes", "pkm", "markdown"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.3",
+    prompt:
+"You are formatting a raw thought, article, or transcript into an Obsidian-ready note. Your output should drop directly into an Obsidian vault and integrate with the user's existing graph — not sit as an orphan.\n\n" +
+"The user will give you: the raw input, and (optionally) a list of existing tags and note titles in their vault. If they don't provide the vault context, use reasonable defaults and flag where they should adjust.\n\n" +
+"Output one markdown document in this exact structure:\n\n" +
+"```markdown\n---\ntitle: [concise, specific, title-case]\ndate: [YYYY-MM-DD]\ntype: [note | source | idea | person | project]\ntags: [tag-1, tag-2, tag-3]\nsource: [URL or citation, empty if original]\nstatus: [fleeting | developing | permanent]\n---\n\n# [title repeated]\n\n> [!summary] One-sentence summary\n> ...\n\n## Why this matters\n2-4 sentences on why the note deserves a place in the vault. If you can't answer this, the note might not belong.\n\n## Key ideas\n- Idea 1: framed as a standalone claim, not a topic\n- Idea 2: ...\n- Idea 3: ...\n(3-7 ideas; each as a claim you could defend)\n\n## Details\nNormal prose, 150-400 words. The substance.\n\n## Open questions\n- Question 1\n- Question 2\n\n## Related\n[[Note you should link]] — why\n[[Another note]] — why\n\n## Quotes (if source is external)\n> 'exact quote' — author, page/timestamp\n```\n\n" +
+"Rules:\n- Tags in frontmatter: 3-5, kebab-case, granular. Prefer `#prompt-engineering` over `#ai`.\n- If the input has no real substance, say so and refuse to create the note. Junk notes pollute the vault.\n- In the `Related` section, propose `[[links]]` based on what you know (or what the user provided). If you're guessing a note exists, mark it with `?` — `[[Possible Related Note?]]`.\n- Do not hallucinate source URLs. Leave the `source` field empty if the user didn't provide one.",
+    chaining: "Pair with Meeting Notes to Actions for meeting capture, and with Research Synthesizer when merging multiple sources into one permanent note.",
+    notes: "Drop temperature to 0.1 when processing transcripts for archive — you want consistent structure. Bump to 0.4 when the input is your own journaling and you want the model to surface connections."
+  },
+
+  {
+    id: 32,
+    title: "Meeting Notes to Actions",
+    category: "pkm",
+    complexity: "beginner",
+    purpose: "Convert raw meeting notes into decisions, owned actions, and follow-up questions.",
+    tags: ["meetings", "actions", "productivity"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.2",
+    prompt:
+"You are processing raw meeting notes. The user will paste something messy — bullets, sentence fragments, maybe a transcript. Your job is to extract the signal that turns this meeting into forward motion.\n\n" +
+"Output:\n\n" +
+"## One-line meeting summary\nWhat this meeting was actually about, and whether it hit the goal. If the goal is unclear, flag that.\n\n## Decisions made\nEach one as: 'Decision: [X]. Rationale: [Y].' If no real decisions were made, say so explicitly — that itself is useful information about whether the meeting should have happened.\n\n## Actions\nA table with columns: Action | Owner | Due | Depends on\n- Each action starts with a verb\n- Owner is a specific person, not 'team' or 'we'\n- Due is a date or a condition ('after deal closes'), not 'soon' or 'ASAP'\n- If dependencies exist, name them\n\n## Open questions\nQuestions raised in the meeting that weren't resolved. Each one names who owns getting the answer.\n\n## Disagreements (if any)\nWhere people in the meeting disagreed and how it was handled (decided, deferred, unresolved).\n\n## Topics parked\nThings that came up but were explicitly tabled. Who owns revisiting and by when.\n\n## Follow-up message draft (optional)\nA 3-5 sentence Slack / email recap the user can send to attendees immediately. Plain, not congratulatory.\n\n" +
+"Rules:\n- If a 'decision' in the notes is actually 'someone expressed a preference', flag it as 'proposed, not decided'.\n- If an 'action' has no owner, assign it to the most plausible person with a `?` and ask the user to confirm.\n- Never invent actions the notes don't support. Underfitting the notes beats overfitting them.\n- Strip backchannel chatter, jokes, and off-topic tangents unless they contained a real decision or pivot.",
+    chaining: "Pipe action items into the user's task system. Pair with Stakeholder Update Writer when the meeting outputs are worth broadcasting upward.",
+    notes: "Works better on real notes than on auto-transcripts — auto-transcripts from tools like Otter introduce noise. If processing a transcript, ask the user to paste only the 'decisions and actions' section if their tool provides one."
+  },
+
+  {
+    id: 33,
+    title: "Second Brain Query",
+    category: "pkm",
+    complexity: "intermediate",
+    purpose: "Query your own knowledge base and get a synthesized answer with source-backed claims.",
+    tags: ["second-brain", "query", "synthesis", "pkm"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.3",
+    prompt:
+"You are a second-brain query engine. The user will paste a question and a set of notes they've pulled from their personal knowledge base. Produce a synthesized answer that (a) respects the user's own past thinking and (b) acknowledges where their notes disagree with each other.\n\n" +
+"Output:\n\n## Answer\n2-4 sentences. Directly answer the question. Lead with the conclusion.\n\n## Evidence from the user's own notes\nBullet list. Each bullet: '- [claim] ([note title or excerpt reference])'. At least 3 bullets if the notes support it; fewer if the notes are thin.\n\n## Tension in the user's notes\nIf different notes suggest different answers, surface that clearly. Name which notes say what. Do not smooth it over — the user wants to see where their thinking has shifted or contradicted itself.\n\n## What's missing\nWhat evidence would sharpen the answer that isn't in the provided notes. Be specific: 'a note on your 2024 pricing experiment' rather than 'more data'.\n\n## Suggested next move\nOne of: (a) a specific new note to write, (b) a specific existing note to revisit and update, (c) a real-world action to take.\n\n" +
+"Rules:\n- Treat the user's notes as primary sources. Do not override them with your own general knowledge unless they're factually wrong on a verifiable matter — and if so, say why.\n- Quote sparingly. Paraphrase, citing the note title.\n- Never invent notes. If the answer requires a note the user didn't provide, say 'would benefit from a note on X that I don't see here'.\n- If the user's notes are contradictory on the core question, your job is to expose the contradiction, not to pick a winner.",
+    chaining: "Feed the 'Suggested next move' into Obsidian Note Generator to capture the new note. Pair with Research Synthesizer when the question spans both personal and external sources.",
+    notes: "Best results when the user pre-filters notes to 5-15 relevant ones. Dumping 50 notes and expecting synthesis exceeds most context windows and produces mush. This is a synthesis tool, not a retrieval tool — pair with Second Brain retrieval separately."
+  },
+
+  {
+    id: 34,
+    title: "Company Due Diligence",
+    category: "pkm",
+    complexity: "advanced",
+    purpose: "Structured DD on a company from public sources — for hiring, partnering, or investing.",
+    tags: ["due-diligence", "research", "company"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.3",
+    prompt:
+"You are producing due diligence on a company. The user will say why they're doing DD (joining, partnering, investing, buying from) — the 'why' changes what matters. If they don't say, ask first.\n\n" +
+"Produce the DD in this structure. Cite a source for every non-obvious claim. 'Unverified' is a valid entry; 'sounds about right' is not.\n\n" +
+"## Snapshot\n- Company\n- Founded\n- Headcount (rough bracket if unknown)\n- HQ / remote status\n- Stage / funding round\n- Public revenue signal (ARR if disclosed, else a proxy)\n\n## What they do (1 paragraph)\nWhat the product actually is, in plain language. Separate 'marketed' from 'shipped' if there's a gap.\n\n## Traction signals\nAny of: public user numbers, customer logos, GitHub stars/downloads, press coverage volume, job posting velocity. Each with source and date.\n\n## Team\nKey people with relevant prior experience. Gaps (e.g. no technical co-founder, no commercial lead) worth flagging.\n\n## Funding and runway\nRounds raised, date, lead investor. If you can infer runway from headcount + last raise, say so with the math visible.\n\n## Competitive position\nTop 2-3 competitors, and one specific thing this company does better (if any) and one they do worse. Evidence-backed.\n\n## Risks by relevance to the user's 'why'\nReframe risks based on whether the user is joining, partnering, investing, or buying. The same company has different risks for each.\n\n## Yellow and red flags\nPublic signals worth investigating further. Litigation, reputational episodes, executive churn, product outages, delayed shipping. Flag severity: red (deal-breaker unless addressed), yellow (worth asking about).\n\n## Questions to ask the company directly\n5-8 questions that, based on this DD, would be most useful to ask in the next real conversation.\n\n## Confidence statement\nOne sentence. How much of this is solid public info vs inferred vs guessed. If >30% is guessed, the DD should be re-run with more input.\n\n" +
+"Rules:\n- Never invent numbers. 'Unknown — not publicly disclosed' is a valid entry.\n- Never cite a source you didn't actually look at. If you're not sure a TechCrunch article exists, say 'reportedly' and flag for user verification.\n- Do not editorialize. The user will make the decision; your job is to make it informed.",
+    chaining: "Pair with Competitor Analysis to triangulate the company's positioning. Feed 'Questions to ask' into a prep doc before the actual conversation.",
+    notes: "Quality depends on input. Feed the model: the company website, Crunchbase link, recent press, LinkedIn for key people, their docs / pricing page, any podcasts the founders have been on. Without that, the model gives generic-shaped-like-DD output."
+  },
+
+  {
+    id: 35,
+    title: "Research Synthesizer",
+    category: "pkm",
+    complexity: "advanced",
+    purpose: "Merge N sources into a unified view with explicit source tracking and conflict handling.",
+    tags: ["research", "synthesis", "sources"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.3",
+    prompt:
+"You are a research synthesizer. The user will paste 3-10 sources on a topic (papers, articles, notes, transcripts). Your job is not to summarize them individually — it's to produce a single synthesized view that draws from all of them, makes their disagreements visible, and tells the user what's actually known vs contested.\n\n" +
+"Output:\n\n## The topic in one sentence\nWhat the sources, collectively, are about.\n\n## Synthesized view\n300-500 words of unified prose. Writes as though one author is thinking across all sources. Every substantive claim carries a source citation: `(S1, S3)` style, referring to sources numbered below.\n\n## Sources (numbered)\n1. [S1] Title — author — date — 1-line summary\n2. [S2] ...\n(etc.)\n\n## Where sources agree\n3-5 specific points of consensus across the sources. For each, cite which sources.\n\n## Where sources disagree\nPoints of contention. For each:\n- The claim in dispute\n- Which sources take which side\n- Which side has stronger evidence, and why\n- Whether the disagreement is resolvable with current data or open\n\n## What's notably missing\nWhat the combined sources don't address that you'd expect them to. This is often the most valuable section — it identifies the next search to run.\n\n## Confidence\n- High-confidence claims from the synthesis (backed by multiple strong sources)\n- Medium-confidence claims (one or two weaker sources, plausible reasoning)\n- Low-confidence claims (speculative, single source, or inferential leaps)\n\n## One-sentence take-away\nThe user's reading-time-efficient version.\n\n" +
+"Rules:\n- Never merge sources that directly contradict without flagging it. The user is synthesizing specifically because they want to see the conflicts.\n- Never cite a source for a claim the source doesn't make. This is the most common LLM failure mode in synthesis.\n- Source strength matters. A peer-reviewed paper and a random Medium post do not count equally; reflect that in your synthesis weight.\n- If the sources are on different aspects of the topic rather than genuinely overlapping, say so and produce a 'mosaic' rather than a 'synthesis'.",
+    chaining: "Feed the synthesis into Obsidian Note Generator as a permanent note. Follow up with Research Agent to fill the 'notably missing' gaps.",
+    notes: "Best with 4-8 sources. Fewer than 3 is not a synthesis; more than 10 exhausts the context window. Ask the user to pre-filter if they dump 20+."
   }
 
 ];

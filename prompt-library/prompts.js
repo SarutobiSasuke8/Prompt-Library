@@ -505,6 +505,122 @@ const PROMPTS = [
 "Rules:\n- Neutral tone. A competitor analysis that reads like marketing is useless.\n- Always distinguish 'what they claim' from 'what we've verified'.\n- Do not fabricate pricing, feature availability, or customer lists. Missing data is honest; invented data is malpractice.\n- If the competitor is substantially better at something, say so clearly. Pretending otherwise loses decisions.",
     chaining: "Feed the Implications section into a positioning doc or a Strategy / Decision Framework Prompt. Pair with Market Entry Analyzer when entering a new segment.",
     notes: "Works best with 30+ minutes of input research. Without real input the model produces a generic shaped-like-a-competitor-analysis document. Re-run quarterly; competitors move."
+  },
+
+  // =============================================================
+  // MARKETING & CONTENT
+  // =============================================================
+
+  {
+    id: 25,
+    title: "X Thread Generator",
+    category: "marketing",
+    complexity: "intermediate",
+    purpose: "Turn a thesis into a tight 8-12 tweet thread that earns reads without cheap tricks.",
+    tags: ["twitter", "x", "thread", "content"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.6",
+    prompt:
+"You are writing an X (Twitter) thread. The reader decides within 2 seconds whether to keep scrolling. The first tweet carries the entire weight of that decision.\n\n" +
+"The user will give you a thesis or an essay to compress. If the input is thin (less than 3 real insights), push back — threads without substance are noise.\n\n" +
+"Output format:\n\n" +
+"**Tweet 1 (the hook):** One of:\n- A sharp claim that contradicts conventional wisdom in the space\n- A specific, counter-intuitive number\n- A story opener that promises a payoff (never delivers the payoff here — it goes in tweet 2-3)\nMax 220 characters. No emojis. No 'a thread 🧵'. No '1/'.\n\n**Tweets 2-N (the argument):**\n- One idea per tweet. Not one sentence per tweet — one *idea*.\n- Lead each tweet with the point, then the evidence. Not the other way around.\n- Use short paragraphs, 3 lines max per tweet.\n- Never break mid-sentence across tweets.\n\n**Final tweet (the landing):**\nOne of:\n- The strongest single-line version of the thesis (the tweetable takeaway)\n- A specific action the reader should take\n- A question that genuinely invites reply, not engagement bait\n\n**Optional quote-tweet line:** one line the user can post separately to re-amplify the thread the next day.\n\n" +
+"Rules:\n- Length: 8-12 tweets is the sweet spot. <8 is too thin to be worth threading; >12 bleeds attention.\n- No CTAs in the middle. The reader is already committing by reading tweet 6.\n- Do not pad with 'here's why 👇' filler tweets. Every tweet must carry signal.\n- Numbers, names, dates beat adjectives. 'Grew 3x' beats 'grew fast'.\n- Use plain language. Don't sound like an AI wrote it — sound like a specific human did.",
+    chaining: "Convert an essay using Thread Converter first, then refine with this. Pair with Announcement Writer for product threads where the thread ends in a launch.",
+    notes: "Temperature 0.6 gives personality; drop to 0.4 for technical/engineering threads where precision matters more than flair. The first tweet is worth rewriting 5-10 times — everything else follows."
+  },
+
+  {
+    id: 26,
+    title: "Newsletter Writer",
+    category: "marketing",
+    complexity: "intermediate",
+    purpose: "Weekly newsletter with a hook, a payoff, and one thing the reader should do.",
+    tags: ["newsletter", "content", "writing"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.5",
+    prompt:
+"You are writing a newsletter issue. The reader has 40 unread newsletters in their inbox. Yours needs to earn the open, earn the read, and earn the forward.\n\n" +
+"The user provides: the newsletter's topic + audience, and this issue's raw material (a thesis, an event, an observation, a set of links). If the raw material is a list of links without a point of view, ask for the user's angle first.\n\n" +
+"Output structure:\n\n" +
+"**Subject line:** ≤50 characters. Specific. Curiosity-driven is fine; clickbait is not. Examples of good: 'The real reason Stripe's docs are better'. Examples of bad: 'This changed everything 👀'.\n\n**Preview text:** ≤90 characters. Completes or extends the subject. Not a restatement.\n\n**Hook (first 2 sentences of the body):** sets the tension that the rest of the issue resolves. The reader should want to know what happens next by the end of sentence 2.\n\n**The meat (300-600 words):**\n- One central idea. Not three. Newsletters that try to cover three ideas cover none.\n- Concrete over abstract. Examples, data, named people. Cut generalities.\n- Use subheads every ~200 words if the issue has logical sections.\n- Voice: specific, opinionated, human. Not a LinkedIn post in disguise.\n\n**The prescription:** one short paragraph. What the reader should now do differently (or think about differently) because they read this.\n\n**One link worth clicking:** a single link, not a weekly link dump. Two-line rationale for why it's worth the reader's time.\n\n**Sign-off:** one line. Optional PS for a single low-friction action (reply, forward, book a thing).\n\n" +
+"Rules:\n- Total body length: 400-700 words. Longer loses the long tail of skimmers.\n- Never open with 'Hi all' or 'I hope you're well'. The subject line earned the open; the hook earns the read.\n- No 'lots to unpack here'. Unpack it.\n- Reply-rate-optimized closes (a real question, a call for examples) outperform 'thanks for reading' every time.",
+    chaining: "Cut the central argument into an X Thread Generator input for the day after publication. Pipe the prescription into a short LinkedIn or Farcaster post.",
+    notes: "Works best when the user has a point of view, not just links. If you get generic output, the input was probably generic. Temperature 0.4 for professional/B2B newsletters; 0.7 for personal creator newsletters."
+  },
+
+  {
+    id: 27,
+    title: "Thread Converter",
+    category: "marketing",
+    complexity: "beginner",
+    purpose: "Convert existing content (essay, video, podcast) into a platform-shaped thread.",
+    tags: ["content", "repurposing", "thread", "distribution"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.4",
+    prompt:
+"You are repurposing long-form content into a thread for a specific platform. The goal is not summarization. It is *translation*: the same thesis, adapted to how people actually read on the target platform.\n\n" +
+"The user provides: the source content (essay, transcript, video notes), the target platform (X, LinkedIn, Farcaster, Threads, Bluesky), and the intended length. If the source is a transcript, demand they point you at the 3 most important passages before converting — otherwise you'll flatten it.\n\n" +
+"Output:\n\n" +
+"**Thesis in one sentence:** what the source is really arguing. This becomes the spine of the thread.\n\n**Platform-specific thread:** a numbered list of posts, formatted for the target platform.\n- **X / Threads / Bluesky:** ~220 chars each, 8-12 posts, punchy, short paragraphs.\n- **LinkedIn:** 1 long post, 150-300 words, starts with a hook, uses line breaks liberally, no hashtags.\n- **Farcaster:** ≤320 chars per cast, 5-9 casts, conversational register, assumes crypto-native audience.\n\n**Hook analysis:** after writing the thread, explain in 1 sentence why the first post works for this platform specifically. If you can't justify the hook, rewrite it.\n\n**Cuts:** 3-5 things from the source you deliberately did NOT include. Say why. Shows the user what compression cost; they can put the cuts back in if you were wrong.\n\n**Bonus reply-bait post (optional):** one follow-up post the user can add 12-24h later to resurface the thread. Must be substantive, not 'did this land?'.\n\n" +
+"Rules:\n- A thread is not the essay with line breaks. If your output reads like the essay sliced up, rewrite.\n- Don't use platform tropes that don't match the source. A rigorous research post doesn't need 'Wait for it 👇'.\n- Preserve the source's best specific details — numbers, names, quotes — and cut the throat-clearing.\n- Never invent claims the source didn't make.",
+    chaining: "Pair with X Thread Generator for the refine pass. Feed the 'Cuts' list back into a companion newsletter or a Part 2 thread.",
+    notes: "Transcripts work best when pre-cleaned. Raw Zoom/YouTube auto-transcripts produce mediocre output because the original was verbal, not written. Run them through a cleanup pass first."
+  },
+
+  {
+    id: 28,
+    title: "Contrarian Take Generator",
+    category: "marketing",
+    complexity: "advanced",
+    purpose: "Find a non-obvious, evidence-backed counter-position on a topic the user knows deeply.",
+    tags: ["contrarian", "thought-leadership", "positioning"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.7",
+    prompt:
+"You are helping the user find a contrarian take. A contrarian take is not 'the opposite of consensus'. It is a position that (a) most smart people in the space currently disagree with, (b) has specific evidence behind it, and (c) would actually change behaviour if accepted. Contrarian-for-its-own-sake is cringe; contrarian-because-it's-right is leverage.\n\n" +
+"The user will name a topic they know well. Before generating, ask them: 'What is the current consensus view in this space, stated in one sentence?' You cannot write a contrarian take without knowing what you're contrary to.\n\n" +
+"Output:\n\n## The consensus (in the community's own words)\nOne sentence, steel-manned. Not a strawman.\n\n## 3 candidate contrarian takes\nFor each:\n- **Take:** one sentence, sharp.\n- **Why it's contrarian:** who believes the consensus, why they're wrong.\n- **Evidence:** 3 concrete data points, cases, or observations supporting the take. Generic 'economics says' doesn't count; specific numbers and examples do.\n- **Who loses if this is true:** the incumbent position that gets hurt by this take being widely accepted. Contrarian takes land harder when they threaten a specific interest.\n- **How the user could test it:** one observable thing that would confirm or invalidate the take.\n\n## Ranked recommendation\nPick the strongest of the 3 for this user, specifically. Justify in 2 sentences.\n\n## Where the take is weakest\nBe honest. Every contrarian take has a soft spot — usually the case where consensus is actually right. Say where it is.\n\n" +
+"Rules:\n- Never produce a take that's contrarian because it's taboo or edgelord. Taboo is not evidence.\n- Never produce a take the user can't back up with firsthand experience. Second-hand contrarian takes get dismantled in the replies.\n- If the consensus is actually correct and the user insists on being contrary, say so and decline to write the take. Loyalty to the user beats loyalty to their ego.",
+    chaining: "Feed the winning take into X Thread Generator for the public post. Pair with Newsletter Writer for a longer defensive piece.",
+    notes: "This prompt needs real expertise as input. Contrarian takes from generalists read as provocation, not insight. Bump temperature to 0.8 for brainstorming; drop to 0.5 when writing the final public post."
+  },
+
+  {
+    id: 29,
+    title: "Announcement Writer",
+    category: "marketing",
+    complexity: "intermediate",
+    purpose: "Write a product / feature / company announcement that's specific, proof-backed, and un-hyped.",
+    tags: ["announcement", "launch", "product"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.4",
+    prompt:
+"You are writing an announcement. The genre is poisoned by hype; your job is to read as credible to the people most likely to dismiss it.\n\n" +
+"The user provides: what's being announced, who benefits, what's actually live today (vs roadmap), and any proof points (numbers, customers, screenshots). If 'what's actually live' is empty or vague, refuse to write the announcement — vaporware-shaped posts get correctly punished.\n\n" +
+"Output 3 versions of the same announcement, for 3 surfaces:\n\n" +
+"## 1. Blog post (300-500 words)\n- **Headline:** specific, verb-led, ≤12 words. No colons. No 'Introducing...'.\n- **Lead (2-3 sentences):** what's new, who it's for, why it matters right now.\n- **What it does:** 3-5 concrete capabilities. Each must be testable.\n- **Proof:** numbers, early-customer quote, screenshot reference, benchmark. At least one real data point.\n- **What's next (optional, one short paragraph):** only if there's a credible roadmap. Do not pad with aspirations.\n- **CTA (one line):** the single next action the reader should take. A link, a signup, a waitlist with a date.\n\n## 2. X thread (6-10 posts)\nSame announcement, thread-shaped. Hook = the most specific, most surprising fact. End with the CTA.\n\n## 3. One-line version\nThe announcement compressed to one X post or one Slack message. This is the version that travels.\n\n" +
+"Rules:\n- Never use: 'revolutionary', 'game-changing', 'thrilled', 'excited to announce', 'paradigm shift', 'reimagining'.\n- If the product is incremental, say so and position it as such. 'Twice as fast' is a better story than 'reimagining performance'.\n- Proof points must be real. If you don't have a number, use a customer name (with permission) or a screenshot. Do not fabricate.\n- If the announcement is partly about fundraising, put the product news first and the fundraise at the bottom. Reversing that order signals the team cares about the money more than the product.\n- Never announce something that ships 'soon'. Either it's live or the post waits.",
+    chaining: "Pair with Brand Voice Definer to ensure the announcement matches the org's register. Pipe the one-liner into partner outreach via Cold Email Generator.",
+    notes: "Different surfaces need different lengths; writing all three at once keeps them coherent. For regulated industries (finance, health), route through legal before publishing — this prompt does not know your compliance constraints."
+  },
+
+  {
+    id: 30,
+    title: "Brand Voice Definer",
+    category: "marketing",
+    complexity: "intermediate",
+    purpose: "Codify a brand voice into rules explicit enough for a stranger (or an LLM) to write in it.",
+    tags: ["brand", "voice", "writing-system"],
+    models: ["claude", "gpt-4o"],
+    temperature: "0.4",
+    prompt:
+"You are codifying a brand voice. A brand voice is not a mood board. It's a set of rules specific enough that a competent writer (or an LLM) can produce consistent copy without further interpretation. Fuzzy voice guidelines produce inconsistent writing.\n\n" +
+"Ask the user for: (a) 3-5 existing pieces of copy that nail the voice, (b) 3-5 pieces that came close but missed, (c) 2-3 brands whose voice the user admires and 2-3 they explicitly don't want to sound like. Do not start until you have these.\n\n" +
+"Output:\n\n## Voice in one sentence\nA specific, memorable line. Not 'friendly and professional' — 'dry, precise, and a little impatient with your time'.\n\n## Three voice axes (with 1-10 positions)\nRate the voice on axes that actually matter here. Example axes:\n- **Formal ↔ Conversational:** X/10\n- **Neutral ↔ Opinionated:** X/10\n- **Verbose ↔ Terse:** X/10\n- **Serious ↔ Playful:** X/10\n- **Technical ↔ Accessible:** X/10\n\nPick the 3 most relevant axes for this brand. Justify the score on each.\n\n## Do / Don't (20 concrete rules)\nSplit into 'do' and 'don't'. Each rule is a concrete, checkable instruction. Examples:\n- DO: lead sentences with the claim, not the setup\n- DO: use numbers wherever plausible\n- DON'T: use 'we're thrilled', 'game-changing', or emojis except ✓ and ✗\n- DON'T: end posts with a question unless you genuinely want a reply\n\n## Vocabulary\n- **Words we use** (10-15)\n- **Words we don't** (10-15)\n- **Phrases we avoid** (5-10)\n\n## Example rewrites\nTake 3 'close but missed' copy samples the user provided. Rewrite each so they hit the voice. Annotate the edits: what changed, why.\n\n## One-line voice test\nA single yes/no question a writer can ask to test any sentence: 'Would this sound like us at a 2am Slack message?' / 'Would the CTO read this aloud without flinching?' Pick whichever is sharpest for this brand.\n\n" +
+"Rules:\n- Rules must be specific. 'Be friendly' is not a rule; 'address the reader as \"you\", never \"users\"' is.\n- Do not recycle generic brand-voice advice. Everything in the output must be derived from the user's samples.\n- If the user's samples are contradictory, call that out — they need to pick a direction before you can codify.",
+    chaining: "Paste the Do/Don't block into the system prompt of any content-generation prompt (Announcement Writer, Newsletter Writer, X Thread Generator). Re-audit yearly — brand voices drift.",
+    notes: "Without sample inputs, the output is generic mush. Push back hard on 'just write something in our voice' — there is no voice until it's codified. For multi-brand organizations, codify once per brand, never one global voice."
   }
 
 ];

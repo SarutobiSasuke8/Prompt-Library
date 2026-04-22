@@ -23,7 +23,11 @@
        ========================================================== -->
   <header class="site-header">
     <div class="inner">
-      <div class="logo"><span class="caret">&gt;</span>prompt-library</div>
+      <div class="logo">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">curated</span>
+      </div>
       <div class="count-pill">
         <span class="num" id="count-num">0</span>
         <span class="label" id="count-label">prompts</span>
@@ -35,8 +39,24 @@
        Hero
        ========================================================== -->
   <section class="hero">
-    <h1>Production-ready prompts<br/>for people building with <span class="accent">AI</span>.</h1>
-    <p>A curated, searchable library of system prompts battle-tested across real workflows. Copy, paste, ship.</p>
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>v1 &middot; static build</span>
+      <span class="sep">/</span>
+      <span>zero dependencies</span>
+      <span class="sep">/</span>
+      <span>copy, paste, ship</span>
+    </div>
+    <h1>Production-ready prompts<br/>for people building with <span class="accent">AI</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">A curated, searchable library of system prompts battle-tested across real workflows. No fluff, no hype &mdash; just the prompt text and enough context to run it confidently.</p>
+    <div class="statline" id="statline">
+      <span><span class="k">total</span> <span class="v"><strong id="stat-total">0</strong></span></span>
+      <span><span class="k">categories</span> <span class="v"><strong id="stat-cats">0</strong></span></span>
+      <span><span class="k">beginner</span> <span class="v"><strong id="stat-beg">0</strong></span></span>
+      <span><span class="k">intermediate</span> <span class="v"><strong id="stat-int">0</strong></span></span>
+      <span><span class="k">advanced</span> <span class="v"><strong id="stat-adv">0</strong></span></span>
+      <span class="kbd-hint">press <span class="kbd">/</span> to search &middot; <span class="kbd">esc</span> to close</span>
+    </div>
   </section>
 
   <!-- ==========================================================
@@ -161,6 +181,12 @@
       const $countNum      = document.getElementById("count-num");
       const $countLabel    = document.getElementById("count-label");
 
+      const $statTotal     = document.getElementById("stat-total");
+      const $statCats      = document.getElementById("stat-cats");
+      const $statBeg       = document.getElementById("stat-beg");
+      const $statInt       = document.getElementById("stat-int");
+      const $statAdv       = document.getElementById("stat-adv");
+
       const $backdrop       = document.getElementById("modal-backdrop");
       const $modalClose     = document.getElementById("modal-close");
       const $modalMeta      = document.getElementById("modal-meta");
@@ -181,9 +207,22 @@
         return;
       }
 
+      renderStatline();
       renderCategoryChips();
       render();
       wireEvents();
+
+      function renderStatline() {
+        const total = PROMPTS.length;
+        const cats  = new Set(PROMPTS.map((p) => p.category)).size;
+        const by    = { beginner: 0, intermediate: 0, advanced: 0 };
+        PROMPTS.forEach((p) => { if (by[p.complexity] != null) by[p.complexity]++; });
+        $statTotal.textContent = total;
+        $statCats.textContent  = cats;
+        $statBeg.textContent   = by.beginner;
+        $statInt.textContent   = by.intermediate;
+        $statAdv.textContent   = by.advanced;
+      }
 
       // ============================================================
       // Rendering
@@ -270,9 +309,13 @@
             '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
           '</svg>';
 
+        const idStr = String(p.id).padStart(3, "0");
         card.innerHTML =
           '<div class="card-head">' +
-            '<div class="card-cat">' + escapeHtml(catLabel) + "</div>" +
+            '<div class="card-head-left">' +
+              '<span class="card-id">#' + escapeHtml(idStr) + "</span>" +
+              '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+            "</div>" +
             '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>" +
           "</div>" +
           "<h3>" + escapeHtml(p.title) + "</h3>" +

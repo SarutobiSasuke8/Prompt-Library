@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Prompt Library — LOCAL UTILITY</title>
+
+  <!--
+    add-prompt.html
+    ---------------------------------------------------------------
+    LOCAL-ONLY prompt capture form. Not linked from the live site.
+    Fill the fields → click Generate → copy the JSON block → paste
+    into prompts.js above the closing bracket. Don't forget to
+    bump the id.
+    ---------------------------------------------------------------
+  -->
+
+  <style>
+    /* ---- reset & base ---- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #0a0a0a;
+      color: #e6e6e6;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    code, pre, .mono {
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* ---- warning banner ---- */
+    .warning-banner {
+      background: #1a0a0a;
+      border-bottom: 2px solid #ff3b3b;
+      color: #ff6b6b;
+      padding: 10px 16px;
+      text-align: center;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .warning-banner strong { color: #ff3b3b; }
+
+    /* ---- layout ---- */
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+    header.page-header {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    header.page-header h1 {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 22px;
+      margin: 0 0 4px;
+      color: #fff;
+    }
+    header.page-header h1 .accent { color: #00ff88; }
+    header.page-header p {
+      margin: 0;
+      color: #888;
+      font-size: 14px;
+    }
+
+    /* ---- form ---- */
+    form { display: grid; gap: 18px; }
+    .field { display: grid; gap: 6px; }
+    .field.row2 { grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 560px) { .field.row2 { grid-template-columns: 1fr; } }
+
+    label {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888;
+    }
+    label .req { color: #00ff88; margin-left: 4px; }
+    label .hint { color: #555; text-transform: none; letter-spacing: 0; margin-left: 6px; font-size: 11px; }
+
+    input[type="text"], input[type="number"], select, textarea {
+      background: #111;
+      border: 1px solid #222;
+      color: #e6e6e6;
+      font: inherit;
+      padding: 10px 12px;
+      border-radius: 2px;
+      width: 100%;
+      transition: border-color 0.15s ease;
+    }
+    textarea {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13.5px;
+      resize: vertical;
+      min-height: 90px;
+    }
+    textarea.prompt-area { min-height: 260px; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #00ff88;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+    }
+    .checkbox-grid label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 2px;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+      font-family: inherit;
+      color: #e6e6e6;
+      font-size: 13px;
+    }
+    .checkbox-grid label:hover { border-color: #333; }
+    .checkbox-grid input[type="checkbox"] {
+      accent-color: #00ff88;
+      margin: 0;
+    }
+    .checkbox-grid label:has(input:checked) {
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    /* ---- buttons ---- */
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    button {
+      font: inherit;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 11px 18px;
+      border-radius: 2px;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.12s ease;
+    }
+    button.primary {
+      background: #00ff88;
+      color: #0a0a0a;
+      border-color: #00ff88;
+      font-weight: 600;
+    }
+    button.primary:hover { background: #00cc6e; border-color: #00cc6e; }
+    button.ghost {
+      background: transparent;
+      color: #e6e6e6;
+      border-color: #333;
+    }
+    button.ghost:hover { border-color: #00ff88; color: #00ff88; }
+
+    /* ---- output ---- */
+    .output {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #1a1a1a;
+    }
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .output-header h2 {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 14px;
+      margin: 0;
+      color: #00ff88;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .output textarea {
+      font-size: 13px;
+      min-height: 280px;
+      background: #050505;
+      border-color: #1a2a1a;
+      color: #d6f5d6;
+    }
+    .reminder {
+      background: #0f1a0f;
+      border: 1px solid #1a3a1a;
+      color: #9cd89c;
+      padding: 12px 14px;
+      margin-top: 12px;
+      border-radius: 2px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .reminder code {
+      color: #00ff88;
+      background: #000;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .hidden { display: none; }
+
+    /* ---- toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #00ff88;
+      color: #0a0a0a;
+      padding: 10px 18px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: 2px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="warning-banner">
+    &#9888; <strong>Local utility</strong> &mdash; not the live site. Output is local JSON only.
+  </div>
+
+  <div class="wrap">
+    <header class="page-header">
+      <h1><span class="accent">&gt;</span> prompt-library &middot; capture</h1>
+      <p>Fill the form, generate JSON, paste into <span class="mono">prompts.js</span>. Don't forget to bump the id.</p>
+    </header>
+
+    <form id="capture-form" autocomplete="off">
+
+      <div class="field row2">
+        <div class="field">
+          <label for="f-id">id <span class="req">*</span><span class="hint">next unused integer</span></label>
+          <input type="number" id="f-id" min="1" step="1" required />
+        </div>
+        <div class="field">
+          <label for="f-temperature">temperature <span class="req">*</span></label>
+          <select id="f-temperature" required>
+            <option value="0.0">0.0 &mdash; deterministic</option>
+            <option value="0.1">0.1</option>
+            <option value="0.2">0.2 &mdash; precise</option>
+            <option value="0.3" selected>0.3 &mdash; default</option>
+            <option value="0.5">0.5</option>
+            <option value="0.7">0.7 &mdash; creative</option>
+            <option value="1.0">1.0 &mdash; wild</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-title">title <span class="req">*</span></label>
+        <input type="text" id="f-title" maxlength="80" placeholder="e.g. Token Research Analyst" required />
+      </div>
+
+      <div class="field row2">
+        <div class="field">
+          <label for="f-category">category <span class="req">*</span></label>
+          <select id="f-category" required>
+            <option value="" disabled selected>&mdash; choose &mdash;</option>
+            <option value="web3">web3 &middot; Web3 &amp; Crypto</option>
+            <option value="agents">agents &middot; AI Agents &amp; Automation</option>
+            <option value="vibe-coding">vibe-coding &middot; Software Dev &amp; Vibe Coding</option>
+            <option value="business">business &middot; Business &amp; BD</option>
+            <option value="marketing">marketing &middot; Marketing &amp; Content</option>
+            <option value="pkm">pkm &middot; Knowledge Management &amp; PKM</option>
+            <option value="strategy">strategy &middot; Strategy &amp; Decision Making</option>
+            <option value="gaming">gaming &middot; Gaming &amp; GameFi</option>
+            <option value="evaluation">evaluation &middot; Evaluation &amp; Quality</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-complexity">complexity <span class="req">*</span></label>
+          <select id="f-complexity" required>
+            <option value="" disabled selected>&mdash; choose &mdash;</option>
+            <option value="beginner">beginner</option>
+            <option value="intermediate">intermediate</option>
+            <option value="advanced">advanced</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-purpose">purpose <span class="req">*</span><span class="hint">one line</span></label>
+        <input type="text" id="f-purpose" maxlength="160" placeholder="e.g. Produce a skeptical fundamental report on any token." required />
+      </div>
+
+      <div class="field">
+        <label for="f-tags">tags <span class="hint">comma separated, lowercase</span></label>
+        <input type="text" id="f-tags" placeholder="research, due-diligence, fundamentals" />
+      </div>
+
+      <div class="field">
+        <label>models <span class="hint">tick the ones you've tested it on</span></label>
+        <div class="checkbox-grid" id="f-models">
+          <label><input type="checkbox" value="claude" checked />claude</label>
+          <label><input type="checkbox" value="gpt-4o" />gpt-4o</label>
+          <label><input type="checkbox" value="gpt-4" />gpt-4</label>
+          <label><input type="checkbox" value="o1" />o1</label>
+          <label><input type="checkbox" value="gemini" />gemini</label>
+          <label><input type="checkbox" value="llama" />llama</label>
+          <label><input type="checkbox" value="mistral" />mistral</label>
+          <label><input type="checkbox" value="grok" />grok</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-prompt">prompt <span class="req">*</span><span class="hint">full system prompt, copy-paste ready</span></label>
+        <textarea id="f-prompt" class="prompt-area" required placeholder="You are a..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="f-chaining">chaining <span class="hint">what to pipe this into next</span></label>
+        <textarea id="f-chaining" placeholder="Pair with X to do Y. Feed output into Z for..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="f-notes">notes <span class="hint">caveats, tuning tips, known failure modes</span></label>
+        <textarea id="f-notes" placeholder="Works best when... Drop temperature to 0.1 for..."></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="primary">Generate JSON</button>
+        <button type="button" class="ghost" id="btn-clear">Clear form</button>
+      </div>
+    </form>
+
+    <section class="output hidden" id="output-block" aria-live="polite">
+      <div class="output-header">
+        <h2>&gt; generated json</h2>
+        <button type="button" class="ghost" id="btn-copy">Copy</button>
+      </div>
+      <textarea id="output-json" readonly spellcheck="false"></textarea>
+      <div class="reminder">
+        &#10003; Paste this object into <code>prompts.js</code> inside the <code>PROMPTS</code> array.
+        Bump the <code>id</code> to the next unused integer. Keep the trailing comma if it's not the last entry.
+      </div>
+    </section>
+
+  </div>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const form       = document.getElementById("capture-form");
+      const outputBlk  = document.getElementById("output-block");
+      const outputJson = document.getElementById("output-json");
+      const btnCopy    = document.getElementById("btn-copy");
+      const btnClear   = document.getElementById("btn-clear");
+      const toast      = document.getElementById("toast");
+
+      // Prefill id from the last one the user generated so add-another flows auto-increment.
+      // User should cross-check against the last id in prompts.js the first time.
+      const LAST_KNOWN_ID_KEY = "promptLibrary.lastId";
+      const savedLast = parseInt(localStorage.getItem(LAST_KNOWN_ID_KEY) || "7", 10);
+      document.getElementById("f-id").value = isNaN(savedLast) ? 8 : savedLast + 1;
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const tags = document
+          .getElementById("f-tags").value
+          .split(",")
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean);
+
+        const models = Array.from(
+          document.querySelectorAll('#f-models input[type="checkbox"]:checked')
+        ).map((cb) => cb.value);
+
+        const obj = {
+          id:          parseInt(document.getElementById("f-id").value, 10),
+          title:       document.getElementById("f-title").value.trim(),
+          category:    document.getElementById("f-category").value,
+          complexity:  document.getElementById("f-complexity").value,
+          purpose:     document.getElementById("f-purpose").value.trim(),
+          tags:        tags,
+          models:      models,
+          temperature: document.getElementById("f-temperature").value,
+          prompt:      document.getElementById("f-prompt").value,
+          chaining:    document.getElementById("f-chaining").value.trim(),
+          notes:       document.getElementById("f-notes").value.trim()
+        };
+
+        outputJson.value = formatAsJsObjectLiteral(obj);
+        outputBlk.classList.remove("hidden");
+        outputBlk.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        if (!isNaN(obj.id)) localStorage.setItem(LAST_KNOWN_ID_KEY, String(obj.id));
+      });
+
+      btnCopy.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(outputJson.value);
+          showToast("Copied");
+        } catch {
+          outputJson.select();
+          document.execCommand("copy");
+          showToast("Copied");
+        }
+      });
+
+      btnClear.addEventListener("click", () => {
+        const currentId = parseInt(document.getElementById("f-id").value, 10) || 0;
+        form.reset();
+        document.getElementById("f-id").value = currentId + 1;
+        document.getElementById("f-temperature").value = "0.3";
+        const claudeCb = document.querySelector('#f-models input[value="claude"]');
+        if (claudeCb) claudeCb.checked = true;
+        outputBlk.classList.add("hidden");
+        outputJson.value = "";
+        document.getElementById("f-title").focus();
+      });
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1400);
+      }
+
+      // Render an entry in the same hand-authored JS-object literal style as prompts.js
+      // (unquoted keys, double-quoted strings, multi-line prompts split across '+'-joined lines).
+      function formatAsJsObjectLiteral(obj) {
+        const lines = ["  {"];
+        lines.push("    id: " + obj.id + ",");
+        lines.push("    title: " + jsString(obj.title) + ",");
+        lines.push("    category: " + jsString(obj.category) + ",");
+        lines.push("    complexity: " + jsString(obj.complexity) + ",");
+        lines.push("    purpose: " + jsString(obj.purpose) + ",");
+        lines.push("    tags: [" + obj.tags.map(jsString).join(", ") + "],");
+        lines.push("    models: [" + obj.models.map(jsString).join(", ") + "],");
+        lines.push("    temperature: " + jsString(obj.temperature) + ",");
+        lines.push("    prompt:");
+        lines.push(formatMultilineString(obj.prompt, "      "));
+        lines.push("    ,");
+        lines.push("    chaining: " + jsString(obj.chaining) + ",");
+        lines.push("    notes: " + jsString(obj.notes));
+        lines.push("  }");
+        return lines.join("\n");
+      }
+
+      function jsString(s) {
+        if (s == null) return '""';
+        return (
+          '"' +
+          String(s)
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, "\\n")
+            .replace(/\r/g, "")
+            .replace(/\t/g, "\\t") +
+          '"'
+        );
+      }
+
+      function formatMultilineString(s, indent) {
+        const parts = String(s).split("\n");
+        return parts
+          .map((line, i) => {
+            const withNl = i < parts.length - 1 ? line + "\n" : line;
+            return indent + jsString(withNl) + (i < parts.length - 1 ? " +" : "");
+          })
+          .join("\n");
+      }
+    })();
+  </script>
+
+</body>
+</html>

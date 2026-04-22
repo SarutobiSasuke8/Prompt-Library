@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; production-ready prompts for AI builders</title>
+  <meta name="description" content="A curated, searchable library of production-ready prompts for building with AI — across web3, agents, dev, business, marketing, and more." />
+
+  <!-- Social / share -->
+  <meta property="og:title" content="prompt-library" />
+  <meta property="og:description" content="A curated, searchable library of production-ready prompts for building with AI." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ==========================================================
+       Header — sticky, logo + live count
+       ========================================================== -->
+  <header class="site-header">
+    <div class="inner">
+      <div class="logo"><span class="caret">&gt;</span>prompt-library</div>
+      <div class="count-pill">
+        <span class="num" id="count-num">0</span>
+        <span class="label" id="count-label">prompts</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================
+       Hero
+       ========================================================== -->
+  <section class="hero">
+    <h1>Production-ready prompts<br/>for people building with <span class="accent">AI</span>.</h1>
+    <p>A curated, searchable library of system prompts battle-tested across real workflows. Copy, paste, ship.</p>
+  </section>
+
+  <!-- ==========================================================
+       Controls — search + category + complexity filters
+       Category chips are rendered dynamically from CATEGORIES,
+       so adding a new category in prompts.js auto-creates its
+       filter button with no UI changes.
+       ========================================================== -->
+  <section class="controls" aria-label="Search and filter">
+    <div class="search-wrap">
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="search title, purpose, tags…"
+        aria-label="Search prompts"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="filter-row" id="category-row" role="group" aria-label="Filter by category">
+      <span class="label">category</span>
+      <!-- chips injected by JS -->
+    </div>
+
+    <div class="filter-row" id="complexity-row" role="group" aria-label="Filter by complexity">
+      <span class="label">complexity</span>
+      <button class="chip active" data-complexity="all">all</button>
+      <button class="chip" data-complexity="beginner">beginner</button>
+      <button class="chip" data-complexity="intermediate">intermediate</button>
+      <button class="chip" data-complexity="advanced">advanced</button>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Card grid — cards injected by JS
+       ========================================================== -->
+  <main>
+    <div class="grid" id="grid" aria-live="polite"></div>
+    <div class="empty hidden" id="empty">
+      <strong>No prompts match</strong>
+      Try clearing a filter or searching something shorter.
+    </div>
+  </main>
+
+  <!-- ==========================================================
+       Modal — full prompt view, one-click copy
+       ========================================================== -->
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <article class="modal" id="modal">
+      <header class="modal-head">
+        <div>
+          <div class="meta" id="modal-meta"></div>
+          <h2 id="modal-title"></h2>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="purpose" id="modal-purpose"></p>
+
+        <h4>System prompt</h4>
+        <div class="prompt-block">
+          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <pre id="modal-prompt"></pre>
+        </div>
+
+        <h4>Details</h4>
+        <dl class="meta-grid" id="modal-details"></dl>
+
+        <div id="modal-chaining-wrap" class="hidden">
+          <h4>Chaining</h4>
+          <p id="modal-chaining"></p>
+        </div>
+
+        <div id="modal-notes-wrap" class="hidden">
+          <h4>Notes</h4>
+          <p id="modal-notes"></p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ==========================================================
+       Footer
+       ========================================================== -->
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="https://github.com/sarutobisasuke8/testing" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/sarutobisasuke8/testing/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- toast for copy confirmation -->
+  <div class="toast" id="toast">Copied</div>
+
+  <!-- ==========================================================
+       Data source — kept deliberately separate from UI code
+       ========================================================== -->
+  <script src="prompts.js"></script>
+
+  <!-- ==========================================================
+       App — search, filter, render, modal
+       ========================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      const state = {
+        query: "",
+        category: "all",
+        complexity: "all"
+      };
+
+      const $grid          = document.getElementById("grid");
+      const $empty         = document.getElementById("empty");
+      const $search        = document.getElementById("search");
+      const $categoryRow   = document.getElementById("category-row");
+      const $complexityRow = document.getElementById("complexity-row");
+      const $countNum      = document.getElementById("count-num");
+      const $countLabel    = document.getElementById("count-label");
+
+      const $backdrop       = document.getElementById("modal-backdrop");
+      const $modalClose     = document.getElementById("modal-close");
+      const $modalMeta      = document.getElementById("modal-meta");
+      const $modalTitle     = document.getElementById("modal-title");
+      const $modalPurpose   = document.getElementById("modal-purpose");
+      const $modalPrompt    = document.getElementById("modal-prompt");
+      const $modalDetails   = document.getElementById("modal-details");
+      const $modalChaining  = document.getElementById("modal-chaining");
+      const $modalChainWrap = document.getElementById("modal-chaining-wrap");
+      const $modalNotes     = document.getElementById("modal-notes");
+      const $modalNotesWrap = document.getElementById("modal-notes-wrap");
+      const $copyBtn        = document.getElementById("copy-btn");
+      const $toast          = document.getElementById("toast");
+
+      // ---- boot ----
+      if (typeof PROMPTS === "undefined" || typeof CATEGORIES === "undefined") {
+        $grid.innerHTML = '<div style="color:#ff6b6b; font-family:var(--mono); padding:16px;">Failed to load prompts.js.</div>';
+        return;
+      }
+
+      renderCategoryChips();
+      render();
+      wireEvents();
+
+      // ============================================================
+      // Rendering
+      // ============================================================
+
+      // Category chips are generated from CATEGORIES so adding a new
+      // category requires only a one-line change in prompts.js.
+      function renderCategoryChips() {
+        const counts = countByCategory();
+        const allCount = PROMPTS.length;
+
+        const frag = document.createDocumentFragment();
+        frag.appendChild(buildChip("all", "all", allCount, "data-category"));
+
+        Object.keys(CATEGORIES).forEach((key) => {
+          const label = CATEGORIES[key];
+          frag.appendChild(buildChip(key, label, counts[key] || 0, "data-category"));
+        });
+
+        // Append after the "category" label span.
+        const label = $categoryRow.querySelector(".label");
+        $categoryRow.innerHTML = "";
+        $categoryRow.appendChild(label);
+        $categoryRow.appendChild(frag);
+
+        // First chip (All) is active by default.
+        const first = $categoryRow.querySelector(".chip");
+        if (first) first.classList.add("active");
+      }
+
+      function buildChip(value, labelText, count, attrName) {
+        const btn = document.createElement("button");
+        btn.className = "chip";
+        btn.setAttribute(attrName, value);
+        btn.innerHTML =
+          escapeHtml(labelText) +
+          '<span class="count">' + count + "</span>";
+        return btn;
+      }
+
+      function countByCategory() {
+        const c = {};
+        PROMPTS.forEach((p) => { c[p.category] = (c[p.category] || 0) + 1; });
+        return c;
+      }
+
+      function render() {
+        const filtered = applyFilters(PROMPTS, state);
+
+        $countNum.textContent = filtered.length;
+        $countLabel.textContent = (state.query || state.category !== "all" || state.complexity !== "all")
+          ? "of " + PROMPTS.length + " prompts"
+          : "prompts";
+
+        if (filtered.length === 0) {
+          $grid.innerHTML = "";
+          $empty.classList.remove("hidden");
+          return;
+        }
+        $empty.classList.add("hidden");
+
+        const frag = document.createDocumentFragment();
+        filtered.forEach((p) => frag.appendChild(buildCard(p)));
+        $grid.innerHTML = "";
+        $grid.appendChild(frag);
+      }
+
+      function buildCard(p) {
+        const card = document.createElement("button");
+        card.className = "card";
+        card.type = "button";
+        card.setAttribute("data-id", p.id);
+        card.setAttribute("aria-label", p.title);
+
+        const catLabel = CATEGORIES[p.category] || p.category;
+        const tags    = (p.tags || []).slice(0, 3);
+        const models  = (p.models || []).slice(0, 3);
+
+        card.innerHTML =
+          '<div class="card-head">' +
+            '<div class="card-cat">' + escapeHtml(catLabel) + "</div>" +
+            '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>" +
+          "</div>" +
+          "<h3>" + escapeHtml(p.title) + "</h3>" +
+          '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
+          '<div class="card-foot">' +
+            tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
+            models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+          "</div>";
+
+        card.addEventListener("click", () => openModal(p));
+        return card;
+      }
+
+      // ============================================================
+      // Filtering
+      // ============================================================
+
+      function applyFilters(list, s) {
+        const q = s.query.trim().toLowerCase();
+        return list.filter((p) => {
+          if (s.category !== "all" && p.category !== s.category) return false;
+          if (s.complexity !== "all" && p.complexity !== s.complexity) return false;
+          if (q) {
+            const hay =
+              (p.title || "")   + " " +
+              (p.purpose || "") + " " +
+              (p.tags || []).join(" ");
+            if (hay.toLowerCase().indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+      }
+
+      // ============================================================
+      // Events
+      // ============================================================
+
+      function wireEvents() {
+        $search.addEventListener("input", (e) => {
+          state.query = e.target.value;
+          render();
+        });
+
+        $categoryRow.addEventListener("click", (e) => {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $categoryRow.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          state.category = chip.getAttribute("data-category");
+          render();
+        });
+
+        $complexityRow.addEventListener("click", (e) => {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $complexityRow.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          state.complexity = chip.getAttribute("data-complexity");
+          render();
+        });
+
+        $modalClose.addEventListener("click", closeModal);
+        $backdrop.addEventListener("click", (e) => {
+          if (e.target === $backdrop) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !$backdrop.classList.contains("hidden")) closeModal();
+          if (e.key === "/" && document.activeElement !== $search) {
+            e.preventDefault();
+            $search.focus();
+          }
+        });
+
+        $copyBtn.addEventListener("click", async () => {
+          const text = $modalPrompt.textContent;
+          try {
+            await navigator.clipboard.writeText(text);
+          } catch {
+            const r = document.createRange();
+            r.selectNode($modalPrompt);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(r);
+            document.execCommand("copy");
+          }
+          $copyBtn.classList.add("copied");
+          $copyBtn.textContent = "Copied";
+          showToast("Prompt copied");
+          setTimeout(() => {
+            $copyBtn.classList.remove("copied");
+            $copyBtn.textContent = "Copy";
+          }, 1500);
+        });
+      }
+
+      // ============================================================
+      // Modal
+      // ============================================================
+
+      function openModal(p) {
+        const catLabel = CATEGORIES[p.category] || p.category;
+
+        $modalMeta.innerHTML =
+          '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+          '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>";
+        $modalTitle.textContent   = p.title;
+        $modalPurpose.textContent = p.purpose;
+        $modalPrompt.textContent  = p.prompt;
+
+        const tagsHtml   = (p.tags || []).map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join(" ");
+        const modelsHtml = (p.models || []).map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join(" ");
+
+        $modalDetails.innerHTML =
+          "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
+          "<dt>temperature</dt><dd class=\"mono\">" + escapeHtml(p.temperature) + "</dd>" +
+          "<dt>models</dt><dd>" + (modelsHtml || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>" +
+          "<dt>tags</dt><dd>"   + (tagsHtml   || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>";
+
+        if (p.chaining && p.chaining.trim()) {
+          $modalChaining.textContent = p.chaining;
+          $modalChainWrap.classList.remove("hidden");
+        } else {
+          $modalChainWrap.classList.add("hidden");
+        }
+
+        if (p.notes && p.notes.trim()) {
+          $modalNotes.textContent = p.notes;
+          $modalNotesWrap.classList.remove("hidden");
+        } else {
+          $modalNotesWrap.classList.add("hidden");
+        }
+
+        $backdrop.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        $modalClose.focus();
+      }
+
+      function closeModal() {
+        $backdrop.classList.add("hidden");
+        document.body.style.overflow = "";
+      }
+
+      // ============================================================
+      // Utilities
+      // ============================================================
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(() => $toast.classList.remove("show"), 1400);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g,  "&amp;")
+          .replace(/</g,  "&lt;")
+          .replace(/>/g,  "&gt;")
+          .replace(/"/g,  "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+      function escapeAttr(s) {
+        return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, "");
+      }
+    })();
+  </script>
+
+</body>
+</html>

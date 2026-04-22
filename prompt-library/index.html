@@ -252,15 +252,23 @@
       }
 
       function buildCard(p) {
-        const card = document.createElement("button");
+        const card = document.createElement("div");
         card.className = "card";
-        card.type = "button";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
         card.setAttribute("data-id", p.id);
         card.setAttribute("aria-label", p.title);
 
         const catLabel = CATEGORIES[p.category] || p.category;
         const tags    = (p.tags || []).slice(0, 3);
         const models  = (p.models || []).slice(0, 3);
+
+        // Inline SVG clipboard icon — no external assets.
+        const clipboardSvg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
+            '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
+            '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
+          '</svg>';
 
         card.innerHTML =
           '<div class="card-head">' +
@@ -270,12 +278,60 @@
           "<h3>" + escapeHtml(p.title) + "</h3>" +
           '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
           '<div class="card-foot">' +
-            tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
-            models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+            '<div class="card-tags">' +
+              tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
+              models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+            "</div>" +
+            '<button class="card-copy" type="button" aria-label="Copy prompt">' +
+              clipboardSvg + '<span>copy</span>' +
+            "</button>" +
           "</div>";
 
-        card.addEventListener("click", () => openModal(p));
+        // Card opens modal on click / Enter / Space.
+        const openFromCard = (e) => {
+          if (e.target.closest(".card-copy")) return;
+          openModal(p);
+        };
+        card.addEventListener("click", openFromCard);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openFromCard(e);
+          }
+        });
+
+        // In-card copy button — stops propagation so the modal doesn't open.
+        const copyBtn = card.querySelector(".card-copy");
+        copyBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          await copyToClipboard(p.prompt);
+          copyBtn.classList.add("copied");
+          const labelSpan = copyBtn.querySelector("span");
+          const originalLabel = labelSpan.textContent;
+          labelSpan.textContent = "copied";
+          showToast("Prompt copied");
+          setTimeout(() => {
+            copyBtn.classList.remove("copied");
+            labelSpan.textContent = originalLabel;
+          }, 1500);
+        });
+
         return card;
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
       }
 
       // ============================================================
@@ -339,16 +395,7 @@
         });
 
         $copyBtn.addEventListener("click", async () => {
-          const text = $modalPrompt.textContent;
-          try {
-            await navigator.clipboard.writeText(text);
-          } catch {
-            const r = document.createRange();
-            r.selectNode($modalPrompt);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(r);
-            document.execCommand("copy");
-          }
+          await copyToClipboard($modalPrompt.textContent);
           $copyBtn.classList.add("copied");
           $copyBtn.textContent = "Copied";
           showToast("Prompt copied");

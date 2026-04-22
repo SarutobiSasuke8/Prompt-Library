@@ -1,0 +1,52 @@
+# ============================================================
+# Deploys the prompt-library/ subdirectory to GitHub Pages.
+#
+# Note: this repo currently contains other tooling alongside
+# prompt-library/, so the workflow publishes ONLY that folder.
+# If prompt-library/ is ever moved to its own dedicated repo,
+# change the `path` below from './prompt-library' to '.'.
+#
+# Set up (one time, in the GitHub UI):
+#   Settings → Pages → Build and deployment → Source: GitHub Actions
+# ============================================================
+
+name: Deploy prompt-library
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'prompt-library/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./prompt-library
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

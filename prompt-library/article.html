@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; article</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .article-wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 18px 80px;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .article-meta .read-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+    .article-wrap h1 {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+      margin: 0 0 14px;
+      letter-spacing: -0.01em;
+    }
+    @media (min-width: 720px) { .article-wrap h1 { font-size: 36px; } }
+    .article-wrap .summary {
+      font-size: 17px;
+      color: var(--text-dim);
+      margin: 0 0 32px;
+      padding-bottom: 28px;
+      border-bottom: 1px dashed var(--border-2);
+    }
+    .article-body { line-height: 1.75; font-size: 15.5px; }
+    .article-body p {
+      margin: 0 0 18px;
+      color: var(--text);
+    }
+    .article-body h3 {
+      font-family: var(--mono);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin: 36px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .article-body h3::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 1px;
+      background: var(--accent);
+    }
+    .article-body ul {
+      margin: 0 0 18px;
+      padding-left: 0;
+      list-style: none;
+    }
+    .article-body ul li {
+      color: var(--text);
+      padding: 6px 0 6px 20px;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body ul li:last-child { border-bottom: 0; }
+    .article-body ul li::before {
+      content: "›";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+    .example-block {
+      background: #050505;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 0 0 18px;
+      position: relative;
+    }
+    .example-block .example-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+      padding: 8px 14px 0;
+    }
+    .example-block pre {
+      margin: 0;
+      padding: 10px 14px 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.65;
+      color: #d0e8d0;
+    }
+    .callout {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin: 0 0 18px;
+      font-size: 14.5px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .article-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .article-nav a {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .article-nav a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub" id="header-sub">learn</span>
+      </a>
+      <div class="count-pill" id="read-time-pill" style="display:none;">
+        <span class="num" id="read-time-val"></span>
+        <span class="label">read</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:24px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to methodology</a>
+    </div>
+  </section>
+
+  <div class="article-wrap">
+    <div id="article-root">
+      <div class="empty">
+        <strong>Article not found</strong>
+        <a href="learn.html">Back to methodology</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="articles.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const params = new URLSearchParams(window.location.search);
+      const id     = parseInt(params.get("id"), 10);
+      const $root  = document.getElementById("article-root");
+
+      if (!id || typeof ARTICLES === "undefined") return;
+
+      const article = ARTICLES.find((a) => a.id === id);
+      if (!article) return;
+
+      document.title = "prompt-library \u00b7 " + article.title;
+      document.getElementById("header-sub").textContent = article.title;
+
+      const pill = document.getElementById("read-time-pill");
+      const pillVal = document.getElementById("read-time-val");
+      pillVal.textContent = article.readTime;
+      pill.style.display = "";
+
+      const tagsHtml = (article.tags || []).map((t) =>
+        '<span class="tag">#' + escapeHtml(t) + "</span>"
+      ).join(" ");
+
+      const authorHtml = article.author
+        ? '<a href="author.html?name=' + encodeURIComponent(article.author) + '" style="color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none;">' + escapeHtml(article.author) + '</a>'
+        : "";
+
+      let html =
+        '<div class="article-meta">' +
+          '<span class="card-cat">methodology</span>' +
+          (tagsHtml ? tagsHtml : "") +
+          '<span class="read-time">' + escapeHtml(article.readTime) + " read</span>" +
+          (authorHtml ? authorHtml : "") +
+        "</div>" +
+        "<h1>" + escapeHtml(article.title) + "</h1>" +
+        '<p class="summary">' + escapeHtml(article.summary) + "</p>" +
+        '<div class="article-body">' + renderBody(article.body) + "</div>";
+
+      // Prev / next navigation
+      const idx  = ARTICLES.findIndex((a) => a.id === id);
+      const prev = ARTICLES[idx - 1];
+      const next = ARTICLES[idx + 1];
+      html += '<div class="article-nav">';
+      html += prev
+        ? '<a href="article.html?id=' + prev.id + '">&larr; ' + escapeHtml(prev.title) + "</a>"
+        : "<span></span>";
+      html += next
+        ? '<a href="article.html?id=' + next.id + '">' + escapeHtml(next.title) + " &rarr;</a>"
+        : "<span></span>";
+      html += "</div>";
+
+      $root.innerHTML = html;
+
+      function renderBody(blocks) {
+        return (blocks || []).map((b) => {
+          if (b.type === "p") {
+            return "<p>" + escapeHtml(b.text) + "</p>";
+          }
+          if (b.type === "h3") {
+            return "<h3>" + escapeHtml(b.text) + "</h3>";
+          }
+          if (b.type === "example") {
+            return '<div class="example-block">' +
+              '<div class="example-label">' + escapeHtml(b.label || "example") + "</div>" +
+              "<pre>" + escapeHtml(b.text) + "</pre>" +
+              "</div>";
+          }
+          if (b.type === "callout") {
+            return '<div class="callout">' + escapeHtml(b.text) + "</div>";
+          }
+          if (b.type === "list") {
+            const items = (b.items || []).map((i) => "<li>" + escapeHtml(i) + "</li>").join("");
+            return "<ul>" + items + "</ul>";
+          }
+          return "";
+        }).join("");
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; learn</title>
+  <meta name="description" content="Prompt engineering methodology — techniques, patterns, and principles for building with AI." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .article-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 22px 18px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .article-card::before {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.18s ease;
+    }
+    .article-card:hover,
+    .article-card:focus-visible {
+      border-color: var(--accent-edge);
+      background: var(--bg-2);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+    .article-card:hover::before,
+    .article-card:focus-visible::before { transform: scaleY(1); }
+    .article-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .article-card:hover h3 { color: var(--accent); }
+
+    .article-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .article-card-head .read-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      white-space: nowrap;
+    }
+    .article-card h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+    .article-card p {
+      margin: 0;
+      color: var(--text-dim);
+      font-size: 14px;
+      flex: 1;
+    }
+    .article-card-foot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+      margin-top: auto;
+    }
+    .article-card .read-cta {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">learn</span>
+      </a>
+      <div class="count-pill">
+        <span class="num" id="count-num">0</span>
+        <span class="label">articles</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:32px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+      <span class="sep">/</span>
+      <span>methodology</span>
+    </div>
+    <h1>Prompt <span class="accent">methodology</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">Techniques, patterns, and principles for writing prompts that work in production — not just in demos.</p>
+  </section>
+
+  <main>
+    <div class="grid" id="grid" aria-live="polite"></div>
+    <div class="empty hidden" id="empty">
+      <strong>No articles yet</strong>
+      Check back soon.
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="articles.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const $grid     = document.getElementById("grid");
+      const $empty    = document.getElementById("empty");
+      const $countNum = document.getElementById("count-num");
+
+      if (typeof ARTICLES === "undefined" || ARTICLES.length === 0) {
+        $empty.classList.remove("hidden");
+        return;
+      }
+
+      $countNum.textContent = ARTICLES.length;
+
+      const frag = document.createDocumentFragment();
+      ARTICLES.forEach((a) => frag.appendChild(buildCard(a)));
+      $grid.appendChild(frag);
+
+      function buildCard(a) {
+        const el = document.createElement("a");
+        el.className = "article-card";
+        el.href = "article.html?id=" + a.id;
+
+        const tagsHtml = (a.tags || []).map((t) =>
+          '<span class="tag">#' + escapeHtml(t) + "</span>"
+        ).join("");
+
+        el.innerHTML =
+          '<div class="article-card-head">' +
+            '<span class="card-cat">methodology</span>' +
+            '<span class="read-time">' + escapeHtml(a.readTime) + " read</span>" +
+          "</div>" +
+          "<h3>" + escapeHtml(a.title) + "</h3>" +
+          "<p>" + escapeHtml(a.summary) + "</p>" +
+          '<div class="article-card-foot">' +
+            tagsHtml +
+            '<span class="read-cta">read &rarr;</span>' +
+          "</div>";
+
+        return el;
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+    })();
+  </script>
+
+</body>
+</html>

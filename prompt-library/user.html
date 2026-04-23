@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; profile</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ---- profile layout ---- */
+    .profile-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 18px 80px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    @media (min-width: 800px) {
+      .profile-wrap { grid-template-columns: 260px 1fr; align-items: start; }
+    }
+
+    /* ---- sidebar / profile card ---- */
+    .profile-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 72px;
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-edge);
+      object-fit: cover;
+      background: var(--bg-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 28px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .profile-handle {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .profile-handle .at { color: var(--text-faint); font-weight: 400; }
+    .profile-bio {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin: 0;
+    }
+    .profile-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .profile-link {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-link:hover { color: var(--accent); }
+    .profile-link .link-label { color: var(--text-faint); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; width: 40px; flex-shrink: 0; }
+    .profile-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+    }
+    .profile-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-block {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+    }
+    .stat-block .stat-val {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-block .stat-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+    }
+    .profile-joined {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    /* ---- main content ---- */
+    .profile-main { min-width: 0; }
+
+    /* ---- tabs ---- */
+    .tab-row {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn .tab-count {
+      font-size: 10px;
+      color: var(--text-faint);
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: var(--radius);
+    }
+    .tab-btn.active .tab-count { color: var(--accent); border-color: var(--accent-edge); }
+
+    /* ---- tab panels ---- */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- privacy banner ---- */
+    .privacy-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .privacy-banner .priv-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .privacy-banner .priv-icon { font-size: 14px; }
+    .privacy-banner .priv-text { color: var(--text-dim); }
+    .privacy-banner .priv-text strong { color: var(--text); }
+    .privacy-toggle {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      white-space: nowrap;
+    }
+    .privacy-toggle:hover { background: var(--accent); color: var(--bg); }
+    .privacy-toggle.public { color: var(--text-dim); background: var(--bg-3); border-color: var(--border-2); }
+
+    /* ---- article card (same as author.html) ---- */
+    .article-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 22px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .article-card::before {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.18s ease;
+    }
+    .article-card:hover, .article-card:focus-visible {
+      border-color: var(--accent-edge);
+      background: var(--bg-2);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+    .article-card:hover::before { transform: scaleY(1); }
+    .article-card:hover h3 { color: var(--accent); }
+    .article-card h3 { margin: 0; font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.3; transition: color 0.15s; }
+    .article-card p { margin: 0; color: var(--text-dim); font-size: 14px; flex: 1; }
+    .article-card-foot {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      padding-top: 10px; border-top: 1px dashed var(--border); margin-top: auto;
+    }
+    .article-card .read-cta { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+    /* ---- empty state (inline) ---- */
+    .panel-empty {
+      text-align: center;
+      padding: 48px 18px;
+      color: var(--text-faint);
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+    .panel-empty strong { display: block; color: var(--text-dim); margin-bottom: 6px; }
+
+    /* ---- locked overlay for private section ---- */
+    .locked-overlay {
+      text-align: center;
+      padding: 60px 18px;
+      color: var(--text-faint);
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+    .locked-overlay .lock-icon { font-size: 32px; display: block; margin-bottom: 12px; }
+    .locked-overlay strong { display: block; color: var(--text-dim); margin-bottom: 6px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub" id="header-handle">profile</span>
+      </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+      </nav>
+      <div class="count-pill" id="header-pill" style="display:none;">
+        <span class="num" id="header-count">0</span>
+        <span class="label">contributions</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:20px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+    </div>
+  </section>
+
+  <div class="profile-wrap" id="profile-wrap">
+    <!-- Sidebar -->
+    <aside class="profile-card" id="profile-card">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div>
+        <div class="profile-handle"><span class="at">@</span><span id="profile-handle-text">—</span></div>
+      </div>
+      <p class="profile-bio" id="profile-bio"></p>
+      <div class="profile-links" id="profile-links"></div>
+      <hr class="profile-divider" />
+      <div class="profile-stats" id="profile-stats"></div>
+      <div class="profile-joined" id="profile-joined"></div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="profile-main">
+      <div class="tab-row" id="tab-row">
+        <button class="tab-btn active" data-tab="prompts">
+          prompts <span class="tab-count" id="tab-count-prompts">0</span>
+        </button>
+        <button class="tab-btn" data-tab="articles">
+          articles <span class="tab-count" id="tab-count-articles">0</span>
+        </button>
+        <button class="tab-btn" data-tab="liked">
+          liked <span class="tab-count" id="tab-count-liked">&#x1F512;</span>
+        </button>
+      </div>
+
+      <!-- Prompts panel -->
+      <div class="tab-panel active" id="panel-prompts">
+        <div class="grid" style="padding:0; margin:0;" id="prompts-grid"></div>
+        <div class="panel-empty hidden" id="prompts-empty">
+          <strong>No prompts yet</strong>
+          This user hasn't contributed any prompts.
+        </div>
+      </div>
+
+      <!-- Articles panel -->
+      <div class="tab-panel" id="panel-articles">
+        <div class="grid" style="padding:0; margin:0;" id="articles-grid"></div>
+        <div class="panel-empty hidden" id="articles-empty">
+          <strong>No articles yet</strong>
+          This user hasn't written any methodology articles.
+        </div>
+      </div>
+
+      <!-- Liked panel -->
+      <div class="tab-panel" id="panel-liked">
+        <div class="privacy-banner" id="privacy-banner">
+          <div class="priv-left">
+            <span class="priv-icon" id="priv-icon">&#x1F512;</span>
+            <span class="priv-text"><strong id="priv-status">Private</strong> &mdash; only visible to this user</span>
+          </div>
+          <!-- Toggle only shown to the profile owner — hidden until auth wired up -->
+          <button class="privacy-toggle hidden" id="privacy-toggle" type="button">make public</button>
+        </div>
+        <div id="liked-content">
+          <div class="locked-overlay" id="liked-locked">
+            <span class="lock-icon">&#x1F512;</span>
+            <strong>Liked prompts are private</strong>
+            Only this user can see what they've liked.
+          </div>
+          <div class="grid hidden" style="padding:0; margin:0;" id="liked-grid"></div>
+          <div class="panel-empty hidden" id="liked-empty">
+            <strong>No liked prompts</strong>
+            Nothing liked yet.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt modal -->
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <article class="modal">
+      <header class="modal-head">
+        <div>
+          <div class="meta" id="modal-meta"></div>
+          <h2 id="modal-title"></h2>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="purpose" id="modal-purpose"></p>
+        <h4>System prompt</h4>
+        <div class="prompt-block">
+          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <pre id="modal-prompt"></pre>
+        </div>
+        <h4>Details</h4>
+        <dl class="meta-grid" id="modal-details"></dl>
+        <div id="modal-chaining-wrap" class="hidden"><h4>Chaining</h4><p id="modal-chaining"></p></div>
+        <div id="modal-notes-wrap" class="hidden"><h4>Notes</h4><p id="modal-notes"></p></div>
+      </div>
+    </article>
+  </div>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="prompts.js"></script>
+  <script src="articles.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      // ---------------------------------------------------------------
+      // URL param
+      // ---------------------------------------------------------------
+      const params = new URLSearchParams(window.location.search);
+      const handle = params.get("handle") || "";
+
+      // ---------------------------------------------------------------
+      // Mock profile data — replace with Supabase fetch when live
+      // TODO: sb.from('profiles').select('*').eq('handle', handle).single()
+      // ---------------------------------------------------------------
+      const MOCK_PROFILES = {
+        "SarutobiSasuke": {
+          handle:        "SarutobiSasuke",
+          bio:           "Building with AI. Prompt engineer and crypto researcher. Curating production-ready prompts for builders.",
+          x_handle:      "SarutobiSasuke8",
+          github_handle: "SarutobiSasuke8",
+          avatar_url:    null,
+          created_at:    "2026-04-01T00:00:00Z"
+        }
+      };
+
+      // Mock liked prompt IDs — replace with Supabase fetch when live
+      // TODO: sb.from('likes').select('prompt_id').eq('user_id', profile.id)
+      const MOCK_LIKED_IDS = new Set([1, 3, 7, 12]);
+
+      // Mock visibility state — replace with profile.likes_public field when live
+      // TODO: add likes_public boolean column to profiles table
+      let likesPublic = false;
+
+      // ---------------------------------------------------------------
+      // Load profile
+      // ---------------------------------------------------------------
+      const profile = handle ? (MOCK_PROFILES[handle] || null) : null;
+
+      if (!profile) {
+        document.getElementById("profile-wrap").innerHTML =
+          '<div class="panel-empty" style="grid-column:1/-1;margin-top:40px;">' +
+          '<strong>User not found</strong>No profile exists for this handle.</div>';
+        return;
+      }
+
+      document.title = "prompt-library \u00b7 @" + profile.handle;
+      document.getElementById("header-handle").textContent = "@" + profile.handle;
+
+      // ---------------------------------------------------------------
+      // Filter data by author handle
+      // ---------------------------------------------------------------
+      const authoredPrompts  = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => (p.author || "") === profile.handle);
+      const authoredArticles = (typeof ARTICLES !== "undefined" ? ARTICLES : []).filter((a) => (a.author || "") === profile.handle);
+      const likedPrompts     = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => MOCK_LIKED_IDS.has(p.id));
+
+      const totalContributions = authoredPrompts.length + authoredArticles.length;
+
+      // ---------------------------------------------------------------
+      // Render sidebar
+      // ---------------------------------------------------------------
+      const $avatar = document.getElementById("profile-avatar");
+      if (profile.avatar_url) {
+        const img = document.createElement("img");
+        img.src = profile.avatar_url;
+        img.alt = profile.handle;
+        img.className = "profile-avatar";
+        $avatar.replaceWith(img);
+      } else {
+        $avatar.textContent = profile.handle.charAt(0).toUpperCase();
+      }
+
+      document.getElementById("profile-handle-text").textContent = profile.handle;
+      const $bio = document.getElementById("profile-bio");
+      if (profile.bio) { $bio.textContent = profile.bio; } else { $bio.remove(); }
+
+      const $links = document.getElementById("profile-links");
+      if (profile.x_handle) {
+        $links.innerHTML += '<a class="profile-link" href="https://x.com/' + escapeHtml(profile.x_handle) + '" target="_blank" rel="noopener"><span class="link-label">x</span>@' + escapeHtml(profile.x_handle) + "</a>";
+      }
+      if (profile.github_handle) {
+        $links.innerHTML += '<a class="profile-link" href="https://github.com/' + escapeHtml(profile.github_handle) + '" target="_blank" rel="noopener"><span class="link-label">github</span>' + escapeHtml(profile.github_handle) + "</a>";
+      }
+      if (!profile.x_handle && !profile.github_handle) $links.remove();
+
+      document.getElementById("profile-stats").innerHTML =
+        statBlock(authoredPrompts.length,  "prompts") +
+        statBlock(authoredArticles.length, "articles") +
+        statBlock(likedPrompts.length,     "liked") +
+        statBlock(totalContributions,      "total");
+
+      const joined = profile.created_at
+        ? "joined " + new Date(profile.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" })
+        : "";
+      document.getElementById("profile-joined").textContent = joined;
+
+      document.getElementById("header-count").textContent = totalContributions;
+      document.getElementById("header-pill").style.display = "";
+
+      // ---------------------------------------------------------------
+      // Update tab counts
+      // ---------------------------------------------------------------
+      document.getElementById("tab-count-prompts").textContent  = authoredPrompts.length;
+      document.getElementById("tab-count-articles").textContent = authoredArticles.length;
+
+      // ---------------------------------------------------------------
+      // Render prompts grid
+      // ---------------------------------------------------------------
+      const $promptsGrid  = document.getElementById("prompts-grid");
+      const $promptsEmpty = document.getElementById("prompts-empty");
+      if (authoredPrompts.length === 0) {
+        $promptsEmpty.classList.remove("hidden");
+      } else {
+        const frag = document.createDocumentFragment();
+        authoredPrompts.forEach((p) => frag.appendChild(buildPromptCard(p)));
+        $promptsGrid.appendChild(frag);
+      }
+
+      // ---------------------------------------------------------------
+      // Render articles grid
+      // ---------------------------------------------------------------
+      const $articlesGrid  = document.getElementById("articles-grid");
+      const $articlesEmpty = document.getElementById("articles-empty");
+      if (authoredArticles.length === 0) {
+        $articlesEmpty.classList.remove("hidden");
+      } else {
+        const frag = document.createDocumentFragment();
+        authoredArticles.forEach((a) => frag.appendChild(buildArticleCard(a)));
+        $articlesGrid.appendChild(frag);
+      }
+
+      // ---------------------------------------------------------------
+      // Render liked grid (respects privacy)
+      // ---------------------------------------------------------------
+      renderLiked();
+
+      function renderLiked() {
+        const $locked = document.getElementById("liked-locked");
+        const $grid   = document.getElementById("liked-grid");
+        const $empty  = document.getElementById("liked-empty");
+        const $banner = document.getElementById("privacy-banner");
+        const $icon   = document.getElementById("priv-icon");
+        const $status = document.getElementById("priv-status");
+        const $toggle = document.getElementById("privacy-toggle");
+
+        // TODO: replace with auth check — show toggle only to profile owner
+        // const isOwner = currentUser?.id === profile.id;
+        const isOwner = false; // stub — flip to true when auth is wired
+        if (isOwner) $toggle.classList.remove("hidden");
+
+        if (likesPublic) {
+          $icon.textContent   = "\uD83D\uDD13";
+          $status.textContent = "Public";
+          $banner.querySelector(".priv-text").lastChild.textContent = " \u2014 visible to everyone";
+          $toggle.textContent = "make private";
+          $toggle.classList.add("public");
+          $locked.classList.add("hidden");
+          $grid.innerHTML = "";
+          if (likedPrompts.length === 0) {
+            $empty.classList.remove("hidden");
+          } else {
+            $empty.classList.add("hidden");
+            $grid.classList.remove("hidden");
+            const frag = document.createDocumentFragment();
+            likedPrompts.forEach((p) => frag.appendChild(buildPromptCard(p)));
+            $grid.appendChild(frag);
+          }
+        } else {
+          $icon.textContent   = "\uD83D\uDD12";
+          $status.textContent = "Private";
+          $banner.querySelector(".priv-text").lastChild.textContent = " \u2014 only visible to this user";
+          $toggle.textContent = "make public";
+          $toggle.classList.remove("public");
+          $locked.classList.remove("hidden");
+          $grid.classList.add("hidden");
+          $empty.classList.add("hidden");
+        }
+      }
+
+      document.getElementById("privacy-toggle").addEventListener("click", () => {
+        likesPublic = !likesPublic;
+        // TODO: persist via sb.from('profiles').update({ likes_public: likesPublic })
+        renderLiked();
+      });
+
+      // ---------------------------------------------------------------
+      // Tabs
+      // ---------------------------------------------------------------
+      document.getElementById("tab-row").addEventListener("click", (e) => {
+        const btn = e.target.closest(".tab-btn");
+        if (!btn) return;
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+      });
+
+      // ---------------------------------------------------------------
+      // Card builders
+      // ---------------------------------------------------------------
+      function buildPromptCard(p) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-label", p.title);
+
+        const catLabel = (typeof CATEGORIES !== "undefined" && CATEGORIES[p.category]) || p.category;
+        const tags     = (p.tags || []).slice(0, 3);
+        const models   = (p.models || []).slice(0, 3);
+        const svg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
+            '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
+            '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
+          '</svg>';
+
+        card.innerHTML =
+          '<div class="card-head"><div class="card-head-left">' +
+            '<span class="card-id">#' + String(p.id).padStart(3, "0") + "</span>" +
+            '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+          '</div><span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span></div>" +
+          "<h3>" + escapeHtml(p.title) + "</h3>" +
+          '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
+          '<div class="card-foot"><div class="card-tags">' +
+            tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
+            models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+          '</div><button class="card-copy" type="button" aria-label="Copy">' + svg + '<span>copy</span></button></div>';
+
+        const open = (e) => { if (!e.target.closest(".card-copy")) openModal(p); };
+        card.addEventListener("click", open);
+        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(e); } });
+        card.querySelector(".card-copy").addEventListener("click", async (e) => {
+          e.stopPropagation();
+          await copyToClipboard(p.prompt);
+          const btn = e.currentTarget;
+          btn.classList.add("copied"); btn.querySelector("span").textContent = "copied";
+          showToast("Prompt copied");
+          setTimeout(() => { btn.classList.remove("copied"); btn.querySelector("span").textContent = "copy"; }, 1500);
+        });
+
+        return card;
+      }
+
+      function buildArticleCard(a) {
+        const el = document.createElement("a");
+        el.className = "article-card";
+        el.href = "article.html?id=" + a.id;
+        const tagsHtml = (a.tags || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join("");
+        el.innerHTML =
+          '<div class="card-head"><span class="card-cat">methodology</span>' +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">' + escapeHtml(a.readTime) + " read</span></div>" +
+          "<h3>" + escapeHtml(a.title) + "</h3>" +
+          "<p>" + escapeHtml(a.summary) + "</p>" +
+          '<div class="article-card-foot">' + tagsHtml + '<span class="read-cta">read &rarr;</span></div>';
+        return el;
+      }
+
+      // ---------------------------------------------------------------
+      // Modal
+      // ---------------------------------------------------------------
+      const $backdrop      = document.getElementById("modal-backdrop");
+      const $modalClose    = document.getElementById("modal-close");
+      const $modalMeta     = document.getElementById("modal-meta");
+      const $modalTitle    = document.getElementById("modal-title");
+      const $modalPurpose  = document.getElementById("modal-purpose");
+      const $modalPrompt   = document.getElementById("modal-prompt");
+      const $modalDetails  = document.getElementById("modal-details");
+      const $modalChaining = document.getElementById("modal-chaining");
+      const $chainWrap     = document.getElementById("modal-chaining-wrap");
+      const $modalNotes    = document.getElementById("modal-notes");
+      const $notesWrap     = document.getElementById("modal-notes-wrap");
+      const $copyBtn       = document.getElementById("copy-btn");
+
+      function openModal(p) {
+        const catLabel = (typeof CATEGORIES !== "undefined" && CATEGORIES[p.category]) || p.category;
+        $modalMeta.innerHTML =
+          '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+          '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>";
+        $modalTitle.textContent   = p.title;
+        $modalPurpose.textContent = p.purpose;
+        $modalPrompt.textContent  = p.prompt;
+        const tagsHtml   = (p.tags   || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join(" ");
+        const modelsHtml = (p.models || []).map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join(" ");
+        $modalDetails.innerHTML =
+          "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
+          "<dt>author</dt><dd class=\"mono\"><a href=\"author.html?name=" + encodeURIComponent(p.author || "") + "\" style=\"color:var(--accent);text-decoration:none;\">" + escapeHtml(p.author || "—") + "</a></dd>" +
+          "<dt>temperature</dt><dd class=\"mono\">" + escapeHtml(p.temperature) + "</dd>" +
+          "<dt>models</dt><dd>" + (modelsHtml || '<span style="color:var(--text-faint)">—</span>') + "</dd>" +
+          "<dt>tags</dt><dd>"   + (tagsHtml   || '<span style="color:var(--text-faint)">—</span>') + "</dd>";
+        if (p.chaining && p.chaining.trim()) { $modalChaining.textContent = p.chaining; $chainWrap.classList.remove("hidden"); } else { $chainWrap.classList.add("hidden"); }
+        if (p.notes && p.notes.trim()) { $modalNotes.textContent = p.notes; $notesWrap.classList.remove("hidden"); } else { $notesWrap.classList.add("hidden"); }
+        $backdrop.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        $modalClose.focus();
+      }
+
+      $modalClose.addEventListener("click", closeModal);
+      $backdrop.addEventListener("click", (e) => { if (e.target === $backdrop) closeModal(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$backdrop.classList.contains("hidden")) closeModal(); });
+      $copyBtn.addEventListener("click", async () => {
+        await copyToClipboard($modalPrompt.textContent);
+        $copyBtn.classList.add("copied"); $copyBtn.textContent = "Copied";
+        showToast("Prompt copied");
+        setTimeout(() => { $copyBtn.classList.remove("copied"); $copyBtn.textContent = "Copy"; }, 1500);
+      });
+
+      function closeModal() { $backdrop.classList.add("hidden"); document.body.style.overflow = ""; }
+
+      // ---------------------------------------------------------------
+      // Utilities
+      // ---------------------------------------------------------------
+      function statBlock(val, label) {
+        return '<div class="stat-block"><div class="stat-val">' + val + '</div><div class="stat-label">' + label + "</div></div>";
+      }
+
+      async function copyToClipboard(text) {
+        try { await navigator.clipboard.writeText(text); }
+        catch {
+          const ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+        }
+      }
+
+      function showToast(msg) {
+        const $t = document.getElementById("toast");
+        $t.textContent = msg; $t.classList.add("show");
+        setTimeout(() => $t.classList.remove("show"), 1400);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+      function escapeAttr(s) { return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, ""); }
+    })();
+  </script>
+
+</body>
+</html>

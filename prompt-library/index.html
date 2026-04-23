@@ -140,6 +140,29 @@
           <h4>Notes</h4>
           <p id="modal-notes"></p>
         </div>
+
+        <!-- Ratings + copy count -->
+        <div id="modal-social" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+          <div>
+            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">rating</div>
+            <div id="modal-stars" style="display:flex; gap:4px; align-items:center;"></div>
+            <div id="modal-rating-label" style="font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:4px;"></div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">times copied</div>
+            <div id="modal-copy-count" style="font-family:var(--mono); font-size:22px; font-weight:600; color:var(--accent); line-height:1;"></div>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div id="modal-comments-wrap" style="margin-top:20px;">
+          <h4>Comments</h4>
+          <div id="modal-comments-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;"></div>
+          <div style="display:flex; gap:8px;">
+            <input id="comment-input" type="text" placeholder="Add a comment…" maxlength="300" style="flex:1; background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--radius); color:var(--text); font-family:var(--mono); font-size:13px; padding:9px 12px; outline:none; transition:border-color 0.15s;" />
+            <button id="comment-submit" type="button" style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--bg); background:var(--accent); border:none; padding:9px 16px; border-radius:var(--radius); cursor:pointer; transition:background 0.12s; white-space:nowrap;">post</button>
+          </div>
+        </div>
       </div>
     </article>
   </div>
@@ -448,6 +471,16 @@
           $copyBtn.classList.add("copied");
           $copyBtn.textContent = "Copied";
           showToast("Prompt copied");
+          // increment copy counter
+          const activeId = $backdrop.dataset.promptId;
+          if (activeId) {
+            const key = "pl_copies_" + activeId;
+            const next = parseInt(localStorage.getItem(key) || "0", 10) + 1;
+            localStorage.setItem(key, next);
+            const $count = document.getElementById("modal-copy-count");
+            if ($count) $count.textContent = next;
+            // TODO: sb.rpc('increment_copies', { prompt_id: activeId })
+          }
           setTimeout(() => {
             $copyBtn.classList.remove("copied");
             $copyBtn.textContent = "Copy";
@@ -493,9 +526,125 @@
           $modalNotesWrap.classList.add("hidden");
         }
 
+        // ---- copy counter ----
+        const copyKey = "pl_copies_" + p.id;
+        const copies = parseInt(localStorage.getItem(copyKey) || "0", 10);
+        document.getElementById("modal-copy-count").textContent = copies;
+
+        // ---- ratings ----
+        const ratingKey = "pl_rating_" + p.id;
+        const myRating = parseInt(localStorage.getItem(ratingKey) || "0", 10);
+        renderStars(p.id, myRating);
+
+        // ---- comments ----
+        renderComments(p.id);
+        document.getElementById("comment-input").value = "";
+        document.getElementById("comment-submit").onclick = () => submitComment(p.id);
+        document.getElementById("comment-input").onkeydown = (e) => { if (e.key === "Enter") submitComment(p.id); };
+
+        $backdrop.dataset.promptId = p.id;
         $backdrop.classList.remove("hidden");
         document.body.style.overflow = "hidden";
         $modalClose.focus();
+      }
+
+      // ---- ratings ----
+      function renderStars(promptId, myRating) {
+        const $stars = document.getElementById("modal-stars");
+        const $label = document.getElementById("modal-rating-label");
+        // TODO: fetch aggregate rating from Supabase
+        // const { avg, count } = await sb.from('ratings').select('stars').eq('prompt_id', promptId)
+        const ratingKey  = "pl_rating_" + promptId;
+        const ratingsKey = "pl_ratings_all";
+        const all = JSON.parse(localStorage.getItem(ratingsKey) || "{}");
+        const vals = Object.values(all[promptId] || {});
+        const avg  = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
+
+        $stars.innerHTML = "";
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement("button");
+          star.type = "button";
+          star.setAttribute("aria-label", i + " star");
+          star.style.cssText = "font-size:20px; background:none; border:none; cursor:pointer; padding:0 2px; line-height:1; transition:transform 0.1s;";
+          star.textContent = i <= myRating ? "\u2605" : "\u2606";
+          star.style.color = i <= myRating ? "var(--accent)" : "var(--text-faint)";
+          const idx = i;
+          star.addEventListener("mouseenter", () => highlightStars(idx));
+          star.addEventListener("mouseleave", () => highlightStars(myRating));
+          star.addEventListener("click", () => {
+            // TODO: persist via sb.from('ratings').upsert({ user_id, prompt_id: promptId, stars: idx })
+            localStorage.setItem("pl_rating_" + promptId, idx);
+            const all = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
+            if (!all[promptId]) all[promptId] = {};
+            all[promptId]["local"] = idx;
+            localStorage.setItem("pl_ratings_all", JSON.stringify(all));
+            renderStars(promptId, idx);
+            showToast("Rating saved");
+          });
+          $stars.appendChild(star);
+        }
+
+        function highlightStars(n) {
+          $stars.querySelectorAll("button").forEach((s, i) => {
+            s.textContent = i < n ? "\u2605" : "\u2606";
+            s.style.color = i < n ? "var(--accent)" : "var(--text-faint)";
+          });
+        }
+
+        $label.textContent = avg ? "\u2605 " + avg + " avg" : "be the first to rate";
+      }
+
+      // ---- comments ----
+      function getComments(promptId) {
+        // TODO: fetch from sb.from('comments').select('*').eq('prompt_id', promptId).order('created_at')
+        const key = "pl_comments_" + promptId;
+        return JSON.parse(localStorage.getItem(key) || "[]");
+      }
+
+      function saveComments(promptId, comments) {
+        localStorage.setItem("pl_comments_" + promptId, JSON.stringify(comments));
+        // TODO: sb.from('comments').insert({ prompt_id: promptId, user_id, body: text })
+      }
+
+      function renderComments(promptId) {
+        const $list = document.getElementById("modal-comments-list");
+        const comments = getComments(promptId);
+
+        if (comments.length === 0) {
+          $list.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No comments yet. Be the first.</div>';
+          return;
+        }
+
+        $list.innerHTML = comments.map((c) =>
+          '<div style="display:flex; gap:10px; align-items:flex-start;">' +
+            '<div style="width:28px; height:28px; border-radius:50%; background:var(--bg-3); border:1px solid var(--border-2); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; color:var(--accent); flex-shrink:0;">' +
+              escapeHtml((c.author || "A").charAt(0).toUpperCase()) +
+            "</div>" +
+            '<div style="flex:1; min-width:0;">' +
+              '<div style="display:flex; gap:8px; align-items:baseline; margin-bottom:3px;">' +
+                '<span style="font-family:var(--mono); font-size:11px; color:var(--accent);">' + escapeHtml(c.author || "anonymous") + "</span>" +
+                '<span style="font-family:var(--mono); font-size:10px; color:var(--text-faint);">' + escapeHtml(c.time || "") + "</span>" +
+              "</div>" +
+              '<div style="font-size:13.5px; color:var(--text-dim); line-height:1.5;">' + escapeHtml(c.body) + "</div>" +
+            "</div>" +
+          "</div>"
+        ).join("");
+      }
+
+      function submitComment(promptId) {
+        const $input = document.getElementById("comment-input");
+        const body = $input.value.trim();
+        if (!body) return;
+        const comments = getComments(promptId);
+        comments.push({
+          author: "SarutobiSasuke", // TODO: replace with currentUser.handle
+          body,
+          time: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+        });
+        saveComments(promptId, comments);
+        $input.value = "";
+        renderComments(promptId);
+        showToast("Comment posted");
       }
 
       function closeModal() {

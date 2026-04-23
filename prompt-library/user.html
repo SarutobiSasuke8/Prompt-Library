@@ -250,6 +250,196 @@
     }
     .panel-empty strong { display: block; color: var(--text-dim); margin-bottom: 6px; }
 
+    /* ---- edit button ---- */
+    .edit-profile-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      width: 100%;
+      text-align: center;
+    }
+    .edit-profile-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ---- edit modal ---- */
+    .edit-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 50;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .edit-modal {
+      background: var(--bg-1);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      max-width: 520px;
+      width: 100%;
+      margin: 40px 0;
+      position: relative;
+      animation: modalIn 0.18s ease-out;
+    }
+    .edit-modal::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    .edit-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .edit-modal-head h3 {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+    .edit-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* avatar upload */
+    .avatar-upload {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .avatar-preview {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-edge);
+      background: var(--bg-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 24px;
+      color: var(--accent);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-upload-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .avatar-upload-btn:hover { background: var(--accent); color: var(--bg); }
+    .avatar-hint { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top: 4px; }
+
+    /* form fields */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+    }
+    .field-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent-edge);
+    }
+    .field-input-wrap .field-icon {
+      padding: 0 10px;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .field-input-wrap input,
+    .field-input-wrap textarea {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 10px 12px 10px 0;
+    }
+    .field textarea { padding: 10px 12px; resize: vertical; min-height: 80px; width: 100%; }
+    .field-prefix {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text-faint);
+      padding-left: 12px;
+      flex-shrink: 0;
+    }
+
+    /* edit modal footer */
+    .edit-modal-foot {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 16px 24px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-cancel {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .btn-cancel:hover { color: var(--text); border-color: var(--border-2); }
+    .btn-save {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .btn-save:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+    .btn-save.saving { opacity: 0.6; pointer-events: none; }
+
     /* ---- locked overlay for private section ---- */
     .locked-overlay {
       text-align: center;
@@ -303,6 +493,8 @@
       <hr class="profile-divider" />
       <div class="profile-stats" id="profile-stats"></div>
       <div class="profile-joined" id="profile-joined"></div>
+      <!-- shown only to profile owner — toggled by JS when auth is wired -->
+      <button class="edit-profile-btn hidden" id="edit-profile-btn" type="button">edit profile</button>
     </aside>
 
     <!-- Main content -->
@@ -388,6 +580,76 @@
     </article>
   </div>
 
+  <!-- Edit profile modal -->
+  <div class="edit-backdrop hidden" id="edit-backdrop">
+    <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div class="edit-modal-head">
+        <h3 id="edit-modal-title">Edit profile</h3>
+        <button class="modal-close" id="edit-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="edit-modal-body">
+
+        <!-- Avatar -->
+        <div class="field">
+          <label>Profile picture</label>
+          <div class="avatar-upload">
+            <div class="avatar-preview" id="edit-avatar-preview"></div>
+            <div>
+              <button class="avatar-upload-btn" type="button" id="avatar-upload-btn">Upload image</button>
+              <input type="file" id="avatar-file-input" accept="image/*" style="display:none;" />
+              <div class="avatar-hint">JPG, PNG or GIF &middot; max 2MB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Handle -->
+        <div class="field">
+          <label>Handle</label>
+          <div class="field-input-wrap">
+            <span class="field-prefix">@</span>
+            <input type="text" id="edit-handle" placeholder="yourhandle" maxlength="24" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="field">
+          <label>Bio</label>
+          <div class="field-input-wrap">
+            <textarea id="edit-bio" placeholder="Tell the world what you're building..." maxlength="200"></textarea>
+          </div>
+        </div>
+
+        <!-- X handle -->
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:6px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X / Twitter
+          </label>
+          <div class="field-input-wrap">
+            <span class="field-prefix">@</span>
+            <input type="text" id="edit-x-handle" placeholder="yourhandle" maxlength="50" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- GitHub handle -->
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:6px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            GitHub
+          </label>
+          <div class="field-input-wrap">
+            <input type="text" id="edit-github-handle" placeholder="yourusername" maxlength="50" autocomplete="off" style="padding-left:12px;" />
+          </div>
+        </div>
+
+      </div>
+      <div class="edit-modal-foot">
+        <button class="btn-cancel" id="edit-cancel" type="button">cancel</button>
+        <button class="btn-save" id="edit-save" type="button">save changes</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="inner">
       <div>&gt; built for people shipping with AI</div>
@@ -420,7 +682,7 @@
         "SarutobiSasuke": {
           handle:        "SarutobiSasuke",
           bio:           "Building with AI. Prompt engineer and crypto researcher. Curating production-ready prompts for builders.",
-          x_handle:      "SarutobiSasuke8",
+          x_handle:      "Sarut0biSasuke",
           github_handle: "SarutobiSasuke8",
           avatar_url:    null,
           created_at:    "2026-04-01T00:00:00Z"
@@ -477,12 +739,15 @@
       const $bio = document.getElementById("profile-bio");
       if (profile.bio) { $bio.textContent = profile.bio; } else { $bio.remove(); }
 
+      const SVG_X  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+      const SVG_GH = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>';
+
       const $links = document.getElementById("profile-links");
       if (profile.x_handle) {
-        $links.innerHTML += '<a class="profile-link" href="https://x.com/' + escapeHtml(profile.x_handle) + '" target="_blank" rel="noopener"><span class="link-label">x</span>@' + escapeHtml(profile.x_handle) + "</a>";
+        $links.innerHTML += '<a class="profile-link" href="https://x.com/' + escapeHtml(profile.x_handle) + '" target="_blank" rel="noopener">' + SVG_X + '@' + escapeHtml(profile.x_handle) + "</a>";
       }
       if (profile.github_handle) {
-        $links.innerHTML += '<a class="profile-link" href="https://github.com/' + escapeHtml(profile.github_handle) + '" target="_blank" rel="noopener"><span class="link-label">github</span>' + escapeHtml(profile.github_handle) + "</a>";
+        $links.innerHTML += '<a class="profile-link" href="https://github.com/' + escapeHtml(profile.github_handle) + '" target="_blank" rel="noopener">' + SVG_GH + escapeHtml(profile.github_handle) + "</a>";
       }
       if (!profile.x_handle && !profile.github_handle) $links.remove();
 
@@ -496,6 +761,10 @@
         ? "joined " + new Date(profile.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" })
         : "";
       document.getElementById("profile-joined").textContent = joined;
+
+      // TODO: replace with auth check — const isOwner = currentUser?.id === profile.id;
+      const isOwner = true; // stub — always show edit button for now
+      if (isOwner) document.getElementById("edit-profile-btn").classList.remove("hidden");
 
       document.getElementById("header-count").textContent = totalContributions;
       document.getElementById("header-pill").style.display = "";
@@ -712,6 +981,99 @@
       // ---------------------------------------------------------------
       // Utilities
       // ---------------------------------------------------------------
+      // ---------------------------------------------------------------
+      // Edit modal
+      // ---------------------------------------------------------------
+      const $editBackdrop = document.getElementById("edit-backdrop");
+      const $editClose    = document.getElementById("edit-close");
+      const $editCancel   = document.getElementById("edit-cancel");
+      const $editSave     = document.getElementById("edit-save");
+      const $editHandle   = document.getElementById("edit-handle");
+      const $editBio      = document.getElementById("edit-bio");
+      const $editX        = document.getElementById("edit-x-handle");
+      const $editGH       = document.getElementById("edit-github-handle");
+      const $avatarPreview= document.getElementById("edit-avatar-preview");
+      const $avatarBtn    = document.getElementById("avatar-upload-btn");
+      const $avatarFile   = document.getElementById("avatar-file-input");
+
+      document.getElementById("edit-profile-btn").addEventListener("click", openEditModal);
+      $editClose.addEventListener("click",  closeEditModal);
+      $editCancel.addEventListener("click", closeEditModal);
+      $editBackdrop.addEventListener("click", (e) => { if (e.target === $editBackdrop) closeEditModal(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$editBackdrop.classList.contains("hidden")) closeEditModal(); });
+
+      $avatarBtn.addEventListener("click", () => $avatarFile.click());
+      $avatarFile.addEventListener("change", () => {
+        const file = $avatarFile.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          $avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="preview" />';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      $editSave.addEventListener("click", async () => {
+        $editSave.textContent = "saving…";
+        $editSave.classList.add("saving");
+
+        // TODO: wire to Supabase when auth is live
+        // await PL.updateProfile({
+        //   bio:           $editBio.value.trim(),
+        //   x_handle:      $editX.value.trim(),
+        //   avatar_url:    uploadedAvatarUrl   // from Supabase Storage upload
+        // });
+        // if handle changed: await PL.setHandle($editHandle.value.trim());
+
+        // Optimistic local update for demo
+        profile.handle        = $editHandle.value.trim() || profile.handle;
+        profile.bio           = $editBio.value.trim();
+        profile.x_handle      = $editX.value.trim();
+        profile.github_handle = $editGH.value.trim();
+
+        document.getElementById("profile-handle-text").textContent = profile.handle;
+        document.getElementById("header-handle").textContent = "@" + profile.handle;
+        document.getElementById("profile-bio").textContent = profile.bio;
+
+        // Refresh links
+        const $l = document.getElementById("profile-links");
+        $l.innerHTML = "";
+        if (profile.x_handle) {
+          $l.innerHTML += '<a class="profile-link" href="https://x.com/' + escapeHtml(profile.x_handle) + '" target="_blank" rel="noopener">' + SVG_X + "@" + escapeHtml(profile.x_handle) + "</a>";
+        }
+        if (profile.github_handle) {
+          $l.innerHTML += '<a class="profile-link" href="https://github.com/' + escapeHtml(profile.github_handle) + '" target="_blank" rel="noopener">' + SVG_GH + escapeHtml(profile.github_handle) + "</a>";
+        }
+
+        showToast("Profile updated");
+        $editSave.textContent = "save changes";
+        $editSave.classList.remove("saving");
+        closeEditModal();
+      });
+
+      function openEditModal() {
+        $editHandle.value = profile.handle || "";
+        $editBio.value    = profile.bio    || "";
+        $editX.value      = profile.x_handle      || "";
+        $editGH.value     = profile.github_handle || "";
+
+        // Show current avatar in preview
+        if (profile.avatar_url) {
+          $avatarPreview.innerHTML = '<img src="' + escapeHtml(profile.avatar_url) + '" alt="avatar" />';
+        } else {
+          $avatarPreview.textContent = (profile.handle || "?").charAt(0).toUpperCase();
+        }
+
+        $editBackdrop.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        $editHandle.focus();
+      }
+
+      function closeEditModal() {
+        $editBackdrop.classList.add("hidden");
+        document.body.style.overflow = "";
+      }
+
       function statBlock(val, label) {
         return '<div class="stat-block"><div class="stat-val">' + val + '</div><div class="stat-label">' + label + "</div></div>";
       }

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; playground</title>
+  <meta name="description" content="Run any prompt from the library against Claude — live, in your browser." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .pg-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 18px 80px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    @media (min-width: 900px) {
+      .pg-wrap { grid-template-columns: 420px 1fr; align-items: start; }
+    }
+
+    /* ---- panel ---- */
+    .pg-panel {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .pg-panel-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pg-panel-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* ---- form elements ---- */
+    .pg-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+      margin-bottom: 5px;
+      display: block;
+    }
+    .pg-select, .pg-input, .pg-textarea {
+      width: 100%;
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .pg-select:focus, .pg-input:focus, .pg-textarea:focus {
+      border-color: var(--accent-edge);
+    }
+    .pg-textarea {
+      resize: vertical;
+      line-height: 1.6;
+      min-height: 120px;
+    }
+    .pg-textarea.system-prompt { min-height: 200px; font-size: 11.5px; }
+
+    /* ---- API key row ---- */
+    .key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .key-row .pg-input { flex: 1; font-size: 11px; letter-spacing: 0.04em; }
+    .key-toggle {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      padding: 9px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color 0.12s;
+    }
+    .key-toggle:hover { color: var(--accent); }
+
+    /* ---- model + temp row ---- */
+    .model-temp-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .temp-display {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      text-align: right;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    /* ---- run button ---- */
+    .run-btn {
+      width: 100%;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.12s, opacity 0.12s;
+    }
+    .run-btn:hover { background: var(--accent-dim); }
+    .run-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ---- output panel ---- */
+    .output-panel {
+      background: #050505;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      min-height: 480px;
+      position: sticky;
+      top: 72px;
+    }
+    [data-theme="light"] .output-panel { background: #1a1a1a; }
+
+    .output-head {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .output-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text-faint);
+    }
+    .output-status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-faint);
+    }
+    .output-status.running .dot { background: var(--accent); animation: pulse 0.8s ease-in-out infinite; }
+    .output-status.done .dot    { background: var(--accent); }
+    .output-status.error .dot   { background: var(--danger); }
+
+    .output-actions { display: flex; gap: 8px; }
+    .output-act-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: none;
+      border: 1px solid var(--accent-edge);
+      border-radius: var(--radius);
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .output-act-btn:hover { background: var(--accent); color: var(--bg); }
+
+    .output-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #c8e6c8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .output-body .placeholder {
+      color: #3a3a3a;
+    }
+    [data-theme="light"] .output-body .placeholder { color: #444; }
+
+    .output-footer {
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .output-footer span { display: flex; align-items: center; gap: 5px; }
+    .output-footer strong { color: var(--accent); }
+
+    /* ---- api key notice ---- */
+    .key-notice {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+    .key-notice strong { color: var(--text); }
+    .key-notice a { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">playground</span>
+      </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+        <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
+        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
+      </nav>
+      <div class="count-pill">
+        <span class="num">live</span>
+        <span class="label">api</span>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">☀</button>
+      <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
+        <span class="av-circle">S</span>
+        <span class="av-handle">SarutobiSasuke</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:28px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+      <span class="sep">/</span>
+      <span>playground</span>
+    </div>
+    <h1>Prompt <span class="accent">playground</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">Select a prompt from the library, add a user message, and run it against Claude — live in your browser. Your API key stays local.</p>
+  </section>
+
+  <div class="pg-wrap">
+
+    <!-- ===== Left panel: config ===== -->
+    <div>
+
+      <!-- API key -->
+      <div class="pg-panel" style="margin-bottom:14px;">
+        <div class="pg-panel-head">
+          <span>API key</span>
+          <span id="key-status" style="color:var(--text-faint);">not set</span>
+        </div>
+        <div class="pg-panel-body">
+          <div class="key-notice">
+            Your key is stored only in <strong>localStorage</strong> — it never leaves your browser.
+            Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.
+          </div>
+          <div>
+            <label class="pg-label" for="api-key-input">Anthropic API key</label>
+            <div class="key-row">
+              <input id="api-key-input" class="pg-input" type="password" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
+              <button class="key-toggle" id="key-toggle-vis">show</button>
+              <button class="key-toggle" id="key-save-btn">save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prompt config -->
+      <div class="pg-panel">
+        <div class="pg-panel-head">configuration</div>
+        <div class="pg-panel-body">
+
+          <div>
+            <label class="pg-label" for="prompt-select">System prompt</label>
+            <select id="prompt-select" class="pg-select">
+              <option value="custom">— custom prompt —</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="pg-label" for="system-prompt">System prompt text</label>
+            <textarea id="system-prompt" class="pg-textarea system-prompt" placeholder="Paste or select a system prompt…" spellcheck="false"></textarea>
+          </div>
+
+          <div>
+            <label class="pg-label" for="user-message">User message</label>
+            <textarea id="user-message" class="pg-textarea" placeholder="What should the user say to trigger this prompt?" rows="4" spellcheck="false"></textarea>
+          </div>
+
+          <div class="model-temp-row">
+            <div>
+              <label class="pg-label" for="model-select">Model</label>
+              <select id="model-select" class="pg-select">
+                <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                <option value="claude-haiku-4-5-20251001">claude-haiku-4-5</option>
+                <option value="claude-opus-4-7">claude-opus-4-7</option>
+              </select>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label class="pg-label" for="temperature" style="margin:0;">Temperature</label>
+                <span class="temp-display" id="temp-display">0.7</span>
+              </div>
+              <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" />
+            </div>
+          </div>
+
+          <div>
+            <label class="pg-label" for="max-tokens">Max tokens</label>
+            <select id="max-tokens" class="pg-select">
+              <option value="512">512</option>
+              <option value="1024">1 024</option>
+              <option value="2048" selected>2 048</option>
+              <option value="4096">4 096</option>
+              <option value="8192">8 192</option>
+            </select>
+          </div>
+
+          <button class="run-btn" id="run-btn" disabled>▶ run prompt</button>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Right panel: output ===== -->
+    <div class="output-panel">
+      <div class="output-head">
+        <div class="output-status" id="output-status">
+          <span class="dot"></span>
+          <span id="status-text">waiting</span>
+        </div>
+        <div class="output-actions">
+          <button class="output-act-btn hidden" id="copy-output-btn">copy</button>
+          <button class="output-act-btn hidden" id="clear-btn">clear</button>
+        </div>
+      </div>
+      <div class="output-body" id="output-body">
+        <span class="placeholder">// output will appear here
+// configure a prompt and message on the left, then click run</span>
+      </div>
+      <div class="output-footer">
+        <span>tokens in <strong id="tok-in">—</strong></span>
+        <span>tokens out <strong id="tok-out">—</strong></span>
+        <span>latency <strong id="latency">—</strong></span>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="learn.html">methodology</a>
+        <a href="tools.html">tools</a>
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="prompts.js"></script>
+  <script src="theme.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      // ── DOM refs ──────────────────────────────────────────────────
+      const $keyInput    = document.getElementById("api-key-input");
+      const $keyToggle   = document.getElementById("key-toggle-vis");
+      const $keySave     = document.getElementById("key-save-btn");
+      const $keyStatus   = document.getElementById("key-status");
+      const $promptSel   = document.getElementById("prompt-select");
+      const $systemPT    = document.getElementById("system-prompt");
+      const $userMsg     = document.getElementById("user-message");
+      const $modelSel    = document.getElementById("model-select");
+      const $tempSlider  = document.getElementById("temperature");
+      const $tempDisplay = document.getElementById("temp-display");
+      const $maxTok      = document.getElementById("max-tokens");
+      const $runBtn      = document.getElementById("run-btn");
+      const $outputBody  = document.getElementById("output-body");
+      const $statusEl    = document.getElementById("output-status");
+      const $statusText  = document.getElementById("status-text");
+      const $copyOutBtn  = document.getElementById("copy-output-btn");
+      const $clearBtn    = document.getElementById("clear-btn");
+      const $tokIn       = document.getElementById("tok-in");
+      const $tokOut      = document.getElementById("tok-out");
+      const $latency     = document.getElementById("latency");
+      const $toast       = document.getElementById("toast");
+
+      const KEY_STORE = "pl_api_key";
+      let isRunning = false;
+
+      // ── Load saved key ────────────────────────────────────────────
+      const savedKey = localStorage.getItem(KEY_STORE) || "";
+      if (savedKey) {
+        $keyInput.value = savedKey;
+        setKeyStatus(true);
+        $runBtn.disabled = false;
+      }
+
+      // ── Populate prompt selector ──────────────────────────────────
+      if (typeof PROMPTS !== "undefined") {
+        const grouped = {};
+        PROMPTS.forEach((p) => {
+          if (!grouped[p.category]) grouped[p.category] = [];
+          grouped[p.category].push(p);
+        });
+        const catLabels = (typeof CATEGORIES !== "undefined") ? CATEGORIES : {};
+        Object.keys(grouped).forEach((cat) => {
+          const grp = document.createElement("optgroup");
+          grp.label = catLabels[cat] || cat;
+          grouped[cat].forEach((p) => {
+            const opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = p.title;
+            opt.dataset.temp = p.temperature || "0.7";
+            grp.appendChild(opt);
+          });
+          $promptSel.appendChild(grp);
+        });
+      }
+
+      // ── Pre-fill from ?id= URL param ─────────────────────────────
+      const urlId = parseInt(new URLSearchParams(window.location.search).get("id"), 10);
+      if (urlId && typeof PROMPTS !== "undefined") {
+        const matched = PROMPTS.find((p) => p.id === urlId);
+        if (matched) {
+          $promptSel.value = urlId;
+          loadPrompt(matched);
+        }
+      }
+
+      // ── Events ────────────────────────────────────────────────────
+      $keyToggle.addEventListener("click", () => {
+        const show = $keyInput.type === "password";
+        $keyInput.type = show ? "text" : "password";
+        $keyToggle.textContent = show ? "hide" : "show";
+      });
+
+      $keySave.addEventListener("click", () => {
+        const val = $keyInput.value.trim();
+        if (!val) { showToast("Key is empty"); return; }
+        localStorage.setItem(KEY_STORE, val);
+        setKeyStatus(true);
+        $runBtn.disabled = false;
+        showToast("Key saved");
+      });
+
+      $keyInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") $keySave.click();
+      });
+
+      $promptSel.addEventListener("change", () => {
+        const id = parseInt($promptSel.value, 10);
+        if (!id || typeof PROMPTS === "undefined") { $systemPT.value = ""; return; }
+        const p = PROMPTS.find((x) => x.id === id);
+        if (p) loadPrompt(p);
+      });
+
+      $tempSlider.addEventListener("input", () => {
+        $tempDisplay.textContent = parseFloat($tempSlider.value).toFixed(1);
+      });
+
+      $runBtn.addEventListener("click", runPrompt);
+
+      $copyOutBtn.addEventListener("click", async () => {
+        await copyToClipboard($outputBody.textContent);
+        showToast("Copied");
+      });
+
+      $clearBtn.addEventListener("click", () => {
+        $outputBody.innerHTML = '<span class="placeholder">// cleared — ready for another run</span>';
+        setStatus("waiting");
+        $tokIn.textContent = $tokOut.textContent = $latency.textContent = "—";
+        $copyOutBtn.classList.add("hidden");
+        $clearBtn.classList.add("hidden");
+      });
+
+      // ── Helpers ───────────────────────────────────────────────────
+      function loadPrompt(p) {
+        $systemPT.value = p.prompt || "";
+        $tempSlider.value = parseFloat(p.temperature) || 0.7;
+        $tempDisplay.textContent = parseFloat($tempSlider.value).toFixed(1);
+      }
+
+      function setKeyStatus(ok) {
+        $keyStatus.textContent = ok ? "saved ✓" : "not set";
+        $keyStatus.style.color = ok ? "var(--accent)" : "var(--text-faint)";
+      }
+
+      function setStatus(state, msg) {
+        $statusEl.className = "output-status " + (state || "");
+        $statusText.textContent = msg || state || "waiting";
+      }
+
+      // ── Run ───────────────────────────────────────────────────────
+      async function runPrompt() {
+        if (isRunning) return;
+        const apiKey = localStorage.getItem(KEY_STORE) || $keyInput.value.trim();
+        if (!apiKey) { showToast("Paste and save your API key first"); return; }
+        const systemPrompt = $systemPT.value.trim();
+        const userMessage  = $userMsg.value.trim();
+        if (!userMessage) { showToast("Add a user message"); return; }
+
+        isRunning = true;
+        $runBtn.disabled = true;
+        $runBtn.textContent = "⏳ running…";
+        $outputBody.textContent = "";
+        $copyOutBtn.classList.add("hidden");
+        $clearBtn.classList.add("hidden");
+        setStatus("running", "streaming…");
+        $tokIn.textContent = $tokOut.textContent = $latency.textContent = "—";
+
+        const t0 = Date.now();
+        let fullText = "";
+
+        try {
+          const body = {
+            model: $modelSel.value,
+            max_tokens: parseInt($maxTok.value, 10),
+            temperature: parseFloat($tempSlider.value),
+            messages: [{ role: "user", content: userMessage }],
+            stream: true
+          };
+          if (systemPrompt) body.system = systemPrompt;
+
+          const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-api-key": apiKey,
+              "anthropic-version": "2023-06-01",
+              "anthropic-dangerous-allow-browser": "true"
+            },
+            body: JSON.stringify(body)
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: { message: res.statusText } }));
+            throw new Error(err.error?.message || "API error " + res.status);
+          }
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let inputTokens = 0, outputTokens = 0;
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n");
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const data = line.slice(6).trim();
+              if (data === "[DONE]") continue;
+              try {
+                const evt = JSON.parse(data);
+                if (evt.type === "content_block_delta" && evt.delta?.text) {
+                  fullText += evt.delta.text;
+                  $outputBody.textContent = fullText;
+                  $outputBody.scrollTop = $outputBody.scrollHeight;
+                }
+                if (evt.type === "message_delta" && evt.usage) {
+                  outputTokens = evt.usage.output_tokens || 0;
+                }
+                if (evt.type === "message_start" && evt.message?.usage) {
+                  inputTokens = evt.message.usage.input_tokens || 0;
+                }
+              } catch (_) { /* partial JSON — skip */ }
+            }
+          }
+
+          const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+          $tokIn.textContent   = inputTokens  || "—";
+          $tokOut.textContent  = outputTokens || "—";
+          $latency.textContent = elapsed + "s";
+          setStatus("done", "complete");
+          $copyOutBtn.classList.remove("hidden");
+          $clearBtn.classList.remove("hidden");
+
+        } catch (err) {
+          $outputBody.textContent = "Error: " + err.message;
+          setStatus("error", "error");
+          $clearBtn.classList.remove("hidden");
+        } finally {
+          isRunning = false;
+          $runBtn.disabled = false;
+          $runBtn.textContent = "▶ run prompt";
+        }
+      }
+
+      // ── Utilities ─────────────────────────────────────────────────
+      async function copyToClipboard(text) {
+        try { await navigator.clipboard.writeText(text); }
+        catch {
+          const ta = document.createElement("textarea");
+          ta.value = text; ta.style.cssText = "position:fixed;opacity:0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+        }
+      }
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(() => $toast.classList.remove("show"), 1400);
+      }
+    })();
+  </script>
+
+</body>
+</html>

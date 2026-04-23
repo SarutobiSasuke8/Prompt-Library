@@ -57,12 +57,53 @@ Do **not** start on these until v1 has users asking for them.
 
 ---
 
+## v2.5 — tool track (parallel to social)
+
+Decided 2026-04-23. Runs alongside the social v2 work, not instead of it. The
+thesis: prompts are most valuable when they flow quickly into the AI tool the
+user actually uses. Everything here reduces the friction from "good prompt"
+to "running in Claude / ChatGPT / Cursor / etc."
+
+### Tools page
+- [x] `tools.html` — curated list of chat UIs, coding tools, infra
+- [x] Nav + footer link site-wide
+- [ ] Per-tool `deepLink` status updated as Phase B wires real URLs
+
+### Deep-link "Use in X" buttons
+- Per-prompt split button: primary = copy, secondary = pick target tool
+- Supported (tier 1): ChatGPT, Perplexity, Claude, Gemini (verify live)
+- Copy-only (tier 2): Claude Code, Cursor, Windsurf, Aider, Cline, etc.
+- localStorage preference for last-used target tool (no auth needed)
+- URL-length guard: >1500 chars falls back to copy with a toast explaining
+
+### Variable slots in prompts
+- Optional `variables: [{ key, label, placeholder, options? }]` on prompt
+  schema. Backwards-compatible (no variables = current behavior).
+- Quick-fill panel opens before "Use →" sends the prompt
+- Retrofit 3–5 flagship prompts first, document pattern in CONTRIBUTING.md
+
+### Direct-link prompt URLs
+- `prompt-library.xyz/p/42` opens the library with that prompt's modal open
+- Shareable links make the library quotable in docs, chats, tweets
+
+### Personal collection (requires auth from social track)
+- "Save to my library" button → per-user tagged list, Supabase-backed
+- `/me` or tab in profile page listing saved prompts, reorderable
+- Replaces the "follow/feed" social idea — individual utility over network
+
+---
+
 ## v3 — possible further directions
 
 Speculative. Park them; don't plan yet.
 
 - Prompt versioning — track edits, diff history, let users "fork" a prompt
 - Prompt chaining builder — visual flow to stitch prompts together
+- Browser extension — right-click any input on Claude/ChatGPT/Gemini to paste
+  a prompt from your library without switching tabs. The "killer app" version
+  of the tool track; do once deep-links + variable slots have usage signal.
+- CLI / API — `npx prompt-lib get token-research | pbcopy`. Unlocks dev
+  workflows (Cursor, Claude Code users) that live in a terminal.
 - In-site "try this prompt" — run a prompt against a free model without leaving the page.
   Viable paths: (a) Cloudflare Workers AI via a Worker proxy (free tier: 10k neurons/day,
   Llama 3.1 8B etc.) — best balance; (b) WebLLM / Transformers.js running fully in-browser

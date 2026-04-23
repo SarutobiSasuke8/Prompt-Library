@@ -29,6 +29,9 @@
   --bg-footer:  rgba(10, 10, 10, 0.60);
   --overlay:    rgba(0, 0, 0, 0.78);
   --dot-color:  rgba(255, 255, 255, 0.025);
+  /* Simple Icons are fetched as near-white SVGs; this filter normalizes
+     them to the current text colour. Overridden in the light theme. */
+  --logo-filter: brightness(0) invert(0.9);
 }
 
 /* ---- light theme overrides ---- */
@@ -50,6 +53,8 @@
   --bg-footer:  rgba(244, 244, 244, 0.94);
   --overlay:    rgba(0, 0, 0, 0.55);
   --dot-color:  rgba(0, 0, 0, 0.055);
+  /* Flip to near-black so logos read on the light background. */
+  --logo-filter: brightness(0) invert(0.1);
 }
 
 /* ---- reset ---- */
@@ -774,6 +779,17 @@ a:hover { text-decoration: underline; }
   transition: all 0.12s ease;
 }
 .site-footer .cta:hover { background: var(--accent-soft); }
+.footer-copy {
+  max-width: 1200px;
+  margin: 14px auto 0;
+  padding: 12px 18px 0;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.footer-copy a { color: var(--text-faint); }
+.footer-copy a:hover { color: var(--accent); }
 
 /* ---- toast ---- */
 .toast {

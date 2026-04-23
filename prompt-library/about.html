@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>about &middot; prompt-library</title>
+  <meta name="description" content="What prompt-library is, why it exists, and what makes a prompt production-ready." />
+
+  <meta property="og:title" content="about &middot; prompt-library" />
+  <meta property="og:description" content="What prompt-library is, why it exists, and what makes a prompt production-ready." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .about-wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 18px 80px;
+    }
+    .about-wrap h2 {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin: 48px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .about-wrap h2::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 1px;
+      background: var(--accent);
+    }
+    .about-wrap p {
+      color: var(--text-dim);
+      font-size: 15.5px;
+      line-height: 1.75;
+      margin: 0 0 16px;
+    }
+    .about-wrap p strong { color: var(--text); }
+    .quality-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quality-list li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .quality-list .q-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      flex-shrink: 0;
+      padding-top: 2px;
+      min-width: 110px;
+    }
+    .quality-list .q-desc {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 0 0 16px;
+    }
+    .spec-block {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .spec-block .spec-key {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+      margin-bottom: 6px;
+    }
+    .spec-block .spec-val {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .about-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 32px;
+    }
+    .about-cta {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      border: 1px solid var(--accent-edge);
+      background: var(--accent-soft);
+      padding: 9px 16px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: all 0.12s ease;
+    }
+    .about-cta:hover { background: var(--accent); color: var(--bg); text-decoration: none; }
+    .about-cta.secondary {
+      color: var(--text-dim);
+      border-color: var(--border-2);
+      background: var(--bg-1);
+    }
+    .about-cta.secondary:hover { color: var(--accent); border-color: var(--accent-edge); background: var(--bg-2); }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">about</span>
+      </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+        <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
+        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
+        <a href="about.html" style="color:var(--accent); text-decoration:none;">about</a>
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">&#9728;</button>
+      <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
+        <span class="av-circle">S</span>
+        <span class="av-handle">SarutobiSasuke</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:32px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+      <span class="sep">/</span>
+      <span>about</span>
+    </div>
+    <h1>About <span class="accent">prompt-library</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">A curated, zero-dependency library of system prompts engineered for production use &mdash; not demos, not tutorials.</p>
+  </section>
+
+  <main class="about-wrap">
+
+    <h2>What this is</h2>
+    <p>
+      prompt-library is a searchable collection of system prompts that have been tested against real models in real workflows.
+      Every entry defines what the prompt does, the temperature it works best at, which models it has been run on, and where it breaks.
+      You search, filter by category or complexity, read the full prompt text, and copy it in one click.
+    </p>
+    <p>
+      The site is entirely static &mdash; no login, no tracking, no backend. It opens as a local <code style="font-family:var(--mono); font-size:13px; color:var(--accent); background:var(--bg-2); padding:1px 5px; border-radius:2px;">file://</code> and deploys to GitHub Pages. The whole thing is under 5 files.
+    </p>
+
+    <h2>Why it exists</h2>
+    <p>
+      Most prompt repositories are tutorials optimised for demos. They show you <em>that</em> something works, not
+      <em>how</em> to make it reliable. When you are building something real &mdash; an agent, a product feature,
+      an internal workflow &mdash; you need prompts that produce structured output, handle edge cases, and fail
+      predictably. That gap is what this library fills.
+    </p>
+    <p>
+      The target reader is a sceptical senior engineer or analyst, not a newsletter subscriber. Nothing
+      &ldquo;revolutionary&rdquo;. No price predictions. No vibes.
+    </p>
+
+    <h2>What &ldquo;production-ready&rdquo; means</h2>
+    <ul class="quality-list">
+      <li>
+        <span class="q-label">structured output</span>
+        <span class="q-desc">The prompt defines the shape of the answer. Headers, lists, JSON, tables &mdash; something predictable that downstream code or humans can act on.</span>
+      </li>
+      <li>
+        <span class="q-label">stated limits</span>
+        <span class="q-desc">The <code style="font-family:var(--mono); font-size:12px;">notes</code> field names failure modes, not just tips. A good prompt knows what it cannot do.</span>
+      </li>
+      <li>
+        <span class="q-label">actually tested</span>
+        <span class="q-desc">The <code style="font-family:var(--mono); font-size:12px;">models</code> array lists models it has actually been run against. If it is not tested, it is not in here.</span>
+      </li>
+      <li>
+        <span class="q-label">neutral tone</span>
+        <span class="q-desc">No shill language. Banned: &ldquo;revolutionary&rdquo;, &ldquo;next-gen&rdquo;, &ldquo;game-changing&rdquo;. Analytical register throughout.</span>
+      </li>
+      <li>
+        <span class="q-label">specific problem</span>
+        <span class="q-desc">Solves one concrete, real problem. A reformatted &ldquo;write me a blog post&rdquo; prompt is not useful. It has to do something distinct.</span>
+      </li>
+    </ul>
+
+    <h2>Open source</h2>
+    <p>
+      prompt-library is MIT licensed. Fork it, extend it, use it commercially. If you have a prompt that meets the
+      quality bar, open a pull request &mdash; the contributing guide explains the schema and the review process.
+      If you want to add a whole category, add a key to <code style="font-family:var(--mono); font-size:13px; color:var(--accent); background:var(--bg-2); padding:1px 5px; border-radius:2px;">CATEGORIES</code> in
+      <code style="font-family:var(--mono); font-size:13px; color:var(--accent); background:var(--bg-2); padding:1px 5px; border-radius:2px;">prompts.js</code> and ship two prompts with it. The UI absorbs it automatically.
+    </p>
+
+    <h2>Tech</h2>
+    <div class="spec-grid">
+      <div class="spec-block">
+        <div class="spec-key">dependencies</div>
+        <div class="spec-val">zero</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-key">build step</div>
+        <div class="spec-val">none</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-key">hosting</div>
+        <div class="spec-val">GitHub Pages</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-key">license</div>
+        <div class="spec-val">MIT</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-key">version</div>
+        <div class="spec-val">v1 &mdash; static</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-key">runtime JS</div>
+        <div class="spec-val">inline, vanilla</div>
+      </div>
+    </div>
+
+    <div class="about-cta-row">
+      <a class="about-cta" href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">view on github</a>
+      <a class="about-cta secondary" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contributing guide</a>
+      <a class="about-cta secondary" href="index.html">browse the library</a>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="index.html">library</a>
+        <a href="learn.html">methodology</a>
+        <a href="collections.html">collections</a>
+        <a href="tools.html">tools</a>
+        <a href="about.html">about</a>
+        <a href="privacy.html">privacy</a>
+        <span style="color:var(--border-2);">|</span>
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta social-x" href="#" target="_blank" rel="noopener" aria-label="Follow on X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          follow on X
+        </a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+    <div class="footer-copy">&copy; 2025 prompt-library &middot; MIT license</div>
+  </footer>
+
+  <script src="theme.js"></script>
+
+</body>
+</html>

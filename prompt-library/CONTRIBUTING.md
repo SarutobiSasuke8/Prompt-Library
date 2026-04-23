@@ -126,6 +126,70 @@ Things to check before opening a PR:
 
 ---
 
+## Adding a new page
+
+When creating a new `.html` page, use the structure below as your template. Copy it, swap the `<title>`, `<sub>` label, active nav link, and page content — everything else stays identical.
+
+### Standard header
+
+```html
+<header class="site-header">
+  <div class="inner">
+    <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+      <span class="caret">&gt;</span>prompt-library
+      <span class="tilde">~</span>
+      <span class="sub"><!-- page label, e.g. tools --></span>
+    </a>
+    <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+      <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+      <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
+      <!-- set color:var(--accent) on the link that matches the current page -->
+    </nav>
+    <div class="count-pill">
+      <span class="num" id="count-num">0</span>
+      <span class="label" id="count-label"><!-- e.g. tools --></span>
+    </div>
+    <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
+      <span class="av-circle">S</span>
+      <span class="av-handle">SarutobiSasuke</span>
+    </a>
+  </div>
+</header>
+```
+
+### Standard footer
+
+```html
+<footer class="site-footer">
+  <div class="inner">
+    <div>&gt; built for people shipping with AI</div>
+    <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+      <a href="index.html">library</a>
+      <a href="learn.html">methodology</a>
+      <a href="tools.html">tools</a>
+      <a href="privacy.html">privacy</a>
+      <span style="color:var(--border-2);">|</span>
+      <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+      <a class="cta social-x" href="#" target="_blank" rel="noopener" aria-label="Follow on X">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        follow on X
+      </a>
+      <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+    </div>
+  </div>
+</footer>
+```
+
+### Rules
+- The active nav link gets `color:var(--accent)` — all others use `color:var(--text-dim)`.
+- The avatar chip always links to `user.html?handle=SarutobiSasuke` and sits after the count pill.
+- The count pill is optional on pages with no filterable list — omit it if there's nothing to count.
+- Never link to `add-prompt.html` from any page. It is a local utility only.
+- Update the footer nav if new top-level pages are added (update all existing pages too).
+
+---
+
 ## Code of conduct
 
 Be the kind of contributor you'd want to work with. Disagreement is fine;

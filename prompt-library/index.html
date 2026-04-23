@@ -35,6 +35,7 @@
         <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
         <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
         <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
+        <a href="about.html" style="color:var(--text-dim); text-decoration:none;">about</a>
       </nav>
       <div class="count-pill">
         <span class="num" id="count-num">0</span>
@@ -144,6 +145,7 @@
         <h4>System prompt</h4>
         <div class="prompt-block">
           <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <a class="copy-btn" id="playground-btn" href="#" target="_blank" rel="noopener" style="right:80px; background:var(--bg-3); color:var(--accent); border:1px solid var(--accent-edge); text-decoration:none;">▶ run</a>
           <pre id="modal-prompt"></pre>
         </div>
 
@@ -199,6 +201,7 @@
         <a href="index.html">library</a>
         <a href="learn.html">methodology</a>
         <a href="tools.html">tools</a>
+        <a href="playground.html">playground</a>
         <a href="privacy.html">privacy</a>
         <span style="color:var(--border-2);">|</span>
         <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
@@ -612,6 +615,9 @@
         document.getElementById("comment-input").value = "";
         document.getElementById("comment-submit").onclick = () => submitComment(p.id);
         document.getElementById("comment-input").onkeydown = (e) => { if (e.key === "Enter") submitComment(p.id); };
+
+        // ---- playground link ----
+        document.getElementById("playground-btn").href = "playground.html?id=" + p.id;
 
         // ---- related prompts ----
         renderRelated(p);

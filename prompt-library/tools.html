@@ -43,8 +43,10 @@
       font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--text);
       letter-spacing: -0.02em; position: relative; overflow: hidden;
     }
-    .tool-mark img { width: 22px; height: 22px; display: block; filter: brightness(0) invert(0.9); position: relative; z-index: 2; }
+    .tool-mark img { width: 22px; height: 22px; display: block; filter: var(--logo-filter); position: relative; z-index: 2; }
     .tool-mark .monogram { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; }
+    .tool-mark .fallback-glyph { width: 20px; height: 20px; color: var(--text-dim); position: relative; z-index: 2; }
+    .tool-mark .fallback-glyph svg { width: 100%; height: 100%; display: block; }
 
     .tool-star {
       position: absolute; top: 10px; right: 10px;
@@ -105,7 +107,9 @@
       <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
         <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
         <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+        <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
         <a href="tools.html" style="color:var(--accent); text-decoration:none;">tools</a>
+        <a href="about.html" style="color:var(--text-dim); text-decoration:none;">about</a>
       </nav>
       <div class="count-pill">
         <span class="num" id="count-num">0</span>
@@ -192,6 +196,7 @@
         <a href="index.html">library</a>
         <a href="learn.html">methodology</a>
         <a href="tools.html">tools</a>
+        <a href="playground.html">playground</a>
         <a href="privacy.html">privacy</a>
         <span style="color:var(--border-2);">|</span>
         <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
@@ -274,6 +279,24 @@
     const $count = document.getElementById('count-num');
     const $label = document.getElementById('count-label');
 
+    // Inline SVG used when a tool has no Simple Icons slug (or the CDN
+     // returns 404). A small "package / self-host" glyph — generic but
+     // visually consistent with the real logos around it.
+    const FALLBACK_GLYPH_SVG =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' +
+        '<path d="M3 7.5 12 3l9 4.5v9L12 21 3 16.5z"/>' +
+        '<path d="M3 7.5 12 12l9-4.5"/>' +
+        '<path d="M12 12v9"/>' +
+      '</svg>';
+
+    function showFallbackGlyph(markEl, monoEl) {
+      if (monoEl) monoEl.style.display = 'none';
+      const wrap = document.createElement('span');
+      wrap.className = 'fallback-glyph';
+      wrap.innerHTML = FALLBACK_GLYPH_SVG;
+      markEl.appendChild(wrap);
+    }
+
     function iconUrl(slug) {
       // Simple Icons: monochrome SVG logos, free to use, match the dark theme.
       // e6e6e6 mirrors --text. If the slug doesn't exist, image onerror falls
@@ -301,8 +324,12 @@
         // Hide monogram immediately when we have a slug; restore it if
         // the CDN returns 404 (keeps a graceful fallback for unknown tools).
         mono.style.display = 'none';
-        img.onerror = () => { img.remove(); mono.style.display = ''; };
+        img.onerror = () => { img.remove(); showFallbackGlyph(mark, mono); };
         mark.appendChild(img);
+      } else {
+        // No Simple Icons coverage — use an inline glyph instead of a bare
+        // monogram so visual density stays consistent across cards.
+        showFallbackGlyph(mark, mono);
       }
 
       const titleEl = document.createElement('div');

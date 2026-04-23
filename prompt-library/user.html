@@ -469,6 +469,7 @@
         <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
         <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
         <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
+        <a href="about.html" style="color:var(--text-dim); text-decoration:none;">about</a>
       </nav>
       <div class="count-pill" id="header-pill" style="display:none;">
         <span class="num" id="header-count">0</span>
@@ -517,6 +518,9 @@
         <button class="tab-btn" data-tab="liked">
           liked <span class="tab-count" id="tab-count-liked">&#x1F512;</span>
         </button>
+        <button class="tab-btn" data-tab="tools">
+          my tools <span class="tab-count" id="tab-count-tools">0</span>
+        </button>
       </div>
 
       <!-- Prompts panel -->
@@ -558,6 +562,18 @@
             <strong>No liked prompts</strong>
             Nothing liked yet.
           </div>
+        </div>
+      </div>
+
+      <!-- My Tools panel -->
+      <div class="tab-panel" id="panel-tools">
+        <div class="tools-intro" style="color:var(--text-dim); font-size:13px; line-height:1.6; margin-bottom:14px;">
+          Tools you've starred on the <a href="tools.html" style="color:var(--accent); text-decoration:none;">tools page</a>. Stored locally in this browser &mdash; no account required.
+        </div>
+        <div id="my-tools-grid" style="display:grid; gap:12px; grid-template-columns:1fr;"></div>
+        <div class="panel-empty hidden" id="tools-empty">
+          <strong>No starred tools yet</strong>
+          Head to the <a href="tools.html" style="color:var(--accent);">tools page</a> and star ones you use.
         </div>
       </div>
     </div>
@@ -665,6 +681,7 @@
         <a href="index.html">library</a>
         <a href="learn.html">methodology</a>
         <a href="tools.html">tools</a>
+        <a href="playground.html">playground</a>
         <a href="privacy.html">privacy</a>
         <span style="color:var(--border-2);">|</span>
         <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
@@ -875,14 +892,127 @@
       // ---------------------------------------------------------------
       // Tabs
       // ---------------------------------------------------------------
+      function activateTab(tabName) {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === tabName));
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + tabName));
+      }
       document.getElementById("tab-row").addEventListener("click", (e) => {
         const btn = e.target.closest(".tab-btn");
         if (!btn) return;
-        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-        btn.classList.add("active");
-        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+        activateTab(btn.dataset.tab);
+        if (location.hash !== "#tab-" + btn.dataset.tab) {
+          history.replaceState(null, "", "#tab-" + btn.dataset.tab);
+        }
       });
+      // Deep-link: ?handle=X#tab-tools jumps straight to My Tools
+      if (location.hash && location.hash.indexOf("#tab-") === 0) {
+        const hashTab = location.hash.slice(5);
+        if (document.getElementById("panel-" + hashTab)) activateTab(hashTab);
+      }
+
+      // ---------------------------------------------------------------
+      // My Tools — reads starred tool ids from localStorage.
+      // Mirrors the TOOLS registry on tools.html. Keep in sync if you
+      // add new tools there.
+      // ---------------------------------------------------------------
+      const TOOL_REGISTRY = {
+        'claude':            { name: 'Claude',           sub: 'Anthropic',           icon: 'anthropic',        mark: 'CL', url: 'https://claude.ai/' },
+        'chatgpt':           { name: 'ChatGPT',          sub: 'OpenAI',              icon: 'openai',           mark: 'GP', url: 'https://chatgpt.com/' },
+        'gemini':            { name: 'Gemini',           sub: 'Google',              icon: 'googlegemini',     mark: 'GE', url: 'https://gemini.google.com/' },
+        'grok':              { name: 'Grok',             sub: 'xAI',                 icon: 'x',                mark: 'GR', url: 'https://grok.com/' },
+        'perplexity':        { name: 'Perplexity',       sub: 'Perplexity',          icon: 'perplexity',       mark: 'PX', url: 'https://www.perplexity.ai/' },
+        'lechat':            { name: 'Le Chat',          sub: 'Mistral',             icon: 'mistralai',        mark: 'LC', url: 'https://chat.mistral.ai/' },
+        'deepseek':          { name: 'DeepSeek',         sub: 'DeepSeek',            icon: 'deepseek',         mark: 'DS', url: 'https://chat.deepseek.com/' },
+        'claude-code':       { name: 'Claude Code',      sub: 'Anthropic CLI',       icon: 'anthropic',        mark: 'CC', url: 'https://docs.claude.com/en/docs/claude-code/overview' },
+        'codex':             { name: 'Codex',            sub: 'OpenAI',              icon: 'openai',           mark: 'CX', url: 'https://chatgpt.com/codex' },
+        'cursor':            { name: 'Cursor',           sub: 'Anysphere',           icon: 'cursor',           mark: 'CR', url: 'https://cursor.com/' },
+        'windsurf':          { name: 'Windsurf',         sub: 'Codeium',             icon: 'codeium',          mark: 'WS', url: 'https://windsurf.com/' },
+        'cline':             { name: 'Cline',            sub: 'VS Code extension',   icon: 'visualstudiocode', mark: 'CN', url: 'https://cline.bot/' },
+        'aider':             { name: 'Aider',            sub: 'open source CLI',     icon: 'gnubash',          mark: 'AD', url: 'https://aider.chat/' },
+        'copilot':           { name: 'GitHub Copilot',   sub: 'GitHub',              icon: 'githubcopilot',    mark: 'CP', url: 'https://github.com/features/copilot' },
+        'zed':               { name: 'Zed AI',           sub: 'Zed',                 icon: 'zedindustries',    mark: 'ZA', url: 'https://zed.dev/' },
+        'openrouter':        { name: 'OpenRouter',       sub: 'model router',        icon: 'openrouter',       mark: 'OR', url: 'https://openrouter.ai/' },
+        'groq':              { name: 'Groq',             sub: 'inference',           icon: 'groq',             mark: 'GQ', url: 'https://groq.com/' },
+        'hf':                { name: 'Hugging Face',     sub: 'model hub',           icon: 'huggingface',      mark: 'HF', url: 'https://huggingface.co/' },
+        'replicate':         { name: 'Replicate',        sub: 'inference',           icon: 'replicate',        mark: 'RP', url: 'https://replicate.com/' },
+        'aistudio':          { name: 'AI Studio',        sub: 'Google',              icon: 'googlegemini',     mark: 'AI', url: 'https://aistudio.google.com/' },
+        'anthropic-console': { name: 'Anthropic Console', sub: 'Anthropic',          icon: 'anthropic',        mark: 'AC', url: 'https://console.anthropic.com/' },
+        'ollama':            { name: 'Ollama',           sub: 'local runner',        icon: 'ollama',           mark: 'OL', url: 'https://ollama.com/' },
+        'lmstudio':          { name: 'LM Studio',        sub: 'desktop app',         icon: '',                 mark: 'LM', url: 'https://lmstudio.ai/' },
+        'jan':               { name: 'Jan',              sub: 'open source desktop', icon: '',                 mark: 'JN', url: 'https://jan.ai/' },
+        'localai':           { name: 'LocalAI',          sub: 'OpenAI-compatible',   icon: '',                 mark: 'LA', url: 'https://localai.io/' },
+        'gpt4all':           { name: 'GPT4All',          sub: 'Nomic',               icon: '',                 mark: 'G4', url: 'https://www.nomic.ai/gpt4all' }
+      };
+
+      function renderMyTools() {
+        const grid  = document.getElementById('my-tools-grid');
+        const empty = document.getElementById('tools-empty');
+        const count = document.getElementById('tab-count-tools');
+        let starred = [];
+        try { starred = JSON.parse(localStorage.getItem('promptLibrary.starredTools') || '[]'); } catch (_) {}
+        const tools = starred.map((id) => TOOL_REGISTRY[id] && { id, ...TOOL_REGISTRY[id] }).filter(Boolean);
+        count.textContent = tools.length;
+        grid.innerHTML = '';
+        empty.classList.toggle('hidden', tools.length !== 0);
+        if (tools.length === 0) return;
+        for (const t of tools) {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:2px; background:var(--bg-1);';
+          const mark = document.createElement('div');
+          mark.style.cssText = 'width:36px; height:36px; flex:0 0 36px; background:var(--bg-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:600; font-size:12px; color:var(--text); position:relative; overflow:hidden;';
+          const mono = document.createElement('span');
+          mono.textContent = t.mark;
+          mono.style.cssText = 'position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:1;';
+          mark.appendChild(mono);
+          const fallbackGlyph = () => {
+            mono.style.display = 'none';
+            const g = document.createElement('span');
+            g.style.cssText = 'width:16px; height:16px; color:var(--text-dim); position:relative; z-index:2; display:block;';
+            g.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" style="width:100%;height:100%;display:block;"><path d="M3 7.5 12 3l9 4.5v9L12 21 3 16.5z"/><path d="M3 7.5 12 12l9-4.5"/><path d="M12 12v9"/></svg>';
+            mark.appendChild(g);
+          };
+          if (t.icon) {
+            const img = document.createElement('img');
+            img.alt = '';
+            img.loading = 'lazy';
+            img.src = 'https://cdn.simpleicons.org/' + t.icon + '/e6e6e6';
+            img.style.cssText = 'width:18px; height:18px; display:block; filter:var(--logo-filter); position:relative; z-index:2;';
+            mono.style.display = 'none';
+            img.onerror = () => { img.remove(); fallbackGlyph(); };
+            mark.appendChild(img);
+          } else {
+            fallbackGlyph();
+          }
+          const info = document.createElement('div');
+          info.style.cssText = 'flex:1 1 auto; min-width:0;';
+          const name = document.createElement('div');
+          name.style.cssText = 'font-family:var(--sans); font-size:14px; font-weight:600; color:var(--text); line-height:1.2;';
+          name.textContent = t.name;
+          const sub = document.createElement('div');
+          sub.style.cssText = 'font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:2px; letter-spacing:0.04em;';
+          sub.textContent = t.sub;
+          info.appendChild(name); info.appendChild(sub);
+          const open = document.createElement('a');
+          open.href = t.url; open.target = '_blank'; open.rel = 'noopener';
+          open.textContent = 'open →';
+          open.style.cssText = 'font-family:var(--mono); font-size:11px; color:var(--text); text-decoration:none; border:1px solid var(--border); background:var(--bg-2); padding:6px 10px; border-radius:2px;';
+          const unstar = document.createElement('button');
+          unstar.type = 'button';
+          unstar.textContent = 'unstar';
+          unstar.style.cssText = 'font-family:var(--mono); font-size:11px; color:var(--text-faint); background:transparent; border:1px solid var(--border); padding:6px 10px; border-radius:2px; cursor:pointer;';
+          unstar.addEventListener('click', () => {
+            try {
+              const cur = new Set(JSON.parse(localStorage.getItem('promptLibrary.starredTools') || '[]'));
+              cur.delete(t.id);
+              localStorage.setItem('promptLibrary.starredTools', JSON.stringify([...cur]));
+            } catch (_) {}
+            renderMyTools();
+          });
+          row.appendChild(mark); row.appendChild(info); row.appendChild(open); row.appendChild(unstar);
+          grid.appendChild(row);
+        }
+      }
+      renderMyTools();
 
       // ---------------------------------------------------------------
       // Card builders

@@ -115,6 +115,46 @@ a:hover { text-decoration: underline; }
 .count-pill .num { color: var(--accent); font-weight: 600; }
 .count-pill .label { color: var(--text-dim); margin-left: 4px; }
 
+/* ---- avatar chip (header profile link) ---- */
+.avatar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 99px;
+  padding: 4px 12px 4px 4px;
+  transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.avatar-chip:hover {
+  border-color: var(--accent-edge);
+  background: var(--bg-3);
+}
+.avatar-chip .av-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.avatar-chip .av-handle {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+@media (max-width: 480px) { .avatar-chip .av-handle { display: none; } }
+
 /* ---- hero ---- */
 .hero {
   max-width: 1200px;

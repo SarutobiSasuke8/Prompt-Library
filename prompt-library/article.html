@@ -100,6 +100,25 @@
       color: var(--text-faint);
       padding: 8px 14px 0;
     }
+    .example-block .ex-copy {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      line-height: 1;
+    }
+    .example-block .ex-copy:hover { background: var(--accent); color: var(--bg); }
+    .example-block .ex-copy.copied { background: var(--accent); color: var(--bg); }
     .example-block pre {
       margin: 0;
       padding: 10px 14px 14px;
@@ -139,6 +158,48 @@
       gap: 6px;
     }
     .article-nav a:hover { color: var(--accent); }
+    .reference-block {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin: 0 0 18px;
+    }
+    .reference-block .ref-icon {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--accent);
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .reference-block .ref-body { flex: 1; min-width: 0; }
+    .reference-block .ref-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+      margin-bottom: 4px;
+    }
+    .reference-block .ref-title {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .reference-block a.ref-link {
+      display: inline-block;
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .reference-block a.ref-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -150,6 +211,10 @@
         <span class="tilde">~</span>
         <span class="sub" id="header-sub">learn</span>
       </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--accent); text-decoration:none;">methodology</a>
+      </nav>
       <div class="count-pill" id="read-time-pill" style="display:none;">
         <span class="num" id="read-time-val"></span>
         <span class="label">read</span>
@@ -239,6 +304,19 @@
 
       $root.innerHTML = html;
 
+      // Wire copy buttons on example blocks
+      $root.querySelectorAll(".example-block").forEach((block) => {
+        const btn = block.querySelector(".ex-copy");
+        const pre = block.querySelector("pre");
+        if (!btn || !pre) return;
+        btn.addEventListener("click", async () => {
+          await copyToClipboard(pre.textContent);
+          btn.textContent = "copied";
+          btn.classList.add("copied");
+          setTimeout(() => { btn.textContent = "copy"; btn.classList.remove("copied"); }, 1500);
+        });
+      });
+
       function renderBody(blocks) {
         return (blocks || []).map((b) => {
           if (b.type === "p") {
@@ -250,11 +328,22 @@
           if (b.type === "example") {
             return '<div class="example-block">' +
               '<div class="example-label">' + escapeHtml(b.label || "example") + "</div>" +
+              '<button class="ex-copy" type="button">copy</button>' +
               "<pre>" + escapeHtml(b.text) + "</pre>" +
               "</div>";
           }
           if (b.type === "callout") {
             return '<div class="callout">' + escapeHtml(b.text) + "</div>";
+          }
+          if (b.type === "reference") {
+            return '<div class="reference-block">' +
+              '<div class="ref-icon">&#9646;</div>' +
+              '<div class="ref-body">' +
+                '<div class="ref-label">source</div>' +
+                '<div class="ref-title">' + escapeHtml(b.title) + "</div>" +
+                (b.url ? '<a class="ref-link" href="' + escapeHtml(b.url) + '" target="_blank" rel="noopener">view on Amazon &rarr;</a>' : "") +
+              "</div>" +
+            "</div>";
           }
           if (b.type === "list") {
             const items = (b.items || []).map((i) => "<li>" + escapeHtml(i) + "</li>").join("");
@@ -262,6 +351,17 @@
           }
           return "";
         }).join("");
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+        }
       }
 
       function escapeHtml(s) {

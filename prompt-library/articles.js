@@ -15,6 +15,7 @@
 //   { type: "example", label: "...", text: "..." }  prompt example block
 //   { type: "callout", text: "..." }          highlighted tip
 //   { type: "list",    items: ["..."] }       bulleted list
+//   { type: "reference", title: "...", author: "...", url: "..." }  book/source citation
 // ---------------------------------------------------------------
 
 const ARTICLES = [
@@ -200,6 +201,46 @@ const ARTICLES = [
       { type: "callout", text: "Every bug you find in red-teaming becomes a test case. Build an eval set of 20–50 known-good and known-bad inputs. Run it every time you change the prompt. Without this, you can't tell if a prompt change is an improvement or a regression." },
       { type: "h3", text: "Automate where possible" },
       { type: "p", text: "LLM-as-judge — using a separate model call to evaluate output quality — scales better than human review. It's not perfect, but it catches regressions fast and is cheap enough to run on every deploy. Pair it with human spot-checks for high-stakes applications." }
+    ]
+  },
+
+  {
+    id: 7,
+    title: "The CRIT Framework",
+    summary: "A four-part prompting structure — Context, Role, Interview, Task — for getting sharper AI output in business decisions.",
+    tags: ["framework", "business", "technique", "fundamentals"],
+    readTime: "7 min",
+    author: "SarutobiSasuke",
+    body: [
+      { type: "p", text: "Most prompts fail not because the model is incapable, but because the prompt leaves too much for the model to guess. CRIT is a four-part framework that eliminates that guesswork by forcing you to be explicit about four things before you ask for anything." },
+      { type: "p", text: "CRIT stands for: Context, Role, Interview, Task. It was introduced in The AI-Driven Leader by Harnessing AI to Make Faster, Smarter Decisions — a practical guide for executives and managers integrating AI into high-stakes decision-making." },
+      { type: "h3", text: "The four components" },
+      { type: "list", items: [
+        "Context — the background the model needs to understand your situation: industry, company stage, constraints, recent events, what's already been tried.",
+        "Role — who the model should be: the specific expertise, seniority level, and perspective it should bring to the problem.",
+        "Interview — before answering, the model asks you clarifying questions to fill gaps in its understanding. This is the differentiating step that most frameworks skip.",
+        "Task — the specific, scoped deliverable you want: not 'help me think about X' but 'produce a 5-point briefing document on X in the format below.'"
+      ]},
+      { type: "h3", text: "Why the Interview step matters" },
+      { type: "p", text: "The Interview step is what separates CRIT from simpler frameworks like role prompting or chain-of-thought. Instead of the model guessing what it doesn't know, it asks. This surfaces assumptions you didn't know you were making and produces output that's calibrated to your actual situation rather than a generic version of it." },
+      { type: "callout", text: "A model that asks good clarifying questions before answering is more useful than one that answers confidently with the wrong assumptions baked in. Build the Interview step into any prompt where the stakes are high enough to matter." },
+      { type: "h3", text: "Business scenario 1: competitive strategy" },
+      { type: "example", label: "CRIT prompt — competitive positioning", text: "Context: We are a B2B SaaS company with 80 employees, operating in the project management space. We have 1,200 paying customers, mostly SMEs in the UK. Our main competitors are Monday.com and Asana. We are preparing for a Series A raise in Q3 and need to sharpen our positioning.\n\nRole: You are a senior strategy consultant with experience advising SaaS companies through Series A fundraising. You have worked with founders on competitive positioning decks and know what investors scrutinise.\n\nInterview: Before producing anything, ask me up to 5 clarifying questions that would meaningfully change your advice. Focus on what you'd need to know to give a genuinely differentiated positioning recommendation rather than generic strategy advice.\n\nTask: Once I've answered your questions, produce a one-page competitive positioning brief covering: our defensible differentiation, the investor narrative around our market position, and three positioning statements we could test." },
+      { type: "p", text: "Notice how the Interview step prevents the model from immediately producing a generic 'focus on your niche, build community, differentiate on service' answer. Instead it will ask: What do customers say they choose you over Monday for? What's your retention vs industry benchmarks? Who are your three biggest churned customers and why did they leave? Those answers change the output entirely." },
+      { type: "h3", text: "Business scenario 2: hiring decision" },
+      { type: "example", label: "CRIT prompt — evaluating a senior hire", text: "Context: We are considering hiring a VP of Sales for our 40-person fintech startup. We have two finalists. Candidate A has 12 years in enterprise sales at large corporates but no startup experience. Candidate B has 6 years total, the last 3 scaling a Series A fintech from £0 to £4M ARR, but left under unclear circumstances. We are pre-revenue and need to reach £2M ARR in 18 months.\n\nRole: You are an executive recruiter who specialises in placing sales leadership at early-stage fintechs. You have seen both profiles succeed and fail and have strong opinions about the risk profile of each.\n\nInterview: Ask me up to 4 questions to better understand our situation before giving your assessment. Focus on what would change your recommendation between the two candidates.\n\nTask: After I answer, give me a structured assessment of each candidate's risk/reward profile for our specific situation, a recommended decision with rationale, and three reference check questions I should ask for the candidate you recommend." },
+      { type: "h3", text: "Business scenario 3: crisis communication" },
+      { type: "example", label: "CRIT prompt — handling a public complaint", text: "Context: A large client publicly posted on LinkedIn that our software caused a data export failure during their annual board report, costing them several hours of emergency work. The post has 200+ reactions and is gaining traction. Internally, the failure was caused by a known edge case we hadn't prioritised fixing. We have not yet responded publicly.\n\nRole: You are a communications director with experience managing software company crises. You understand how to balance accountability, technical explanation, and brand protection without making legal admissions.\n\nInterview: Ask me up to 3 questions before drafting anything. The most important thing is understanding what we can and cannot say given our legal exposure.\n\nTask: Draft a public LinkedIn response from our CEO (under 150 words), an internal Slack message to the customer success team, and a private message to the affected client — all with different tones calibrated to each audience." },
+      { type: "h3", text: "How to use CRIT in practice" },
+      { type: "list", items: [
+        "Write the Context first — it forces you to clarify what you actually know about the situation before asking the model anything.",
+        "Be specific about the Role — 'senior consultant with SaaS Series A experience' outperforms 'business expert' every time.",
+        "Don't skip the Interview step for high-stakes prompts — the questions the model asks often reveal gaps in your own thinking.",
+        "Scope the Task precisely — vague tasks ('give me advice') produce vague output. Named deliverables ('a 5-point briefing in bullet format') produce usable output.",
+        "The framework scales down — for quick queries you can abbreviate, but for any decision that matters, use all four components."
+      ]},
+      { type: "h3", text: "Source" },
+      { type: "reference", title: "The AI-Driven Leader: Harnessing AI to Make Faster, Smarter Decisions", author: "Harnessing AI to Make Faster Smarter Decisions", url: "https://www.amazon.co.uk/AI-Driven-Leader-Harnessing-Smarter-Decisions/dp/B0DB8QL3ZK" }
     ]
   }
 

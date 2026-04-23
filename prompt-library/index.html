@@ -468,6 +468,7 @@
 
         $modalDetails.innerHTML =
           "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
+          "<dt>author</dt><dd class=\"mono\">" + escapeHtml(p.author || "—") + "</dd>" +
           "<dt>temperature</dt><dd class=\"mono\">" + escapeHtml(p.temperature) + "</dd>" +
           "<dt>models</dt><dd>" + (modelsHtml || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>" +
           "<dt>tags</dt><dd>"   + (tagsHtml   || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>";

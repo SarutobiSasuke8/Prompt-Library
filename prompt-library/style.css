@@ -101,6 +101,8 @@ a:hover { text-decoration: underline; }
   justify-content: space-between;
   gap: 14px;
 }
+.site-header nav { display: none; }
+@media (min-width: 860px) { .site-header nav { display: flex; } }
 .logo {
   font-family: var(--mono);
   font-size: 15px;
@@ -420,7 +422,7 @@ a:hover { text-decoration: underline; }
   border-radius: var(--radius);
   padding: 18px 18px 16px;
   cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
   text-align: left;
   width: 100%;
   gap: 10px;
@@ -443,7 +445,6 @@ a:hover { text-decoration: underline; }
 .card:focus-visible {
   border-color: var(--accent-edge);
   background: var(--bg-2);
-  transform: translateY(-1px);
 }
 .card:hover::before,
 .card:focus-visible::before { transform: scaleY(1); }

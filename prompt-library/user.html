@@ -686,7 +686,7 @@
         const modelsHtml = (p.models || []).map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join(" ");
         $modalDetails.innerHTML =
           "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
-          "<dt>author</dt><dd class=\"mono\"><a href=\"author.html?name=" + encodeURIComponent(p.author || "") + "\" style=\"color:var(--accent);text-decoration:none;\">" + escapeHtml(p.author || "—") + "</a></dd>" +
+          "<dt>author</dt><dd class=\"mono\"><a href=\"user.html?handle=" + encodeURIComponent(p.author || "") + "\" style=\"color:var(--accent);text-decoration:none;\">" + escapeHtml(p.author || "—") + "</a></dd>" +
           "<dt>temperature</dt><dd class=\"mono\">" + escapeHtml(p.temperature) + "</dd>" +
           "<dt>models</dt><dd>" + (modelsHtml || '<span style="color:var(--text-faint)">—</span>') + "</dd>" +
           "<dt>tags</dt><dd>"   + (tagsHtml   || '<span style="color:var(--text-faint)">—</span>') + "</dd>";

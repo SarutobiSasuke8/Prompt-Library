@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tools &middot; prompt-library</title>
+  <meta name="description" content="AI tools worth pairing with production-ready prompts — chat UIs, coding agents, and model infra." />
+
+  <meta property="og:title" content="prompt-library &middot; tools" />
+  <meta property="og:description" content="AI tools worth pairing with production-ready prompts." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.simpleicons.org" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    /* Tools grid + card — aligned with the library card pattern */
+    .tools-wrap { max-width: 1200px; margin: 0 auto 60px; padding: 0 18px; }
+
+    .tools-grid {
+      display: grid; gap: 14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px)  { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .tool-card {
+      position: relative;
+      background: var(--bg-1); border: 1px solid var(--border); border-radius: 2px;
+      padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 10px;
+      transition: border-color 120ms, transform 120ms;
+    }
+    .tool-card:hover { border-color: var(--text-faint); }
+
+    .tool-head { display: flex; align-items: center; gap: 12px; min-width: 0; padding-right: 36px; }
+    .tool-mark {
+      width: 44px; height: 44px; flex: 0 0 44px;
+      background: var(--bg-2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--text);
+      letter-spacing: -0.02em; position: relative; overflow: hidden;
+    }
+    .tool-mark img { width: 22px; height: 22px; display: block; filter: brightness(0) invert(0.9); position: relative; z-index: 2; }
+    .tool-mark .monogram { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; }
+
+    .tool-star {
+      position: absolute; top: 10px; right: 10px;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid var(--border); border-radius: 2px;
+      color: var(--text-faint); cursor: pointer; padding: 0;
+      transition: color 120ms, border-color 120ms, background 120ms;
+    }
+    .tool-star:hover { color: var(--text-dim); border-color: var(--text-faint); }
+    .tool-star.on { color: var(--accent); border-color: var(--accent); background: rgba(0,255,136,0.06); }
+    .tool-star svg { width: 14px; height: 14px; display: block; }
+    .tool-title { font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .tool-sub   { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top: 3px; letter-spacing: 0.04em; }
+
+    .tool-purpose { color: var(--text-dim); font-size: 13px; line-height: 1.5; flex: 1 1 auto; }
+
+    .tool-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+    .tool-badge {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+      padding: 2px 7px; border: 1px solid var(--border); color: var(--text-faint);
+      border-radius: 2px; text-transform: lowercase;
+    }
+    .tool-badge.supported { color: var(--accent); border-color: var(--accent); }
+    .tool-badge.pending   { color: var(--warn);   border-color: var(--warn);   }
+    .tool-badge.group     { color: var(--text-dim); }
+
+    .tool-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .tool-open {
+      font-family: var(--mono); font-size: 12px; color: var(--text);
+      text-decoration: none; border: 1px solid var(--border); background: var(--bg-2);
+      padding: 7px 11px; border-radius: 2px; letter-spacing: 0.03em;
+      transition: border-color 120ms, color 120ms, background 120ms;
+    }
+    .tool-open:hover { border-color: var(--accent); color: var(--accent); }
+
+    .legend {
+      font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+      margin-top: 28px; padding: 14px; border: 1px dashed var(--border); border-radius: 2px;
+      line-height: 1.7;
+    }
+    .legend strong { color: var(--text-dim); font-weight: 500; }
+    .legend .accent-ref { color: var(--accent); }
+    .legend .warn-ref   { color: var(--warn); }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================
+       Header — same structure as library & methodology pages
+       ========================================================== -->
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">tools</span>
+      </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+        <a href="tools.html" style="color:var(--accent); text-decoration:none;">tools</a>
+      </nav>
+      <div class="count-pill">
+        <span class="num" id="count-num">0</span>
+        <span class="label" id="count-label">tools</span>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">☀</button>
+      <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
+        <span class="av-circle">S</span>
+        <span class="av-handle">SarutobiSasuke</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ==========================================================
+       Hero — same structure as learn.html
+       ========================================================== -->
+  <section class="hero" style="padding-bottom:32px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+      <span class="sep">/</span>
+      <span>tools</span>
+    </div>
+    <h1>AI <span class="accent">tools</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">The tools worth pairing with production-ready prompts &mdash; chat UIs, agentic coding, and model infra. Filter by category, pricing, or prompt-compatibility.</p>
+  </section>
+
+  <!-- ==========================================================
+       Controls — filter chips (same pattern as library page)
+       ========================================================== -->
+  <section class="controls" aria-label="Filter tools">
+    <div class="filter-row" id="group-row" role="group" aria-label="Filter by category">
+      <span class="label">category</span>
+      <button class="chip active" data-group="all">all</button>
+      <button class="chip" data-group="chat">chat UIs</button>
+      <button class="chip" data-group="coding">coding</button>
+      <button class="chip" data-group="infra">infra</button>
+      <button class="chip" data-group="local">local / self-host</button>
+      <button class="chip" data-group="starred">★ starred</button>
+    </div>
+
+    <div class="filter-row" id="pricing-row" role="group" aria-label="Filter by pricing">
+      <span class="label">pricing</span>
+      <button class="chip active" data-pricing="all">all</button>
+      <button class="chip" data-pricing="free">free</button>
+      <button class="chip" data-pricing="freemium">freemium</button>
+      <button class="chip" data-pricing="paid">paid</button>
+      <button class="chip" data-pricing="byok">bring-your-own-key</button>
+    </div>
+
+    <div class="filter-row" id="deeplink-row" role="group" aria-label="Filter by deep-link support">
+      <span class="label">prompt-in</span>
+      <button class="chip active" data-deeplink="all">all</button>
+      <button class="chip" data-deeplink="supported">deep-link</button>
+      <button class="chip" data-deeplink="planned">planned</button>
+      <button class="chip" data-deeplink="none">copy-only</button>
+    </div>
+  </section>
+
+  <div class="tools-wrap">
+    <div class="tools-grid" id="grid"></div>
+    <div class="empty hidden" id="empty" style="text-align:center; color:var(--text-dim); padding:40px 20px;">
+      <strong style="display:block; color:var(--text); margin-bottom:6px;">No tools match</strong>
+      Try clearing a filter.
+    </div>
+
+    <div class="legend">
+      <strong>Badges.</strong>
+      <span class="accent-ref">deep-link</span> = sending a prompt via URL is supported.
+      <span class="warn-ref">planned</span> = pattern exists; wiring in progress.
+      Otherwise: <em>copy-only</em> (copy, then paste into the tool).<br/>
+      <strong>Star</strong> any tool to add it to your <a href="user.html?handle=SarutobiSasuke#tab-tools" style="color:var(--accent);">My Tools</a> list (stored locally, no account needed).<br/>
+      Missing a tool? <a href="https://github.com/SarutobiSasuke8/Prompt-Library/issues" target="_blank" rel="noopener" style="color:var(--accent);">open an issue</a>.
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       Footer — same structure as library page
+       ========================================================== -->
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="index.html">library</a>
+        <a href="learn.html">methodology</a>
+        <a href="tools.html">tools</a>
+        <a href="privacy.html">privacy</a>
+        <span style="color:var(--border-2);">|</span>
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta social-x" href="#" target="_blank" rel="noopener" aria-label="Follow on X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          follow on X
+        </a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+
+    // -----------------------------------------------------------
+    // Tools data. Kept inline so the page stays self-contained.
+    //
+    //   group    : 'chat' | 'coding' | 'infra'
+    //   pricing  : 'free' | 'freemium' | 'paid' | 'byok'
+    //   deepLink : 'supported' | 'planned' | 'none'
+    //   icon     : simple-icons slug (rendered via cdn.simpleicons.org);
+    //              if the image fails to load, the `mark` monogram shows.
+    // -----------------------------------------------------------
+    const TOOLS = [
+      // ---- Chat UIs ----
+      { id: 'claude',      group: 'chat',   mark: 'CL', icon: 'anthropic',       name: 'Claude',           sub: 'Anthropic',          pricing: 'freemium', url: 'https://claude.ai/',                                     deepLink: 'planned',   purpose: 'The reference chat UI for long-context and hard-reasoning work. Strong defaults for structured outputs.' },
+      { id: 'chatgpt',     group: 'chat',   mark: 'GP', icon: 'openai',          name: 'ChatGPT',          sub: 'OpenAI',             pricing: 'freemium', url: 'https://chatgpt.com/',                                   deepLink: 'supported', purpose: 'Most popular chat UI. Widest ecosystem of GPTs, tools, and integrations.' },
+      { id: 'gemini',      group: 'chat',   mark: 'GE', icon: 'googlegemini',    name: 'Gemini',           sub: 'Google',             pricing: 'freemium', url: 'https://gemini.google.com/',                             deepLink: 'planned',   purpose: 'Google\'s chat UI with tight Workspace and search integration. Strong multimodal.' },
+      { id: 'grok',        group: 'chat',   mark: 'GR', icon: 'x',               name: 'Grok',             sub: 'xAI',                pricing: 'freemium', url: 'https://grok.com/',                                      deepLink: 'none',      purpose: 'xAI\'s chat UI. Integrated with X, leans unfiltered, useful for crypto/market-adjacent work.' },
+      { id: 'perplexity',  group: 'chat',   mark: 'PX', icon: 'perplexity',      name: 'Perplexity',       sub: 'Perplexity',         pricing: 'freemium', url: 'https://www.perplexity.ai/',                             deepLink: 'supported', purpose: 'Answer engine with citations. Best when research + sourcing matters more than raw generation.' },
+      { id: 'lechat',      group: 'chat',   mark: 'LC', icon: 'mistralai',       name: 'Le Chat',          sub: 'Mistral',            pricing: 'free',     url: 'https://chat.mistral.ai/',                               deepLink: 'none',      purpose: 'Mistral\'s chat UI. European-hosted option, fast and capable for general use.' },
+      { id: 'deepseek',    group: 'chat',   mark: 'DS', icon: 'deepseek',        name: 'DeepSeek',         sub: 'DeepSeek',           pricing: 'free',     url: 'https://chat.deepseek.com/',                             deepLink: 'none',      purpose: 'Chinese lab\'s chat UI. Competitive reasoning at low cost; think twice about sensitive data.' },
+
+      // ---- Coding ----
+      { id: 'claude-code', group: 'coding', mark: 'CC', icon: 'anthropic',       name: 'Claude Code',      sub: 'Anthropic CLI',      pricing: 'paid',     url: 'https://docs.claude.com/en/docs/claude-code/overview',  deepLink: 'none',      purpose: 'Agentic CLI. Reads/edits your repo, runs commands, ships PRs. Best pairing for long-form engineering prompts.' },
+      { id: 'codex',       group: 'coding', mark: 'CX', icon: 'openai',          name: 'Codex',            sub: 'OpenAI',             pricing: 'paid',     url: 'https://chatgpt.com/codex',                              deepLink: 'planned',   purpose: 'OpenAI\'s coding agent. Cloud-hosted agentic coding built into ChatGPT.' },
+      { id: 'cursor',      group: 'coding', mark: 'CR', icon: 'cursor',          name: 'Cursor',           sub: 'Anysphere',          pricing: 'freemium', url: 'https://cursor.com/',                                    deepLink: 'none',      purpose: 'IDE fork. Strong at inline edits and multi-file refactors. Popular with full-time devs.' },
+      { id: 'windsurf',    group: 'coding', mark: 'WS', icon: 'codeium',         name: 'Windsurf',         sub: 'Codeium',            pricing: 'freemium', url: 'https://windsurf.com/',                                  deepLink: 'none',      purpose: 'IDE with agentic Cascade flows. Competitor to Cursor with stronger multi-step execution.' },
+      { id: 'cline',       group: 'coding', mark: 'CN', icon: 'visualstudiocode', name: 'Cline',           sub: 'VS Code extension',  pricing: 'byok',     url: 'https://cline.bot/',                                     deepLink: 'none',      purpose: 'Open-source agent inside VS Code. Good if you want agentic coding without leaving your editor.' },
+      { id: 'aider',       group: 'coding', mark: 'AD', icon: 'gnubash',         name: 'Aider',            sub: 'open source CLI',    pricing: 'byok',     url: 'https://aider.chat/',                                    deepLink: 'none',      purpose: 'Terminal-based coding agent. Minimal, scriptable, git-native. Great for power users.' },
+      { id: 'copilot',     group: 'coding', mark: 'CP', icon: 'githubcopilot',   name: 'GitHub Copilot',   sub: 'GitHub',             pricing: 'paid',     url: 'https://github.com/features/copilot',                    deepLink: 'none',      purpose: 'The mainstream IDE autocomplete + chat. Works everywhere, ubiquitous inside JetBrains/VS Code.' },
+      { id: 'zed',         group: 'coding', mark: 'ZA', icon: 'zedindustries',   name: 'Zed AI',           sub: 'Zed',                pricing: 'freemium', url: 'https://zed.dev/',                                       deepLink: 'none',      purpose: 'High-performance native editor with built-in AI chat. Fast, opinionated, new.' },
+
+      // ---- Infra ----
+      { id: 'openrouter',  group: 'infra',  mark: 'OR', icon: 'openrouter',      name: 'OpenRouter',       sub: 'model router',       pricing: 'paid',     url: 'https://openrouter.ai/',                                 deepLink: 'none',      purpose: 'Unified API across dozens of models. Useful for comparing outputs or routing by cost/latency.' },
+      { id: 'groq',        group: 'infra',  mark: 'GQ', icon: 'groq',            name: 'Groq',             sub: 'inference',          pricing: 'freemium', url: 'https://groq.com/',                                      deepLink: 'none',      purpose: 'Extremely fast inference on select open models. Good for low-latency prompt experimentation.' },
+      { id: 'hf',          group: 'infra',  mark: 'HF', icon: 'huggingface',     name: 'Hugging Face',     sub: 'model hub',          pricing: 'freemium', url: 'https://huggingface.co/',                                deepLink: 'none',      purpose: 'Model hub + inference API. Run small models free, browse thousands of open-weight options.' },
+      { id: 'replicate',   group: 'infra',  mark: 'RP', icon: 'replicate',       name: 'Replicate',        sub: 'inference',          pricing: 'paid',     url: 'https://replicate.com/',                                 deepLink: 'none',      purpose: 'Hosted inference for open-source models. Good for multimodal (image, audio, video) experiments.' },
+      { id: 'aistudio',    group: 'infra',  mark: 'AI', icon: 'googlegemini',    name: 'AI Studio',        sub: 'Google',             pricing: 'free',     url: 'https://aistudio.google.com/',                           deepLink: 'none',      purpose: 'Google\'s playground for Gemini. Generous free tier for prompt testing and API keys.' },
+      { id: 'anthropic-console', group: 'infra', mark: 'AC', icon: 'anthropic',  name: 'Anthropic Console', sub: 'Anthropic',         pricing: 'paid',     url: 'https://console.anthropic.com/',                         deepLink: 'none',      purpose: 'Claude\'s developer console. Prompt evaluation, workbench, API keys, usage analytics.' },
+
+      // ---- Local / self-host ----
+      { id: 'ollama',      group: 'local',  mark: 'OL', icon: 'ollama',          name: 'Ollama',           sub: 'local runner',       pricing: 'free',     url: 'https://ollama.com/',                                    deepLink: 'none',      purpose: 'Run open-weight models locally via a clean CLI + HTTP API. The default entry point for self-hosted LLMs.' },
+      { id: 'lmstudio',    group: 'local',  mark: 'LM', icon: '',                name: 'LM Studio',        sub: 'desktop app',        pricing: 'free',     url: 'https://lmstudio.ai/',                                   deepLink: 'none',      purpose: 'Desktop GUI for downloading and running local models. Friendliest on-ramp for non-terminal users.' },
+      { id: 'jan',         group: 'local',  mark: 'JN', icon: '',                name: 'Jan',              sub: 'open source desktop', pricing: 'free',    url: 'https://jan.ai/',                                        deepLink: 'none',      purpose: 'Open-source ChatGPT-style UI that runs fully offline. Model-agnostic, BYOM.' },
+      { id: 'localai',     group: 'local',  mark: 'LA', icon: '',                name: 'LocalAI',          sub: 'OpenAI-compatible',  pricing: 'free',     url: 'https://localai.io/',                                    deepLink: 'none',      purpose: 'Drop-in OpenAI-compatible API server backed by local models. Good if you want to swap cloud calls for local.' },
+      { id: 'gpt4all',     group: 'local',  mark: 'G4', icon: '',                name: 'GPT4All',          sub: 'Nomic',              pricing: 'free',     url: 'https://www.nomic.ai/gpt4all',                           deepLink: 'none',      purpose: 'Privacy-first local chat app. Pre-packaged with quantized models; runs on modest hardware.' }
+    ];
+
+    const state = { group: 'all', pricing: 'all', deeplink: 'all' };
+
+    // ---- Starred tools (localStorage, anon-friendly) ----
+    const STAR_KEY = 'promptLibrary.starredTools';
+    function loadStars() {
+      try { return new Set(JSON.parse(localStorage.getItem(STAR_KEY) || '[]')); }
+      catch (_) { return new Set(); }
+    }
+    function saveStars(set) {
+      try { localStorage.setItem(STAR_KEY, JSON.stringify([...set])); } catch (_) {}
+    }
+    const stars = loadStars();
+
+    const STAR_SVG_OUTLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.7 1.4 6.6L12 17.3l-5.9 3.4 1.4-6.6-5-4.7 6.6-.7z"/></svg>';
+    const STAR_SVG_FILLED  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.7 1.4 6.6L12 17.3l-5.9 3.4 1.4-6.6-5-4.7 6.6-.7z"/></svg>';
+
+    const $grid  = document.getElementById('grid');
+    const $empty = document.getElementById('empty');
+    const $count = document.getElementById('count-num');
+    const $label = document.getElementById('count-label');
+
+    function iconUrl(slug) {
+      // Simple Icons: monochrome SVG logos, free to use, match the dark theme.
+      // e6e6e6 mirrors --text. If the slug doesn't exist, image onerror falls
+      // back to the letter monogram.
+      if (!slug) return '';
+      return 'https://cdn.simpleicons.org/' + slug + '/e6e6e6';
+    }
+
+    function pricingLabel(p) {
+      return p === 'byok' ? 'BYO key' : p;
+    }
+
+    function card(t) {
+      const mark = document.createElement('div');
+      mark.className = 'tool-mark';
+      const mono = document.createElement('span');
+      mono.className = 'monogram';
+      mono.textContent = t.mark;
+      mark.appendChild(mono);
+      if (t.icon) {
+        const img = document.createElement('img');
+        img.alt = '';
+        img.loading = 'lazy';
+        img.src = iconUrl(t.icon);
+        // Hide monogram immediately when we have a slug; restore it if
+        // the CDN returns 404 (keeps a graceful fallback for unknown tools).
+        mono.style.display = 'none';
+        img.onerror = () => { img.remove(); mono.style.display = ''; };
+        mark.appendChild(img);
+      }
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'tool-title';
+      titleEl.textContent = t.name;
+      const subEl = document.createElement('div');
+      subEl.className = 'tool-sub';
+      subEl.textContent = t.sub;
+      const titleBlock = document.createElement('div');
+      titleBlock.appendChild(titleEl);
+      titleBlock.appendChild(subEl);
+
+      const head = document.createElement('div');
+      head.className = 'tool-head';
+      head.appendChild(mark);
+      head.appendChild(titleBlock);
+
+      const purpose = document.createElement('div');
+      purpose.className = 'tool-purpose';
+      purpose.textContent = t.purpose;
+
+      const badges = document.createElement('div');
+      badges.className = 'tool-badges';
+
+      const groupBadge = document.createElement('span');
+      groupBadge.className = 'tool-badge group';
+      groupBadge.textContent = t.group === 'chat' ? 'chat UI' : t.group;
+      badges.appendChild(groupBadge);
+
+      const priceBadge = document.createElement('span');
+      priceBadge.className = 'tool-badge';
+      priceBadge.textContent = pricingLabel(t.pricing);
+      badges.appendChild(priceBadge);
+
+      const dlBadge = document.createElement('span');
+      if (t.deepLink === 'supported') { dlBadge.className = 'tool-badge supported'; dlBadge.textContent = 'deep-link'; }
+      else if (t.deepLink === 'planned') { dlBadge.className = 'tool-badge pending'; dlBadge.textContent = 'planned'; }
+      else                             { dlBadge.className = 'tool-badge'; dlBadge.textContent = 'copy-only'; }
+      badges.appendChild(dlBadge);
+
+      const open = document.createElement('a');
+      open.className = 'tool-open';
+      open.href = t.url; open.target = '_blank'; open.rel = 'noopener';
+      open.textContent = 'Open →';
+      const actions = document.createElement('div');
+      actions.className = 'tool-actions';
+      actions.appendChild(open);
+
+      const star = document.createElement('button');
+      star.type = 'button';
+      star.className = 'tool-star' + (stars.has(t.id) ? ' on' : '');
+      star.setAttribute('aria-label', stars.has(t.id) ? 'Unstar ' + t.name : 'Star ' + t.name);
+      star.setAttribute('aria-pressed', stars.has(t.id) ? 'true' : 'false');
+      star.innerHTML = stars.has(t.id) ? STAR_SVG_FILLED : STAR_SVG_OUTLINE;
+      star.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (stars.has(t.id)) { stars.delete(t.id); }
+        else { stars.add(t.id); }
+        saveStars(stars);
+        const on = stars.has(t.id);
+        star.classList.toggle('on', on);
+        star.setAttribute('aria-pressed', on ? 'true' : 'false');
+        star.setAttribute('aria-label', (on ? 'Unstar ' : 'Star ') + t.name);
+        star.innerHTML = on ? STAR_SVG_FILLED : STAR_SVG_OUTLINE;
+        // Re-render if the starred filter is active so toggling removes the card.
+        if (state.group === 'starred') render();
+      });
+
+      const el = document.createElement('div');
+      el.className = 'tool-card';
+      el.appendChild(star);
+      el.appendChild(head); el.appendChild(purpose); el.appendChild(badges); el.appendChild(actions);
+      return el;
+    }
+
+    function matches(t) {
+      if (state.group === 'starred') {
+        if (!stars.has(t.id)) return false;
+      } else if (state.group !== 'all' && t.group !== state.group) {
+        return false;
+      }
+      if (state.pricing  !== 'all' && t.pricing  !== state.pricing)  return false;
+      if (state.deeplink !== 'all' && t.deepLink !== state.deeplink) return false;
+      return true;
+    }
+
+    function render() {
+      $grid.innerHTML = '';
+      const filtered = TOOLS.filter(matches);
+      for (const t of filtered) $grid.appendChild(card(t));
+      $count.textContent = filtered.length;
+      $label.textContent = filtered.length === 1 ? 'tool' : 'tools';
+      $empty.classList.toggle('hidden', filtered.length !== 0);
+    }
+
+    function wireChips(rowId, key) {
+      const row = document.getElementById(rowId);
+      row.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip');
+        if (!btn) return;
+        const val = btn.getAttribute('data-' + key);
+        state[key] = val;
+        row.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+        render();
+      });
+    }
+
+    wireChips('group-row',    'group');
+    wireChips('pricing-row',  'pricing');
+    wireChips('deeplink-row', 'deeplink');
+    render();
+  })();
+  </script>
+  <script src="theme.js"></script>
+</body>
+</html>

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
   <style>
     .article-wrap {
       max-width: 740px;
@@ -221,6 +222,7 @@
         <span class="num" id="read-time-val"></span>
         <span class="label">read</span>
       </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">☀</button>
       <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
         <span class="av-circle">S</span>
         <span class="av-handle">SarutobiSasuke</span>
@@ -248,13 +250,23 @@
     <div class="inner">
       <div>&gt; built for people shipping with AI</div>
       <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="index.html">library</a>
+        <a href="learn.html">methodology</a>
+        <a href="tools.html">tools</a>
+        <a href="privacy.html">privacy</a>
+        <span style="color:var(--border-2);">|</span>
         <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta social-x" href="#" target="_blank" rel="noopener" aria-label="Follow on X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          follow on X
+        </a>
         <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
       </div>
     </div>
   </footer>
 
   <script src="articles.js"></script>
+  <script src="theme.js"></script>
   <script>
     (function () {
       "use strict";

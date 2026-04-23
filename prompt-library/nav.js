@@ -1,11 +1,10 @@
-// nav.js — shared site header with responsive mobile nav.
+// nav.js — shared site header with responsive mobile nav + explore dropdown.
 // Pages declare:
 //   <div id="site-nav" data-active="library" data-sub="curated">
-//     <!-- optional pill markup injected into the header right slot -->
+//     <!-- optional pill markup placed between nav and theme toggle -->
 //   </div>
-// The mount div's attributes drive the highlight + logo subtitle; its
-// innerHTML is reused verbatim as the pill slot between the nav and the
-// theme toggle. Adding a new top-level page = one line in LINKS.
+// Adding a top-level page = one line in LINKS. Adding a dropdown item = one
+// line inside the dropdown's items array.
 (function () {
   "use strict";
   var mount = document.getElementById("site-nav");
@@ -15,14 +14,22 @@
   var sub    = mount.getAttribute("data-sub")    || "curated";
   var slot   = mount.innerHTML.trim();
 
+  // LINKS drives both the desktop nav and the mobile drawer.
+  // Entries with dropdown:true render as an "explore ▾" flyout.
   var LINKS = [
-    { key: "library",     href: "index.html",       label: "library" },
-    { key: "methodology", href: "learn.html",       label: "methodology" },
-    { key: "collections", href: "collections.html", label: "collections" },
-    { key: "tools",       href: "tools.html",       label: "tools" },
-    { key: "agents",      href: "agents.html",      label: "agents" },
-    { key: "playground",  href: "playground.html",  label: "playground" },
-    { key: "about",       href: "about.html",       label: "about" }
+    { key: "library", href: "index.html", label: "library" },
+    { key: "docs",    href: "docs.html",  label: "md repo" },
+    { key: "tools",   href: "tools.html", label: "tools" },
+    {
+      key: "explore", label: "explore", dropdown: true,
+      items: [
+        { key: "agents",      href: "agents.html",      label: "agents" },
+        { key: "collections", href: "collections.html", label: "collections" },
+        { key: "playground",  href: "playground.html",  label: "playground" },
+        { key: "methodology", href: "learn.html",        label: "methodology" }
+      ]
+    },
+    { key: "about", href: "about.html", label: "about" }
   ];
 
   function esc(s) {
@@ -31,12 +38,31 @@
       .replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  // Desktop nav links
+  // ---- Desktop nav ----
   var desktopNav = LINKS.map(function (l) {
+    if (l.dropdown) {
+      var isChildActive = l.items.some(function (i) { return i.key === active; });
+      var items = l.items.map(function (i) {
+        var cls = "nav-dd-item" + (i.key === active ? " current" : "");
+        return '<a href="' + esc(i.href) + '" class="' + cls + '">' + esc(i.label) + '</a>';
+      }).join("");
+      return (
+        '<div class="nav-dropdown">' +
+          '<button class="nav-dd-btn' + (isChildActive ? " child-active" : "") + '" ' +
+                  'aria-haspopup="true" aria-expanded="false">' +
+            esc(l.label) + '<span class="nav-dd-caret">&#9660;</span>' +
+          '</button>' +
+          '<div class="nav-dd-menu" role="menu">' + items + '</div>' +
+        '</div>'
+      );
+    }
     var color = (l.key === active) ? "var(--accent)" : "var(--text-dim)";
-    return '<a href="' + esc(l.href) + '" style="color:' + color + '; text-decoration:none;">' + l.label + '</a>';
+    return '<a href="' + esc(l.href) + '" style="color:' + color + '; text-decoration:none;">' +
+             esc(l.label) +
+           '</a>';
   }).join("");
 
+  // ---- Inject header HTML ----
   var html =
     '<header class="site-header" id="site-header">' +
       '<div class="inner">' +
@@ -49,7 +75,7 @@
           desktopNav +
         '</nav>' +
         (slot ? slot : "") +
-        '<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">\u2600</button>' +
+        '<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">&#9728;</button>' +
         '<a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">' +
           '<span class="av-circle">S</span>' +
           '<span class="av-handle">SarutobiSasuke</span>' +
@@ -62,38 +88,60 @@
 
   mount.outerHTML = html;
 
-  // Build mobile drawer and append to body
-  var drawerLinks = LINKS.map(function (l) {
-    var cls = (l.key === active) ? ' class="active"' : '';
-    return '<a href="' + esc(l.href) + '"' + cls + '>' + l.label + '</a>';
-  }).join("");
+  // ---- Mobile drawer ----
+  var drawerHTML = "";
+  LINKS.forEach(function (l) {
+    if (l.dropdown) {
+      drawerHTML += '<div class="drawer-group-label">' + esc(l.label) + '</div>';
+      l.items.forEach(function (i) {
+        var cls = (i.key === active) ? ' class="active"' : "";
+        drawerHTML += '<a href="' + esc(i.href) + '"' + cls +
+                      ' style="padding-left:24px;">' + esc(i.label) + '</a>';
+      });
+    } else {
+      var cls = (l.key === active) ? ' class="active"' : "";
+      drawerHTML += '<a href="' + esc(l.href) + '"' + cls + '>' + esc(l.label) + '</a>';
+    }
+  });
 
   var drawer = document.createElement("div");
-  drawer.id = "nav-drawer";
+  drawer.id        = "nav-drawer";
   drawer.className = "nav-drawer";
-  drawer.innerHTML = drawerLinks;
+  drawer.innerHTML = drawerHTML;
   document.body.appendChild(drawer);
 
-  // Wire burger toggle
+  // ---- Burger toggle ----
   var burger = document.getElementById("nav-burger");
-  function open()  { drawer.classList.add("open");  burger.classList.add("open");  burger.setAttribute("aria-expanded", "true"); }
-  function close() { drawer.classList.remove("open"); burger.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); }
-  function toggle() { drawer.classList.contains("open") ? close() : open(); }
+  function openDrawer()  { drawer.classList.add("open");    burger.classList.add("open");    burger.setAttribute("aria-expanded", "true"); }
+  function closeDrawer() { drawer.classList.remove("open"); burger.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); }
+  function toggleDrawer() { drawer.classList.contains("open") ? closeDrawer() : openDrawer(); }
 
-  burger.addEventListener("click", function (e) { e.stopPropagation(); toggle(); });
-
-  // Close on outside click
+  burger.addEventListener("click", function (e) { e.stopPropagation(); toggleDrawer(); });
   document.addEventListener("click", function (e) {
-    if (drawer.classList.contains("open") && !drawer.contains(e.target)) close();
+    if (drawer.classList.contains("open") && !drawer.contains(e.target)) closeDrawer();
   });
+  drawer.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", closeDrawer); });
 
-  // Close on Esc
+  // ---- Desktop dropdown ----
+  var ddWrap = document.querySelector(".nav-dropdown");
+  var ddBtn  = ddWrap ? ddWrap.querySelector(".nav-dd-btn") : null;
+
+  function closeDropdown() {
+    if (ddWrap) ddWrap.classList.remove("open");
+    if (ddBtn)  ddBtn.setAttribute("aria-expanded", "false");
+  }
+
+  if (ddBtn) {
+    ddBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var isOpen = ddWrap.classList.toggle("open");
+      ddBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+    document.addEventListener("click", closeDropdown);
+  }
+
+  // ---- Shared Escape handler ----
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") close();
-  });
-
-  // Close when a drawer link is clicked
-  drawer.querySelectorAll("a").forEach(function (a) {
-    a.addEventListener("click", close);
+    if (e.key === "Escape") { closeDrawer(); closeDropdown(); }
   });
 })();

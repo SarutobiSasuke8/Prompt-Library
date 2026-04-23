@@ -10,6 +10,7 @@
   <meta property="og:description" content="AI tools worth pairing with production-ready prompts." />
   <meta property="og:type" content="website" />
 
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -130,6 +131,7 @@
       <button class="chip" data-group="infra">infra</button>
       <button class="chip" data-group="local">local / self-host</button>
       <button class="chip" data-group="knowledge">knowledge</button>
+      <button class="chip" data-group="agents">agents</button>
       <button class="chip" data-group="starred">★ starred</button>
     </div>
 
@@ -174,6 +176,8 @@
        ========================================================== -->
   <div id="site-footer"></div>
 
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
   <script>
   (function () {
     "use strict";
@@ -229,7 +233,14 @@
       // methodology article for the workflow.
       { id: 'obsidian', group: 'knowledge', mark: 'OB', icon: 'obsidian', name: 'Obsidian',  sub: 'local markdown vault', pricing: 'freemium', url: 'https://obsidian.md/',  deepLink: 'none', purpose: 'Local-first markdown notebook with a thriving plugin ecosystem. Pairs with MCP, Smart Connections, and Copilot plugin to become an AI-readable second brain.' },
       { id: 'logseq',   group: 'knowledge', mark: 'LS', icon: 'logseq',   name: 'Logseq',    sub: 'outliner, local-first', pricing: 'free',    url: 'https://logseq.com/',   deepLink: 'none', purpose: 'Open-source outliner with bidirectional links. Plain text on disk; easy for agents to parse.' },
-      { id: 'notion',   group: 'knowledge', mark: 'NT', icon: 'notion',   name: 'Notion',    sub: 'collaborative docs',    pricing: 'freemium', url: 'https://www.notion.so/',deepLink: 'none', purpose: 'Cloud doc/workspace with an official MCP server. Useful when your knowledge lives in a team wiki rather than a local vault.' }
+      { id: 'notion',   group: 'knowledge', mark: 'NT', icon: 'notion',   name: 'Notion',    sub: 'collaborative docs',    pricing: 'freemium', url: 'https://www.notion.so/',deepLink: 'none', purpose: 'Cloud doc/workspace with an official MCP server. Useful when your knowledge lives in a team wiki rather than a local vault.' },
+
+      // ---- Agents ----
+      { id: 'langchain',  group: 'agents', mark: 'LC', icon: 'langchain', name: 'LangChain',  sub: 'framework',        pricing: 'free',     url: 'https://langchain.com/',                                    deepLink: 'none', purpose: 'Dominant framework for building LLM applications and agents. Large ecosystem, expression-based chains, extensive tool integrations.' },
+      { id: 'langgraph',  group: 'agents', mark: 'LG', icon: 'langchain', name: 'LangGraph',  sub: 'orchestration',    pricing: 'free',     url: 'https://langchain-ai.github.io/langgraph/',                 deepLink: 'none', purpose: 'Graph-based agent orchestration from the LangChain team. Handles multi-step, branching, and cyclical flows cleanly.' },
+      { id: 'crewai',     group: 'agents', mark: 'CW', icon: '',          name: 'CrewAI',     sub: 'multi-agent',      pricing: 'free',     url: 'https://crewai.com/',                                       deepLink: 'none', purpose: 'Role-based multi-agent framework. Agents get roles, goals, and backstories; tasks are delegated automatically between the crew.' },
+      { id: 'autogpt',    group: 'agents', mark: 'AG', icon: '',          name: 'AutoGPT',    sub: 'autonomous agent', pricing: 'free',     url: 'https://agpt.co/',                                          deepLink: 'none', purpose: 'One of the original autonomous agent projects. Web and CLI versions; useful reference implementation of long-horizon planning.' },
+      { id: 'agentops',   group: 'agents', mark: 'AO', icon: '',          name: 'AgentOps',   sub: 'observability',    pricing: 'freemium', url: 'https://agentops.ai/',                                      deepLink: 'none', purpose: 'Monitoring and observability for AI agents. Traces token usage, cost, and step-by-step execution across runs.' }
     ];
 
     const state = { group: 'all', pricing: 'all', deeplink: 'all' };
@@ -441,8 +452,6 @@
     }
   })();
   </script>
-  <script src="nav.js"></script>
-  <script src="footer.js"></script>
   <script src="theme.js"></script>
   <script defer src="shortcuts.js"></script>
 </body>

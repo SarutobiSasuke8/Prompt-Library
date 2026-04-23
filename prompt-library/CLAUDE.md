@@ -261,6 +261,15 @@ library · methodology · collections · tools · agents · playground · about 
 
 ### Script ordering (required, on every page)
 
+The hard rule: **`nav.js` and `footer.js` must run before any inline script
+that queries a `nav.js`/`footer.js`-injected element** (`#nav-sub`,
+`#theme-toggle`, `#count-num`, `#count-label`, `#header-count`,
+`#header-pill`, `#nav-burger`, etc.). The pill slot IDs also count — they
+live inside the mount div until `nav.js` rewrites it, then land in the
+injected header with their IDs intact.
+
+Canonical ordering for a page with no page-specific inline script:
+
 ```html
 <!-- optional data scripts first: prompts.js, articles.js -->
 <script src="nav.js"></script>
@@ -269,9 +278,22 @@ library · methodology · collections · tools · agents · playground · about 
 <script defer src="shortcuts.js"></script>
 ```
 
-Order is load-bearing: `theme.js` binds to `#theme-toggle` which `nav.js`
-injects, so `nav.js` must run first. `footer.js` is independent but listed
-next for consistency.
+For pages with an inline IIFE that touches injected elements (`user.html`,
+`collections.html`, `tools.html`, `article.html`, `learn.html`,
+`index.html`, `playground.html`), `nav.js` + `footer.js` must be placed
+**immediately before** that inline script, not at the end of the body:
+
+```html
+<script src="prompts.js"></script>
+<script src="nav.js"></script>      <!-- before the inline script -->
+<script src="footer.js"></script>
+<script>(function () { /* touches #count-num, #nav-sub, etc. */ })();</script>
+<script src="theme.js"></script>
+<script defer src="shortcuts.js"></script>
+```
+
+`theme.js` binds to `#theme-toggle` so it must run after `nav.js`.
+`shortcuts.js` is `defer`, so its position is cosmetic.
 
 ### Do not
 - Hardcode a `<header class="site-header">` or `<footer class="site-footer">`

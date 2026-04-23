@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>docs &middot; prompt-library</title>
+  <meta name="description" content="A curated library of markdown resources — agent frameworks, models, tools, and protocols for AI builders." />
+
+  <meta property="og:title" content="prompt-library &middot; docs" />
+  <meta property="og:description" content="Curated markdown resources for AI builders — frameworks, models, tools, protocols." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+
+  <style>
+    /* ---- docs card grid ---- */
+    .docs-wrap { max-width: 1200px; margin: 0 auto; padding: 0 18px 80px; }
+
+    /* Reuse the card grid from style.css */
+    .docs-grid {
+      display: grid; gap: 14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px)  { .docs-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .docs-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    /* md badge — green outline like beginner but labelled "md" */
+    .badge.md-file {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    /* ---- doc modal extras (download button) ---- */
+    .dl-btn {
+      position: absolute;
+      top: 10px; right: 80px;
+      font-family: var(--mono); font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--accent); background: var(--bg-3);
+      border: 1px solid var(--accent-edge);
+      padding: 5px 11px; border-radius: var(--radius);
+      text-decoration: none; transition: background 0.12s, color 0.12s;
+      white-space: nowrap; cursor: pointer;
+    }
+    .dl-btn:hover { background: var(--accent); color: var(--bg); text-decoration: none; }
+
+    /* ---- external link in modal footer ---- */
+    .modal-ext-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-faint); text-decoration: none;
+      border: 1px solid var(--border); padding: 5px 11px;
+      border-radius: var(--radius); transition: color 0.12s, border-color 0.12s;
+    }
+    .modal-ext-link:hover { color: var(--accent); border-color: var(--accent-edge); text-decoration: none; }
+    .modal-ext-link svg { flex-shrink: 0; }
+
+    /* ---- md content pre — allow horizontal scroll for wide code ---- */
+    #modal-content { white-space: pre; overflow-x: auto; }
+  </style>
+</head>
+<body>
+
+  <!-- nav rendered by nav.js -->
+  <div id="site-nav" data-active="docs" data-sub="docs">
+    <div class="count-pill">
+      <span class="num" id="count-num">0</span>
+      <span class="label" id="count-label">docs</span>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       Hero
+       ================================================================ -->
+  <section class="hero">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>frameworks</span>
+      <span class="sep">/</span>
+      <span>models</span>
+      <span class="sep">/</span>
+      <span>tools &amp; protocols</span>
+    </div>
+    <h1>The markdown <span class="accent">library</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">
+      Curated reference documents for the agent ecosystem &mdash; frameworks, model
+      cards, protocol specs, and tooling guides. Each entry is a copyable, downloadable
+      markdown file you can drop straight into your context window or repo.
+    </p>
+  </section>
+
+  <!-- ================================================================
+       Controls
+       ================================================================ -->
+  <section class="controls" aria-label="Search and filter">
+    <div class="search-wrap">
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="search title, description, tags&hellip;"
+        aria-label="Search docs"
+        autocomplete="off"
+      />
+    </div>
+    <div class="filter-row" id="category-row" role="group" aria-label="Filter by category">
+      <span class="label">category</span>
+      <!-- chips injected by JS -->
+    </div>
+  </section>
+
+  <!-- ================================================================
+       Card grid
+       ================================================================ -->
+  <main>
+    <div class="docs-wrap">
+      <div class="docs-grid grid" id="grid" aria-live="polite"></div>
+      <div class="empty hidden" id="empty">
+        <strong>No docs match</strong>
+        Try clearing a filter or searching something shorter.
+      </div>
+    </div>
+  </main>
+
+  <!-- ================================================================
+       Modal
+       ================================================================ -->
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <article class="modal" id="modal">
+      <header class="modal-head">
+        <div>
+          <div class="meta" id="modal-meta"></div>
+          <h2 id="modal-title"></h2>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="purpose" id="modal-desc"></p>
+
+        <h4>Markdown</h4>
+        <div class="prompt-block">
+          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <a class="dl-btn" id="dl-btn" href="#" download>&#8595; download</a>
+          <pre id="modal-content">loading&hellip;</pre>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+          <a class="modal-ext-link" id="modal-ext" href="#" target="_blank" rel="noopener">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/>
+              <path d="M10 2h4v4M14 2 8 8"/>
+            </svg>
+            visit official site
+          </a>
+          <div id="modal-tags" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- toast -->
+  <div class="toast" id="toast">Copied</div>
+
+  <!-- ================================================================
+       Footer
+       ================================================================ -->
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="index.html">library</a>
+        <a href="docs.html">docs</a>
+        <a href="learn.html">methodology</a>
+        <a href="collections.html">collections</a>
+        <a href="tools.html">tools</a>
+        <a href="playground.html">playground</a>
+        <a href="about.html">about</a>
+        <a href="privacy.html">privacy</a>
+        <span style="color:var(--border-2);">|</span>
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta social-x" href="#" target="_blank" rel="noopener" aria-label="Follow on X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          follow on X
+        </a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute</a>
+      </div>
+    </div>
+    <div class="footer-copy">&copy; 2025 prompt-library &middot; MIT license</div>
+  </footer>
+
+  <script src="docs.js"></script>
+  <script src="theme.js"></script>
+  <script src="nav.js"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var state = { query: "", category: "all" };
+
+      var $grid        = document.getElementById("grid");
+      var $empty       = document.getElementById("empty");
+      var $search      = document.getElementById("search");
+      var $catRow      = document.getElementById("category-row");
+      var $backdrop    = document.getElementById("modal-backdrop");
+      var $modalClose  = document.getElementById("modal-close");
+      var $modalMeta   = document.getElementById("modal-meta");
+      var $modalTitle  = document.getElementById("modal-title");
+      var $modalDesc   = document.getElementById("modal-desc");
+      var $modalContent= document.getElementById("modal-content");
+      var $copyBtn     = document.getElementById("copy-btn");
+      var $dlBtn       = document.getElementById("dl-btn");
+      var $modalExt    = document.getElementById("modal-ext");
+      var $modalTags   = document.getElementById("modal-tags");
+      var $countNum    = document.getElementById("count-num");
+      var $countLabel  = document.getElementById("count-label");
+      var $toast       = document.getElementById("toast");
+
+      var currentText = "";
+
+      if (typeof DOCS === "undefined") {
+        $grid.innerHTML = '<div style="color:#ff6b6b;font-family:var(--mono);padding:16px;">Failed to load docs.js.</div>';
+        return;
+      }
+
+      renderCategoryChips();
+      render();
+      wireEvents();
+
+      // ---- chips ----
+      function renderCategoryChips() {
+        var counts = {};
+        DOCS.forEach(function (d) { counts[d.category] = (counts[d.category] || 0) + 1; });
+
+        var frag = document.createDocumentFragment();
+        frag.appendChild(buildChip("all", "all", DOCS.length));
+        Object.keys(DOC_CATEGORIES).forEach(function (key) {
+          if (!counts[key]) return;
+          frag.appendChild(buildChip(key, DOC_CATEGORIES[key], counts[key]));
+        });
+
+        var label = $catRow.querySelector(".label");
+        $catRow.innerHTML = "";
+        $catRow.appendChild(label);
+        $catRow.appendChild(frag);
+        var first = $catRow.querySelector(".chip");
+        if (first) first.classList.add("active");
+      }
+
+      function buildChip(value, labelText, count) {
+        var btn = document.createElement("button");
+        btn.className = "chip";
+        btn.dataset.category = value;
+        btn.innerHTML = escapeHtml(labelText) + '<span class="count">' + count + "</span>";
+        return btn;
+      }
+
+      // ---- render ----
+      function render() {
+        var q = state.query.trim().toLowerCase();
+        var filtered = DOCS.filter(function (d) {
+          if (state.category !== "all" && d.category !== state.category) return false;
+          if (q) {
+            var hay = (d.title + " " + d.description + " " + (d.tags || []).join(" ")).toLowerCase();
+            if (hay.indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+
+        $countNum.textContent   = filtered.length;
+        $countLabel.textContent = filtered.length === DOCS.length ? "docs" : "of " + DOCS.length + " docs";
+
+        if (filtered.length === 0) {
+          $grid.innerHTML = "";
+          $empty.classList.remove("hidden");
+          return;
+        }
+        $empty.classList.add("hidden");
+
+        var frag = document.createDocumentFragment();
+        filtered.forEach(function (d) { frag.appendChild(buildCard(d)); });
+        $grid.innerHTML = "";
+        $grid.appendChild(frag);
+      }
+
+      // ---- card ----
+      function buildCard(d) {
+        var card = document.createElement("div");
+        card.className = "card";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-label", d.title);
+
+        var catLabel = DOC_CATEGORIES[d.category] || d.category;
+        var tags = (d.tags || []).slice(0, 3);
+
+        // Clipboard icon SVG
+        var clipSvg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
+            '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
+            '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
+          '</svg>';
+
+        card.innerHTML =
+          '<div class="card-head">' +
+            '<div class="card-head-left">' +
+              '<span class="card-cat">' + escapeHtml(catLabel) + '</span>' +
+            '</div>' +
+            '<span class="badge md-file">.md</span>' +
+          '</div>' +
+          '<h3>' + escapeHtml(d.title) + '</h3>' +
+          '<p class="purpose">' + escapeHtml(d.description) + '</p>' +
+          '<div class="card-foot">' +
+            '<div class="card-tags">' +
+              tags.map(function (t) { return '<span class="tag">#' + escapeHtml(t) + '</span>'; }).join("") +
+            '</div>' +
+            '<button class="card-copy" type="button" aria-label="Copy markdown">' +
+              clipSvg + '<span>copy</span>' +
+            '</button>' +
+          '</div>';
+
+        // Open modal on card click (not copy button)
+        var openCard = function (e) {
+          if (e.target.closest(".card-copy")) return;
+          openModal(d);
+        };
+        card.addEventListener("click", openCard);
+        card.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard(e); }
+        });
+
+        // In-card copy — fetches the file
+        var copyBtn = card.querySelector(".card-copy");
+        copyBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var labelSpan = copyBtn.querySelector("span");
+          fetch("agents/" + d.filename)
+            .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+            .then(function (text) {
+              copyText(text);
+              copyBtn.classList.add("copied");
+              labelSpan.textContent = "copied";
+              showToast("Copied");
+              setTimeout(function () {
+                copyBtn.classList.remove("copied");
+                labelSpan.textContent = "copy";
+              }, 1500);
+            })
+            .catch(function () { showToast("File not yet available"); });
+        });
+
+        return card;
+      }
+
+      // ---- modal ----
+      function openModal(d) {
+        var catLabel = DOC_CATEGORIES[d.category] || d.category;
+        currentText = "";
+
+        $modalMeta.innerHTML =
+          '<span class="card-cat">' + escapeHtml(catLabel) + '</span>' +
+          '<span class="badge md-file">.md</span>';
+        $modalTitle.textContent = d.title;
+        $modalDesc.textContent  = d.description;
+        $modalContent.textContent = "loading\u2026";
+
+        // Download link
+        $dlBtn.href     = "agents/" + d.filename;
+        $dlBtn.download = d.filename;
+
+        // External site link
+        if (d.url) {
+          $modalExt.href = d.url;
+          $modalExt.style.display = "";
+        } else {
+          $modalExt.style.display = "none";
+        }
+
+        // Tags
+        $modalTags.innerHTML = (d.tags || []).map(function (t) {
+          return '<span class="tag">#' + escapeHtml(t) + '</span>';
+        }).join("");
+
+        // Fetch the MD file
+        fetch("agents/" + d.filename)
+          .then(function (r) {
+            if (!r.ok) throw new Error("not found");
+            return r.text();
+          })
+          .then(function (text) {
+            currentText = text;
+            $modalContent.textContent = text;
+          })
+          .catch(function () {
+            $modalContent.textContent =
+              "// File not yet available.\n// Add agents/" + d.filename + " to the repository.";
+          });
+
+        $backdrop.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        $modalClose.focus();
+      }
+
+      function closeModal() {
+        $backdrop.classList.add("hidden");
+        document.body.style.overflow = "";
+      }
+
+      // ---- events ----
+      function wireEvents() {
+        $search.addEventListener("input", function (e) { state.query = e.target.value; render(); });
+
+        $catRow.addEventListener("click", function (e) {
+          var chip = e.target.closest(".chip");
+          if (!chip) return;
+          $catRow.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+          chip.classList.add("active");
+          state.category = chip.dataset.category;
+          render();
+        });
+
+        $modalClose.addEventListener("click", closeModal);
+        $backdrop.addEventListener("click", function (e) { if (e.target === $backdrop) closeModal(); });
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && !$backdrop.classList.contains("hidden")) closeModal();
+          if (e.key === "/" && document.activeElement !== $search) {
+            e.preventDefault(); $search.focus();
+          }
+        });
+
+        $copyBtn.addEventListener("click", function () {
+          if (!currentText) return;
+          copyText(currentText);
+          $copyBtn.textContent = "Copied";
+          $copyBtn.classList.add("copied");
+          showToast("Copied to clipboard");
+          setTimeout(function () {
+            $copyBtn.textContent = "Copy";
+            $copyBtn.classList.remove("copied");
+          }, 1500);
+        });
+      }
+
+      // ---- utilities ----
+      function copyText(text) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).catch(fallback.bind(null, text));
+        } else {
+          fallback(text);
+        }
+      }
+      function fallback(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;opacity:0;";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(function () { $toast.classList.remove("show"); }, 1400);
+      }
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+    })();
+  </script>
+
+</body>
+</html>

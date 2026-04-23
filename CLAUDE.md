@@ -59,3 +59,30 @@ merged before the site goes live.
 
 When in doubt, ask the user — and before adding a library/framework/backend,
 check `prompt-library/ROADMAP.md`.
+
+## Session recording — standard practice
+
+Every working session on this repo MUST end with a session log written to
+`sessions/` at the repo root. This is how future Claude sessions (and
+future-you) reconstruct what happened, why, and what's left.
+
+**Rules:**
+
+- One markdown file per session, named `YYYY-MM-DD-kebab-name.md`.
+- Use the template at the bottom of `sessions/README.md`.
+- YAML frontmatter MUST include `[[wikilink]]` values for `project`, `date`,
+  `llms_used`, `scope`, `related`, and `concepts` — these power the
+  [[Obsidian]] graph.
+- `llms_used` lists every model that contributed to the session (e.g.
+  `[[Claude Opus 4.7]]`, `[[Claude Sonnet 4.6]]`). If multiple threads
+  collaborated, list them all.
+- `commits` lists every short-SHA produced during the session.
+- Body sections: Context → Decisions → Changes → Follow-ups. Keep Follow-ups
+  actionable and prioritised; future sessions start from there.
+- Update the Index table in `sessions/README.md` with a new row.
+- Do NOT write session logs anywhere else. An older alternate folder
+  (`logs/sessions/`) exists from a prior Sonnet session — it is deprecated.
+  Consolidate under `sessions/` only.
+
+Sessions live at the repo root so the GitHub Pages deploy (which publishes
+only `prompt-library/`) does not expose internal working notes.

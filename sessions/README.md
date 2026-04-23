@@ -65,7 +65,9 @@ deserves its own note.
 
 | Date       | Session                                                                            | Branch                                     | Status  |
 |------------|------------------------------------------------------------------------------------|--------------------------------------------|---------|
+| 2026-04-22 | [[2026-04-22-prompt-library-build\|prompt-library build day (Sonnet 4.6)]]         | `claude/plan-user-accounts-zlhey`          | shipped |
 | 2026-04-22 | [[2026-04-22-frontend-visual-refresh\|frontend visual refresh + sessions system]]  | `claude/create-frontend-html-bnbEu`        | shipped |
+| 2026-04-23 | [[2026-04-23-supabase-backend-scaffold\|Supabase backend scaffold (v2 user mgmt)]] | `main`                                     | active  |
 
 ## Past work — reconstructed from git log
 

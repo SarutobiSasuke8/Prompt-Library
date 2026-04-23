@@ -457,31 +457,12 @@
 </head>
 <body>
 
-  <header class="site-header">
-    <div class="inner">
-      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
-        <span class="caret">&gt;</span>prompt-library
-        <span class="tilde">~</span>
-        <span class="sub" id="header-handle">profile</span>
-      </a>
-      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
-        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
-        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
-        <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
-        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
-        <a href="about.html" style="color:var(--text-dim); text-decoration:none;">about</a>
-      </nav>
-      <div class="count-pill" id="header-pill" style="display:none;">
-        <span class="num" id="header-count">0</span>
-        <span class="label">contributions</span>
-      </div>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">☀</button>
-      <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
-        <span class="av-circle">S</span>
-        <span class="av-handle">SarutobiSasuke</span>
-      </a>
+  <div id="site-nav" data-active="" data-sub="profile">
+    <div class="count-pill" id="header-pill" style="display:none;">
+      <span class="num" id="header-count">0</span>
+      <span class="label">contributions</span>
     </div>
-  </header>
+  </div>
 
   <section class="hero" style="padding-bottom:20px;">
     <div class="eyebrow">
@@ -520,6 +501,9 @@
         </button>
         <button class="tab-btn" data-tab="tools">
           my tools <span class="tab-count" id="tab-count-tools">0</span>
+        </button>
+        <button class="tab-btn" data-tab="collections">
+          collections <span class="tab-count" id="tab-count-collections">0</span>
         </button>
       </div>
 
@@ -574,6 +558,18 @@
         <div class="panel-empty hidden" id="tools-empty">
           <strong>No starred tools yet</strong>
           Head to the <a href="tools.html" style="color:var(--accent);">tools page</a> and star ones you use.
+        </div>
+      </div>
+
+      <!-- Collections panel -->
+      <div class="tab-panel" id="panel-collections">
+        <div style="color:var(--text-dim); font-size:13px; line-height:1.6; margin-bottom:14px;">
+          Local prompt collections. Open a prompt and click <em>+ new</em> or an existing chip to save. Stored in this browser &mdash; no account required.
+        </div>
+        <div id="my-collections-list" style="display:flex; flex-direction:column; gap:22px;"></div>
+        <div class="panel-empty hidden" id="collections-empty">
+          <strong>No collections yet</strong>
+          Open any prompt on the <a href="index.html" style="color:var(--accent);">library</a> and save it to a named collection.
         </div>
       </div>
     </div>
@@ -680,8 +676,10 @@
       <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
         <a href="index.html">library</a>
         <a href="learn.html">methodology</a>
+        <a href="collections.html">collections</a>
         <a href="tools.html">tools</a>
         <a href="playground.html">playground</a>
+        <a href="about.html">about</a>
         <a href="privacy.html">privacy</a>
         <span style="color:var(--border-2);">|</span>
         <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
@@ -692,6 +690,7 @@
         <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
       </div>
     </div>
+    <div class="footer-copy">&copy; 2025 prompt-library &middot; MIT license</div>
   </footer>
 
   <div class="toast" id="toast">Copied</div>
@@ -744,7 +743,7 @@
       }
 
       document.title = "prompt-library \u00b7 @" + profile.handle;
-      document.getElementById("header-handle").textContent = "@" + profile.handle;
+      document.getElementById("nav-sub").textContent = "@" + profile.handle;
 
       // ---------------------------------------------------------------
       // Filter data by author handle
@@ -1015,6 +1014,82 @@
       renderMyTools();
 
       // ---------------------------------------------------------------
+      // My Collections
+      // ---------------------------------------------------------------
+      function loadCollections() {
+        try { return JSON.parse(localStorage.getItem("promptLibrary.collections") || "{}"); }
+        catch (_) { return {}; }
+      }
+      function saveCollections(obj) {
+        try { localStorage.setItem("promptLibrary.collections", JSON.stringify(obj)); } catch (_) {}
+      }
+      function renderMyCollections() {
+        const wrap = document.getElementById("my-collections-list");
+        const empty = document.getElementById("collections-empty");
+        const countEl = document.getElementById("tab-count-collections");
+        if (!wrap) return;
+        const cols = loadCollections();
+        const names = Object.keys(cols).sort();
+        if (countEl) countEl.textContent = names.length;
+        if (!names.length) {
+          wrap.innerHTML = "";
+          if (empty) empty.classList.remove("hidden");
+          return;
+        }
+        if (empty) empty.classList.add("hidden");
+        const allPrompts = (typeof PROMPTS !== "undefined" ? PROMPTS : []);
+        wrap.innerHTML = "";
+        names.forEach((name) => {
+          const ids = cols[name] || [];
+          const items = ids.map((id) => allPrompts.find((p) => p.id === id)).filter(Boolean);
+          const section = document.createElement("div");
+          section.style.cssText = "border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; background:var(--bg-1);";
+
+          const head = document.createElement("div");
+          head.style.cssText = "display:flex; align-items:center; gap:10px; margin-bottom:12px;";
+          const title = document.createElement("div");
+          title.style.cssText = "font-family:var(--mono); font-size:13px; font-weight:600; color:var(--text);";
+          title.textContent = name + " (" + items.length + ")";
+          const del = document.createElement("button");
+          del.type = "button";
+          del.textContent = "delete";
+          del.style.cssText = "margin-left:auto; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); background:none; border:1px solid var(--border-2); padding:3px 8px; border-radius:var(--radius); cursor:pointer;";
+          del.addEventListener("click", () => {
+            if (!confirm('Delete collection "' + name + '"?')) return;
+            const all = loadCollections();
+            delete all[name];
+            saveCollections(all);
+            renderMyCollections();
+          });
+          head.appendChild(title);
+          head.appendChild(del);
+          section.appendChild(head);
+
+          if (!items.length) {
+            const note = document.createElement("div");
+            note.style.cssText = "font-size:12px; color:var(--text-faint);";
+            note.textContent = "empty";
+            section.appendChild(note);
+          } else {
+            const list = document.createElement("div");
+            list.style.cssText = "display:flex; flex-direction:column; gap:8px;";
+            items.forEach((p) => {
+              const row = document.createElement("a");
+              row.href = "index.html#prompt-" + p.id;
+              row.style.cssText = "display:flex; justify-content:space-between; gap:10px; background:var(--bg-2); border:1px solid var(--border); padding:10px 12px; border-radius:var(--radius); color:var(--text); text-decoration:none;";
+              row.innerHTML =
+                '<span style="font-size:13px; font-weight:600;">' + escapeHtml(p.title) + '</span>' +
+                '<span style="font-family:var(--mono); font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.08em;">#' + p.id + '</span>';
+              list.appendChild(row);
+            });
+            section.appendChild(list);
+          }
+          wrap.appendChild(section);
+        });
+      }
+      renderMyCollections();
+
+      // ---------------------------------------------------------------
       // Card builders
       // ---------------------------------------------------------------
       function buildPromptCard(p) {
@@ -1179,7 +1254,7 @@
         profile.github_handle = $editGH.value.trim();
 
         document.getElementById("profile-handle-text").textContent = profile.handle;
-        document.getElementById("header-handle").textContent = "@" + profile.handle;
+        document.getElementById("nav-sub").textContent = "@" + profile.handle;
         document.getElementById("profile-bio").textContent = profile.bio;
 
         // Refresh links
@@ -1249,7 +1324,9 @@
       function escapeAttr(s) { return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, ""); }
     })();
   </script>
+  <script src="nav.js"></script>
   <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
 
 </body>
 </html>

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <script defer src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
   <style>
     main { max-width: 720px; margin: 40px auto; padding: 0 20px; color: var(--text); font-family: var(--sans, 'Inter', sans-serif); line-height: 1.6; }
     main h1 { font-size: 28px; margin-bottom: 8px; }
@@ -19,21 +22,7 @@
   </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="inner">
-      <div class="logo">
-        <span class="caret">&gt;</span>prompt-library
-        <span class="tilde">~</span>
-        <span class="sub">privacy</span>
-      </div>
-      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
-        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
-        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
-        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
-        <a href="user.html?handle=SarutobiSasuke" style="color:var(--text-dim); text-decoration:none;">profile</a>
-      </nav>
-    </div>
-  </header>
+  <div id="site-nav" data-active="" data-sub="privacy"></div>
 
   <main>
     <h1>Privacy</h1>
@@ -73,5 +62,7 @@
     <h2>Contact</h2>
     <p>Open an issue on the <a href="https://github.com/SarutobiSasuke8/Prompt-Library">GitHub repo</a>.</p>
   </main>
+  <script src="nav.js"></script>
+  <script src="theme.js"></script>
 </body>
 </html>

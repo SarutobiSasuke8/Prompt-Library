@@ -243,30 +243,12 @@
 </head>
 <body>
 
-  <header class="site-header">
-    <div class="inner">
-      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
-        <span class="caret">&gt;</span>prompt-library
-        <span class="tilde">~</span>
-        <span class="sub">playground</span>
-      </a>
-      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
-        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
-        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
-        <a href="collections.html" style="color:var(--text-dim); text-decoration:none;">collections</a>
-        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
-      </nav>
-      <div class="count-pill">
-        <span class="num">live</span>
-        <span class="label">api</span>
-      </div>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">☀</button>
-      <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
-        <span class="av-circle">S</span>
-        <span class="av-handle">SarutobiSasuke</span>
-      </a>
+  <div id="site-nav" data-active="playground" data-sub="playground">
+    <div class="count-pill">
+      <span class="num">live</span>
+      <span class="label">api</span>
     </div>
-  </header>
+  </div>
 
   <section class="hero" style="padding-bottom:28px;">
     <div class="eyebrow">
@@ -403,7 +385,9 @@
   <div class="toast" id="toast">Copied</div>
 
   <script src="prompts.js"></script>
+  <script src="nav.js"></script>
   <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
   <script>
     (function () {
       "use strict";

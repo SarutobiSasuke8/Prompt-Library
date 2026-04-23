@@ -4,7 +4,7 @@ date: 2026-04-23
 project: [[prompt-library]]
 branch: main
 agent: [[Claude Sonnet 4.6]]
-status: active
+status: shipped
 tags: [nav, agents, markdown-library, tools, frontend, dropdown]
 touches:
   - prompt-library/agents.html
@@ -16,7 +16,7 @@ touches:
   - prompt-library/index.html
   - prompt-library/agents/openclaw.md
   - prompt-library/agents/hermes.md
-commits: []
+commits: [b76b111]
 related:
   - [[2026-04-23-supabase-backend-scaffold]]
   - [[2026-04-22-frontend-visual-refresh]]

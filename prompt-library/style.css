@@ -822,6 +822,67 @@ a:hover { text-decoration: underline; }
 .prompt-block pre::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
 .prompt-block pre::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 
+/* ---- variable slots panel ---- */
+.vars-panel {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.vars-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.vars-panel-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+}
+.vars-reset {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.vars-reset:hover { text-decoration: underline; }
+.vars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.var-field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+.var-field input {
+  width: 100%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  transition: border-color 0.12s;
+}
+.var-field input:focus { outline: none; border-color: var(--accent); }
+.var-field input::placeholder { color: var(--text-faint); }
+
 /* ---- reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

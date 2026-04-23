@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; author</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">curated</span>
+      </a>
+      <div class="count-pill">
+        <span class="num" id="count-num">0</span>
+        <span class="label" id="count-label">prompts</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:24px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+    </div>
+    <h1>Prompts by <span class="accent" id="author-name"></span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede" id="author-lede"></p>
+  </section>
+
+  <main>
+    <div class="grid" id="grid" aria-live="polite"></div>
+    <div class="empty hidden" id="empty">
+      <strong>No prompts found</strong>
+      This author hasn't contributed any prompts yet.
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <article class="modal" id="modal">
+      <header class="modal-head">
+        <div>
+          <div class="meta" id="modal-meta"></div>
+          <h2 id="modal-title"></h2>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="purpose" id="modal-purpose"></p>
+        <h4>System prompt</h4>
+        <div class="prompt-block">
+          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <pre id="modal-prompt"></pre>
+        </div>
+        <h4>Details</h4>
+        <dl class="meta-grid" id="modal-details"></dl>
+        <div id="modal-chaining-wrap" class="hidden">
+          <h4>Chaining</h4>
+          <p id="modal-chaining"></p>
+        </div>
+        <div id="modal-notes-wrap" class="hidden">
+          <h4>Notes</h4>
+          <p id="modal-notes"></p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="prompts.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const params = new URLSearchParams(window.location.search);
+      const author = params.get("name") || "";
+
+      document.title = author ? "prompt-library \u00b7 " + author : "prompt-library \u00b7 author";
+      document.getElementById("author-name").textContent = author || "Unknown";
+
+      const $grid       = document.getElementById("grid");
+      const $empty      = document.getElementById("empty");
+      const $countNum   = document.getElementById("count-num");
+      const $countLabel = document.getElementById("count-label");
+      const $lede       = document.getElementById("author-lede");
+
+      const $backdrop       = document.getElementById("modal-backdrop");
+      const $modalClose     = document.getElementById("modal-close");
+      const $modalMeta      = document.getElementById("modal-meta");
+      const $modalTitle     = document.getElementById("modal-title");
+      const $modalPurpose   = document.getElementById("modal-purpose");
+      const $modalPrompt    = document.getElementById("modal-prompt");
+      const $modalDetails   = document.getElementById("modal-details");
+      const $modalChaining  = document.getElementById("modal-chaining");
+      const $modalChainWrap = document.getElementById("modal-chaining-wrap");
+      const $modalNotes     = document.getElementById("modal-notes");
+      const $modalNotesWrap = document.getElementById("modal-notes-wrap");
+      const $copyBtn        = document.getElementById("copy-btn");
+      const $toast          = document.getElementById("toast");
+
+      if (typeof PROMPTS === "undefined") {
+        $grid.innerHTML = '<div style="color:#ff6b6b; font-family:var(--mono); padding:16px;">Failed to load prompts.js.</div>';
+        return;
+      }
+
+      const prompts = author
+        ? PROMPTS.filter((p) => (p.author || "") === author)
+        : [];
+
+      $countNum.textContent   = prompts.length;
+      $countLabel.textContent = "prompts";
+      $lede.textContent       = prompts.length
+        ? prompts.length + " prompt" + (prompts.length === 1 ? "" : "s") + " contributed to the library."
+        : "No prompts found for this author.";
+
+      if (prompts.length === 0) {
+        $empty.classList.remove("hidden");
+      } else {
+        const frag = document.createDocumentFragment();
+        prompts.forEach((p) => frag.appendChild(buildCard(p)));
+        $grid.appendChild(frag);
+      }
+
+      wireEvents();
+
+      function buildCard(p) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("data-id", p.id);
+        card.setAttribute("aria-label", p.title);
+
+        const catLabel = CATEGORIES[p.category] || p.category;
+        const tags     = (p.tags || []).slice(0, 3);
+        const models   = (p.models || []).slice(0, 3);
+
+        const clipboardSvg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
+            '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
+            '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
+          '</svg>';
+
+        const idStr = String(p.id).padStart(3, "0");
+        card.innerHTML =
+          '<div class="card-head">' +
+            '<div class="card-head-left">' +
+              '<span class="card-id">#' + escapeHtml(idStr) + "</span>" +
+              '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+            "</div>" +
+            '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>" +
+          "</div>" +
+          "<h3>" + escapeHtml(p.title) + "</h3>" +
+          '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
+          '<div class="card-foot">' +
+            '<div class="card-tags">' +
+              tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
+              models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+            "</div>" +
+            '<button class="card-copy" type="button" aria-label="Copy prompt">' +
+              clipboardSvg + '<span>copy</span>' +
+            "</button>" +
+          "</div>";
+
+        const openFromCard = (e) => {
+          if (e.target.closest(".card-copy")) return;
+          openModal(p);
+        };
+        card.addEventListener("click", openFromCard);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFromCard(e); }
+        });
+
+        const copyBtn = card.querySelector(".card-copy");
+        copyBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          await copyToClipboard(p.prompt);
+          copyBtn.classList.add("copied");
+          const labelSpan = copyBtn.querySelector("span");
+          labelSpan.textContent = "copied";
+          showToast("Prompt copied");
+          setTimeout(() => { copyBtn.classList.remove("copied"); labelSpan.textContent = "copy"; }, 1500);
+        });
+
+        return card;
+      }
+
+      function openModal(p) {
+        const catLabel = CATEGORIES[p.category] || p.category;
+        $modalMeta.innerHTML =
+          '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+          '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>";
+        $modalTitle.textContent   = p.title;
+        $modalPurpose.textContent = p.purpose;
+        $modalPrompt.textContent  = p.prompt;
+
+        const tagsHtml   = (p.tags || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join(" ");
+        const modelsHtml = (p.models || []).map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join(" ");
+
+        $modalDetails.innerHTML =
+          "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
+          "<dt>author</dt><dd class=\"mono\"><a href=\"author.html?name=" + encodeURIComponent(p.author || "") + "\" style=\"color:var(--accent);text-decoration:none;\">" + escapeHtml(p.author || "—") + "</a></dd>" +
+          "<dt>temperature</dt><dd class=\"mono\">" + escapeHtml(p.temperature) + "</dd>" +
+          "<dt>models</dt><dd>" + (modelsHtml || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>" +
+          "<dt>tags</dt><dd>"   + (tagsHtml   || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>";
+
+        if (p.chaining && p.chaining.trim()) {
+          $modalChaining.textContent = p.chaining;
+          $modalChainWrap.classList.remove("hidden");
+        } else { $modalChainWrap.classList.add("hidden"); }
+
+        if (p.notes && p.notes.trim()) {
+          $modalNotes.textContent = p.notes;
+          $modalNotesWrap.classList.remove("hidden");
+        } else { $modalNotesWrap.classList.add("hidden"); }
+
+        $backdrop.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        $modalClose.focus();
+      }
+
+      function wireEvents() {
+        $modalClose.addEventListener("click", closeModal);
+        $backdrop.addEventListener("click", (e) => { if (e.target === $backdrop) closeModal(); });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !$backdrop.classList.contains("hidden")) closeModal();
+        });
+        $copyBtn.addEventListener("click", async () => {
+          await copyToClipboard($modalPrompt.textContent);
+          $copyBtn.classList.add("copied");
+          $copyBtn.textContent = "Copied";
+          showToast("Prompt copied");
+          setTimeout(() => { $copyBtn.classList.remove("copied"); $copyBtn.textContent = "Copy"; }, 1500);
+        });
+      }
+
+      function closeModal() {
+        $backdrop.classList.add("hidden");
+        document.body.style.overflow = "";
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+        }
+      }
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(() => $toast.classList.remove("show"), 1400);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+      function escapeAttr(s) {
+        return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, "");
+      }
+    })();
+  </script>
+
+</body>
+</html>

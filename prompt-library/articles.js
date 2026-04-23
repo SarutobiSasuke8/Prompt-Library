@@ -242,6 +242,58 @@ const ARTICLES = [
       { type: "h3", text: "Source" },
       { type: "reference", title: "The AI-Driven Leader: Harnessing AI to Make Faster, Smarter Decisions", author: "Harnessing AI to Make Faster Smarter Decisions", url: "https://www.amazon.co.uk/AI-Driven-Leader-Harnessing-Smarter-Decisions/dp/B0DB8QL3ZK" }
     ]
+  },
+
+  {
+    id: 8,
+    title: "Obsidian as an AI Brain for Agents and Coding Agents",
+    summary: "Why a plain-markdown vault is the highest-leverage long-term memory you can give an LLM — and how to wire it up.",
+    tags: ["obsidian", "knowledge-management", "agents", "coding-agents", "mcp"],
+    readTime: "8 min",
+    author: "SarutobiSasuke",
+    body: [
+      { type: "p", text: "Every serious workflow with language models eventually hits the same wall: the model doesn't remember. Context windows reset. Chat histories scroll off. Project folders are a pile of half-edited files nobody re-reads. The question isn't whether you need external memory — it's what shape that memory should take." },
+      { type: "p", text: "Obsidian is, at first glance, a note-taking app. Look again and it's a plain-markdown, folder-based, locally-stored, backlink-indexed knowledge graph. Every one of those adjectives matters when you want a model to read from and write to the same place you do." },
+      { type: "h3", text: "Why markdown, why local" },
+      { type: "p", text: "Agents read text. LLMs are trained on markdown in such volume that headings, lists, and fenced code blocks are effectively a native format. A vault is a folder of .md files. No database, no proprietary store, no cloud dependency, no schema migration. When the agent lands on a note, there's nothing to parse beyond what it already parses natively." },
+      { type: "p", text: "Local matters for two reasons. First, the agent can read and write it through ordinary file-system tools — no auth flow, no rate limit, no network. Second, your knowledge stays yours; you're not exporting your thinking into someone else's model provider as a side effect of using it." },
+      { type: "h3", text: "The three roles a vault plays for agents" },
+      { type: "list", items: [
+        "Long-term memory — facts, decisions, preferences, and project state that persist across sessions and across model providers.",
+        "Shared workspace — both human and agent read and edit the same files, so the human can review what the agent learned and the agent can pick up where the human left off.",
+        "Structured index — backlinks and tags turn a flat folder into a graph the agent can traverse: 'show me everything linked to [[Project X]]' is a first-class query."
+      ]},
+      { type: "h3", text: "Three ways to wire an agent to a vault" },
+      { type: "p", text: "These are ordered from lowest to highest effort. Start with the first that fits." },
+      { type: "h3", text: "1. File-system access (simplest)" },
+      { type: "p", text: "If your coding agent already has file tools — Claude Code, Cursor, Aider, any MCP filesystem server — point it at the vault folder. That's it. The agent can now read any note, grep across the vault, and write new notes. No plugins, no server, no setup. This is usually enough for coding agents that need design docs, decision logs, and architecture notes to land somewhere durable." },
+      { type: "example", label: "Minimal vault layout for a coding agent", text: "vault/\n  README.md                  — how this vault is organised\n  projects/\n    prompt-library/\n      decisions.md           — architectural choices + rationale\n      todo.md                — what's next, prioritised\n      sessions/              — session logs (agent appends one per run)\n  patterns/                  — reusable prompt templates\n  people/                    — collaborators, roles, context\n  inbox.md                   — scratch, triaged weekly" },
+      { type: "h3", text: "2. MCP (Model Context Protocol) server" },
+      { type: "p", text: "The Obsidian community ships an MCP server that exposes the vault as a first-class tool: search, read, create, update, append, follow backlinks. For agents that support MCP (Claude Desktop, Claude Code, any MCP-aware client), this turns the vault into a queryable knowledge base rather than a folder you have to tell the agent about. Backlink traversal is the feature that actually matters — it lets the agent pull connected context without you having to name every relevant file." },
+      { type: "h3", text: "3. In-app plugins (Smart Connections, Copilot)" },
+      { type: "p", text: "Smart Connections and Copilot for Obsidian run inside the app itself. They embed your notes, offer semantic search against the vault, and let you chat with a model that has been given the vault as retrieval context. Use these when you want the model in the same window as your notes rather than in a separate agent session. They pair well with the MCP approach — the plugin handles lookup from inside the app, the MCP server handles lookup from outside agents." },
+      { type: "callout", text: "For coding agents, (1) is almost always sufficient. For deep research or long-running agent workflows, add (2). For active writing and thinking, (3) closes the loop between you and the model in the same UI." },
+      { type: "h3", text: "The pattern: session logs" },
+      { type: "p", text: "The single highest-leverage habit is having the agent write a session log to the vault at the end of every run. A few hundred words: what was done, what decisions were made, what's broken, what's next. The next agent run — possibly a different model, possibly weeks later — reads those logs before starting. Continuity compounds." },
+      { type: "example", label: "Session log template", text: "---\ndate: 2026-04-23\nproject: [[prompt-library]]\nagent: [[Claude Opus 4.7]]\n---\n\n## Context\nWhat triggered this session, what state things were in.\n\n## Decisions\nWhat was chosen and why. Link to alternatives considered.\n\n## Changes\nFiles touched, at a line-range level if it matters.\n\n## Follow-ups\nPrioritised list. Next session starts here." },
+      { type: "h3", text: "Design notes that pay off" },
+      { type: "list", items: [
+        "One fact per note. Short atomic notes linked together outperform long documents when the agent is doing retrieval — each match is more precise.",
+        "Use [[wikilinks]] liberally. They're how the graph becomes traversable; every link is a free index entry.",
+        "Keep a top-level README.md that describes the vault's own structure. The agent reads it first and orients itself.",
+        "Put prompts in the vault. Your best prompts are project artefacts; version them alongside the code they operate on.",
+        "Write meta-notes ('how I work with this codebase', 'how I prefer PR reviews'). Agents that read these make fewer mistakes that need correcting."
+      ]},
+      { type: "h3", text: "Failure modes" },
+      { type: "list", items: [
+        "Letting the vault drift. If sessions stop appending logs, the continuity benefit evaporates within weeks.",
+        "Over-structuring. A strict ontology that neither you nor the agent follow is worse than no ontology. Start flat, let structure emerge from backlinks.",
+        "Granting broad write access without review. Agents will happily reorganise files. Require that structural changes land as explicit tool calls you approve, not as silent rewrites.",
+        "Confusing the vault with a database. Markdown is a great memory substrate but a poor transactional store. If you're tempted to write a JSON index as .md, you want a database."
+      ]},
+      { type: "h3", text: "Why this wins over 'just use the context window'" },
+      { type: "p", text: "Context windows are working memory. Vaults are long-term memory. Every model you'll use over the next five years will be able to read markdown. No vendor lock-in, no migration, no re-indexing. The vault survives model upgrades, tool churn, and your own attention drift. It's the part of your AI workflow that isn't rented." }
+    ]
   }
 
 ];

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Local utility — not for indexing
+Disallow: /add-prompt.html
+
+Sitemap: https://sarutobisasuke8.github.io/Prompt-Library/sitemap.xml

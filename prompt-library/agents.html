@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agents &middot; prompt-library</title>
+  <meta name="description" content="A practical directory of agent patterns, design principles, and prompt strategies for building reliable AI agents." />
+
+  <meta property="og:title" content="prompt-library &middot; agents" />
+  <meta property="og:description" content="A practical directory of agent patterns and design principles for AI builders." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+
+  <style>
+    .agents-wrap { max-width: 1100px; margin: 0 auto 72px; padding: 0 18px; }
+
+    /* ---- section headings ---- */
+    .section-rule {
+      display: flex; align-items: center; gap: 12px;
+      margin: 48px 0 22px;
+    }
+    .section-rule span:first-child {
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--text-faint); white-space: nowrap;
+    }
+    .section-rule hr {
+      flex: 1; height: 1px; border: none; background: var(--border); margin: 0;
+    }
+
+    /* ---- pattern grid ---- */
+    .pattern-grid {
+      display: grid; gap: 14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px)  { .pattern-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .pattern-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .pattern-card {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: border-color 120ms;
+    }
+    .pattern-card:hover { border-color: var(--text-faint); }
+
+    .pattern-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .pattern-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .pattern-badge {
+      font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 2px 7px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      white-space: nowrap; flex-shrink: 0; color: var(--text-faint);
+    }
+    .pattern-badge.advanced   { color: var(--danger); border-color: var(--danger); }
+    .pattern-badge.intermediate { color: var(--warn);   border-color: var(--warn);   }
+    .pattern-badge.beginner   { color: var(--accent);  border-color: var(--accent); }
+
+    .pattern-desc { font-size: 13px; color: var(--text-dim); line-height: 1.55; }
+
+    .pattern-ingredients {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .pattern-ingredients li {
+      font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+      padding-left: 14px; position: relative; line-height: 1.4;
+    }
+    .pattern-ingredients li::before {
+      content: "›"; position: absolute; left: 0;
+      color: var(--accent); font-size: 13px; line-height: 1.1;
+    }
+
+    .pattern-footer {
+      margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .pattern-tag {
+      font-family: var(--mono); font-size: 10px; color: var(--text-faint);
+      padding: 1px 6px; border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .pattern-link {
+      margin-left: auto; font-family: var(--mono); font-size: 11px;
+      color: var(--accent); text-decoration: none; letter-spacing: 0.02em;
+      transition: color 120ms;
+    }
+    .pattern-link:hover { color: var(--accent-dim); }
+
+    /* ---- principles list ---- */
+    .principles-grid {
+      display: grid; gap: 14px; grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px) { .principles-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .principle {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px; display: flex; gap: 14px;
+    }
+    .principle-num {
+      font-family: var(--mono); font-size: 13px; font-weight: 600;
+      color: var(--accent); flex-shrink: 0; line-height: 1;
+      padding-top: 2px;
+    }
+    .principle-body {}
+    .principle-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .principle-desc  { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; margin: 0; }
+
+    /* ---- glossary ---- */
+    .glossary { display: flex; flex-direction: column; gap: 0; }
+    .glossary-row {
+      display: grid; grid-template-columns: 160px 1fr;
+      padding: 12px 0; border-bottom: 1px solid var(--border); gap: 20px;
+      align-items: baseline;
+    }
+    .glossary-row:last-child { border-bottom: none; }
+    .gloss-term {
+      font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 500;
+    }
+    .gloss-def { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+    @media (max-width: 600px) {
+      .glossary-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+
+    /* ---- CTA strip ---- */
+    .cta-strip {
+      background: var(--bg-1); border: 1px solid var(--accent-edge);
+      border-radius: var(--radius); padding: 28px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; flex-wrap: wrap; margin-top: 48px;
+    }
+    .cta-strip-text {}
+    .cta-strip-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .cta-strip-sub { font-size: 13px; color: var(--text-dim); }
+    .cta-strip-btn {
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--bg); background: var(--accent); text-decoration: none;
+      padding: 10px 20px; border-radius: var(--radius);
+      white-space: nowrap; transition: background 120ms;
+    }
+    .cta-strip-btn:hover { background: var(--accent-dim); color: var(--bg); }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       Header
+       ================================================================ -->
+  <div id="site-nav" data-active="agents" data-sub="agents"></div>
+
+  <!-- ================================================================
+       Hero
+       ================================================================ -->
+  <section class="hero">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>agent patterns</span>
+      <span class="sep">/</span>
+      <span>design principles</span>
+      <span class="sep">/</span>
+      <span>prompt strategies</span>
+    </div>
+    <h1>The agent <span class="accent">directory</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">
+      A practical reference for building reliable AI agents &mdash; patterns that
+      work in production, principles that prevent common failure modes, and prompts
+      tuned for agentic contexts. No vague architectures; everything here maps to
+      actual system prompt design.
+    </p>
+  </section>
+
+  <!-- ================================================================
+       Main content
+       ================================================================ -->
+  <div class="agents-wrap">
+
+    <!-- ---- Patterns ---- -->
+    <div class="section-rule">
+      <span>patterns</span><hr />
+    </div>
+
+    <div class="pattern-grid">
+
+      <!-- 1 -->
+      <div class="pattern-card">
+        <div class="pattern-head">
+          <div class="pattern-title">ReAct Loop</div>
+          <span class="pattern-badge intermediate">intermediate</span>
+        </div>
+        <p class="pattern-desc">
+          Interleaves reasoning and acting in a tight loop: think, choose a tool,
+          observe the result, repeat. The most widely deployed agentic pattern and
+          a reliable baseline before reaching for anything more complex.
+        </p>
+        <ul class="pattern-ingredients">
+          <li>Explicit Thought / Action / Observation structure in the prompt</li>
+          <li>Tool list with usage constraints described inline</li>
+          <li>Max-step budget to prevent runaway loops</li>
+          <li>Stop condition: when to declare done vs. escalate</li>
+        </ul>
+        <div class="pattern-footer">
+          <span class="pattern-tag">tool-use</span>
+          <span class="pattern-tag">reasoning</span>
+          <a class="pattern-link" href="index.html?cat=agents">prompts &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="pattern-card">
+        <div class="pattern-head">
+          <div class="pattern-title">Orchestrator + Workers</div>
+          <span class="pattern-badge advanced">advanced</span>
+        </div>
+        <p class="pattern-desc">
+          A planner agent decomposes a task into subtasks and dispatches them to
+          specialised subagents. Each worker has a narrow scope. The orchestrator
+          aggregates results and handles failures. Scales to complex, multi-domain
+          workflows.
+        </p>
+        <ul class="pattern-ingredients">
+          <li>Orchestrator prompt defines decomposition strategy</li>
+          <li>Worker prompts are scoped and stateless where possible</li>
+          <li>Handoff format: structured JSON between agents</li>
+          <li>Failure modes: timeout, partial result, and retry policy</li>
+        </ul>
+        <div class="pattern-footer">
+          <span class="pattern-tag">multi-agent</span>
+          <span class="pattern-tag">orchestration</span>
+          <a class="pattern-link" href="index.html?cat=agents">prompts &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="pattern-card">
+        <div class="pattern-head">
+          <div class="pattern-title">Tool-Use Scaffold</div>
+          <span class="pattern-badge beginner">beginner</span>
+        </div>
+        <p class="pattern-desc">
+          Gives a single model a curated toolset and a decision policy for when
+          and how to use each one. Simpler than full ReAct &mdash; no loop required.
+          Good for retrieval-augmented generation, calculator tasks, and API lookups.
+        </p>
+        <ul class="pattern-ingredients">
+          <li>Tool descriptions written as capability constraints, not just names</li>
+          <li>One tool per call policy to reduce ambiguity</li>
+          <li>Citation requirement: cite the tool and result used</li>
+          <li>Graceful fallback when a tool returns empty</li>
+        </ul>
+        <div class="pattern-footer">
+          <span class="pattern-tag">rag</span>
+          <span class="pattern-tag">function-calling</span>
+          <a class="pattern-link" href="index.html?cat=agents">prompts &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="pattern-card">
+        <div class="pattern-head">
+          <div class="pattern-title">Self-Critique Loop</div>
+          <span class="pattern-badge intermediate">intermediate</span>
+        </div>
+        <p class="pattern-desc">
+          The model produces a draft, then critiques it against explicit criteria
+          before returning output. Can be a single model in two passes or two
+          separate calls. Reduces obvious errors without human review for
+          well-defined domains.
+        </p>
+        <ul class="pattern-ingredients">
+          <li>Critique rubric defined in the system prompt</li>
+          <li>Separate critique role from generation role</li>
+          <li>Pass/fail threshold: when to iterate vs. accept</li>
+          <li>Max revision count to bound cost</li>
+        </ul>
+        <div class="pattern-footer">
+          <span class="pattern-tag">evaluation</span>
+          <span class="pattern-tag">reflection</span>
+          <a class="pattern-link" href="index.html?cat=agents">prompts &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="pattern-card">
+        <div class="pattern-head">
+          <div class="pattern-title">Memory-Augmented Agent</div>
+          <span class="pattern-badge advanced">advanced</span>
+        </div>
+        <p class="pattern-desc">
+          Separates working memory (context window), episodic memory (retrieved
+          past interactions), and semantic memory (vector-searched knowledge) into
+          distinct channels. The system prompt defines what gets written, retrieved,
+          and when.
+        </p>
+        <ul class="pattern-ingredients">
+          <li>Memory write policy: what is worth storing</li>
+          <li>Retrieval trigger: when to query before answering</li>
+          <li>Freshness policy: how to handle stale memories</li>
+          <li>Conflict resolution when memories contradict</li>
+        </ul>
+        <div class="pattern-footer">
+          <span class="pattern-tag">memory</span>
+          <span class="pattern-tag">retrieval</span>
+          <a class="pattern-link" href="index.html?cat=agents">prompts &rarr;</a>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="pattern-card">
+        <div class="pattern-head">
+          <div class="pattern-title">Human-in-the-Loop</div>
+          <span class="pattern-badge intermediate">intermediate</span>
+        </div>
+        <p class="pattern-desc">
+          The agent identifies decision points it cannot resolve alone and pauses
+          to request human input. The system prompt defines the escalation taxonomy:
+          which actions need approval, which can proceed autonomously, and how to
+          ask clearly.
+        </p>
+        <ul class="pattern-ingredients">
+          <li>Autonomy boundaries listed explicitly in the prompt</li>
+          <li>Escalation format: structured question, not open prose</li>
+          <li>State serialisation so the agent can resume cleanly</li>
+          <li>Confidence threshold below which it always asks</li>
+        </ul>
+        <div class="pattern-footer">
+          <span class="pattern-tag">safety</span>
+          <span class="pattern-tag">escalation</span>
+          <a class="pattern-link" href="index.html?cat=agents">prompts &rarr;</a>
+        </div>
+      </div>
+
+    </div><!-- /pattern-grid -->
+
+    <!-- ---- Design principles ---- -->
+    <div class="section-rule">
+      <span>design principles</span><hr />
+    </div>
+
+    <div class="principles-grid">
+
+      <div class="principle">
+        <div class="principle-num">01</div>
+        <div class="principle-body">
+          <div class="principle-title">Scope before capability</div>
+          <p class="principle-desc">Define what the agent must not do before defining what it can do. Narrow scope reduces failure modes faster than adding guardrails after the fact.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">02</div>
+        <div class="principle-body">
+          <div class="principle-title">Make the stop condition explicit</div>
+          <p class="principle-desc">Agents without a clear done state loop indefinitely. Every agentic prompt needs a success definition and at least one failure exit.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">03</div>
+        <div class="principle-body">
+          <div class="principle-title">Treat tool descriptions as contracts</div>
+          <p class="principle-desc">Write tool descriptions as: what it does, what it needs, what it returns, and when not to use it. Vague descriptions produce misuse.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">04</div>
+        <div class="principle-body">
+          <div class="principle-title">Log reasoning, not just actions</div>
+          <p class="principle-desc">Prompt the agent to externalise its chain of thought before acting. This makes failures debuggable and is usually worth the token cost.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">05</div>
+        <div class="principle-body">
+          <div class="principle-title">Budget tokens like money</div>
+          <p class="principle-desc">Set an explicit step or token budget in the prompt. Agents with no cost awareness will explore exhaustively. Set a limit, then test the edge.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">06</div>
+        <div class="principle-body">
+          <div class="principle-title">Stateless workers, stateful orchestrators</div>
+          <p class="principle-desc">Keep subagent prompts stateless and idempotent. Push state ownership up to the orchestrator. This simplifies retries and parallelisation.</p>
+        </div>
+      </div>
+
+    </div><!-- /principles-grid -->
+
+    <!-- ---- Glossary ---- -->
+    <div class="section-rule">
+      <span>glossary</span><hr />
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-row">
+        <div class="gloss-term">agent loop</div>
+        <div class="gloss-def">The execution cycle of perceive → reason → act → observe, repeated until a stop condition is met.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">tool call</div>
+        <div class="gloss-def">A structured invocation of an external capability (search, code execution, API) made by the model during a reasoning step.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">context window</div>
+        <div class="gloss-def">The total token budget available to the model in one inference call. Agentic tasks burn it fast; managing it is a first-class design concern.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">grounding</div>
+        <div class="gloss-def">Anchoring model output to retrieved or verified facts, reducing hallucination in long-running tasks where the model can't rely on training alone.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">handoff</div>
+        <div class="gloss-def">The structured transfer of state, task context, and partial results from one agent to another in a multi-agent pipeline.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">scaffolding</div>
+        <div class="gloss-def">The orchestration code and system prompt structure that wraps a model and gives it access to tools, memory, and control flow.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">reflection</div>
+        <div class="gloss-def">A prompted self-evaluation step where the agent critiques its own output against defined criteria before returning a result.</div>
+      </div>
+      <div class="glossary-row">
+        <div class="gloss-term">autonomy boundary</div>
+        <div class="gloss-def">An explicit policy line in the system prompt: actions below it are autonomous; above it requires human approval or escalation.</div>
+      </div>
+    </div>
+
+    <!-- ---- CTA strip ---- -->
+    <div class="cta-strip">
+      <div class="cta-strip-text">
+        <div class="cta-strip-title">Ready to build?</div>
+        <div class="cta-strip-sub">Browse production-ready prompts for the agents category &mdash; tool-use scaffolds, orchestrators, evaluators, and more.</div>
+      </div>
+      <a class="cta-strip-btn" href="index.html?cat=agents">view agent prompts</a>
+    </div>
+
+  </div><!-- /agents-wrap -->
+
+  <!-- ================================================================
+       Footer
+       ================================================================ -->
+  <div id="site-footer"></div>
+
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+
+</body>
+</html>

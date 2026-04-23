@@ -45,12 +45,21 @@ don't. Read `ROADMAP.md`. Backend features are parked until v1 has users.
 │       └── deploy.yml      # GitHub Pages deploy on push to main (must live at repo root)
 └── prompt-library/
     ├── index.html          # app shell + all runtime JS (inline)
+    ├── learn.html          # methodology / articles listing
+    ├── article.html        # single article view (driven by articles.js)
+    ├── collections.html    # curated prompt packs
+    ├── tools.html          # AI tools directory
+    ├── about.html          # project mission, quality bar, tech specs
+    ├── user.html           # user profile page
+    ├── privacy.html        # privacy policy
     ├── prompts.js          # CATEGORIES map + PROMPTS array — the data
+    ├── articles.js         # ARTICLES array — methodology content
     ├── style.css           # all styles; dark theme, mobile-first
+    ├── theme.js            # light/dark toggle (shared across pages)
     ├── add-prompt.html     # LOCAL capture utility, not linked from site
     ├── CLAUDE.md           # this file
     ├── README.md           # public-facing project doc
-    ├── CONTRIBUTING.md     # schema, quality bar, PR flow
+    ├── CONTRIBUTING.md     # schema, quality bar, PR flow + page template
     └── ROADMAP.md          # v1 checklist + v2 parking lot
 ```
 
@@ -211,6 +220,69 @@ entry.
 - Do not remove the warning banner.
 - Do not change the output format without also updating existing entries —
   the file is hand-editable and consistency matters.
+
+---
+
+## Page template standard
+
+Every `.html` page **must** use the shared `nav.js` + `footer.js` mount
+helpers. The full markup is in `CONTRIBUTING.md` under "Adding a new page".
+
+### Mount-div contract
+
+Pages declare two empty mount divs. On DOMContentLoaded the helpers replace
+each div's `outerHTML` with the canonical header/footer markup. The mount
+div's `innerHTML` is preserved as a slot.
+
+**Header — `<div id="site-nav" data-active="<key>" data-sub="<label>">…pill slot…</div>`**
+- `data-active`: one of `library`, `methodology`, `collections`, `tools`,
+  `agents`, `playground`, `about`. Use `""` (empty) on pages with no
+  top-level nav highlight (`user`, `privacy`).
+- `data-sub`: short string shown after the logo in `<span class="sub">`
+  (e.g. `curated`, `learn`, `tools`).
+- `innerHTML`: optional pill markup (a `.count-pill`, read-time pill, etc.)
+  rendered inline in the header. Omit the div's innerHTML to render no pill.
+
+**Footer — `<div id="site-footer">…extras slot…</div>`**
+- `innerHTML`: optional extra links appended after "contribute a prompt"
+  (e.g. `download json` / `download csv` on index). Omit for the default.
+
+### Canonical nav links (order)
+```
+library · methodology · collections · tools · agents · playground · about
+```
+Active page link uses `color:var(--accent)`. All others use `color:var(--text-dim)`.
+
+### Canonical footer link order
+```
+library · methodology · collections · tools · agents · playground · about · privacy  |  github · [X button]  [extras slot]  [contribute a prompt]
+© 2025 prompt-library · MIT license
+```
+
+### Script ordering (required, on every page)
+
+```html
+<!-- optional data scripts first: prompts.js, articles.js -->
+<script src="nav.js"></script>
+<script src="footer.js"></script>
+<script src="theme.js"></script>
+<script defer src="shortcuts.js"></script>
+```
+
+Order is load-bearing: `theme.js` binds to `#theme-toggle` which `nav.js`
+injects, so `nav.js` must run first. `footer.js` is independent but listed
+next for consistency.
+
+### Do not
+- Hardcode a `<header class="site-header">` or `<footer class="site-footer">`
+  inline on any page. The only canonical headers/footers live in
+  `nav.js` / `footer.js`. Drift = bug.
+- Add "profile" as a nav link — the avatar chip (injected by `nav.js`)
+  handles that.
+- Reorder the bottom scripts. Changing ordering without updating this
+  section is not allowed.
+- Add a new nav link by editing individual pages. Add it to the `LINKS`
+  array in `nav.js` (and `footer.js`) once; all pages pick it up.
 
 ---
 

@@ -98,6 +98,17 @@
   </section>
 
   <!-- ==========================================================
+       Trending — top 3 most-copied prompts
+       ========================================================== -->
+  <section id="trending-section" class="hidden" style="padding:0 18px 28px; max-width:1200px; margin:0 auto;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <span style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-faint);">trending</span>
+      <span style="flex:1; height:1px; background:var(--border);"></span>
+    </div>
+    <div id="trending-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px;"></div>
+  </section>
+
+  <!-- ==========================================================
        Card grid — cards injected by JS
        ========================================================== -->
   <main>
@@ -244,6 +255,7 @@
       renderStatline();
       renderCategoryChips();
       render();
+      renderTrending();
       wireEvents();
 
       function renderStatline() {
@@ -256,6 +268,44 @@
         $statBeg.textContent   = by.beginner;
         $statInt.textContent   = by.intermediate;
         $statAdv.textContent   = by.advanced;
+      }
+
+      // ============================================================
+      // Trending
+      // ============================================================
+
+      function renderTrending() {
+        const scored = PROMPTS.map((p) => ({
+          prompt: p,
+          copies: parseInt(localStorage.getItem("pl_copies_" + p.id) || "0", 10)
+        }))
+        .filter((x) => x.copies > 0)
+        .sort((a, b) => b.copies - a.copies)
+        .slice(0, 3);
+
+        const $section = document.getElementById("trending-section");
+        const $grid    = document.getElementById("trending-grid");
+
+        if (scored.length === 0) { $section.classList.add("hidden"); return; }
+        $section.classList.remove("hidden");
+
+        $grid.innerHTML = "";
+        scored.forEach(({ prompt: p, copies }) => {
+          const catLabel = CATEGORIES[p.category] || p.category;
+          const card = document.createElement("div");
+          card.style.cssText = "cursor:pointer; background:var(--bg-1); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; display:flex; flex-direction:column; gap:6px; transition:border-color 0.15s;";
+          card.innerHTML =
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+              '<span class="card-cat" style="font-size:10px;">' + escapeHtml(catLabel) + '</span>' +
+              '<span style="font-family:var(--mono); font-size:11px; color:var(--accent);">' + copies + ' cop' + (copies === 1 ? 'y' : 'ies') + '</span>' +
+            '</div>' +
+            '<div style="font-weight:600; font-size:14px; color:var(--text); line-height:1.3;">' + escapeHtml(p.title) + '</div>' +
+            '<div style="font-size:12px; color:var(--text-dim); line-height:1.4;">' + escapeHtml(p.purpose) + '</div>';
+          card.addEventListener("mouseenter", () => card.style.borderColor = "var(--accent-edge)");
+          card.addEventListener("mouseleave", () => card.style.borderColor = "var(--border)");
+          card.addEventListener("click", () => openModal(p));
+          $grid.appendChild(card);
+        });
       }
 
       // ============================================================
@@ -484,6 +534,7 @@
             localStorage.setItem(key, next);
             const $count = document.getElementById("modal-copy-count");
             if ($count) $count.textContent = next;
+            renderTrending();
             // TODO: sb.rpc('increment_copies', { prompt_id: activeId })
           }
           setTimeout(() => {

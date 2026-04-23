@@ -8,6 +8,67 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    .article-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 22px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .article-card::before {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.18s ease;
+    }
+    .article-card:hover, .article-card:focus-visible {
+      border-color: var(--accent-edge);
+      background: var(--bg-2);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+    .article-card:hover::before, .article-card:focus-visible::before { transform: scaleY(1); }
+    .article-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .article-card:hover h3 { color: var(--accent); }
+    .article-card h3 { margin: 0; font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.3; transition: color 0.15s; }
+    .article-card p { margin: 0; color: var(--text-dim); font-size: 14px; flex: 1; }
+    .article-card-foot {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      padding-top: 10px; border-top: 1px dashed var(--border); margin-top: auto;
+    }
+    .article-card .read-cta { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+    .section-label {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 8px 18px 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::before {
+      content: "";
+      display: inline-block;
+      width: 10px; height: 1px;
+      background: var(--accent);
+    }
+  </style>
 </head>
 <body>
 
@@ -16,11 +77,15 @@
       <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
         <span class="caret">&gt;</span>prompt-library
         <span class="tilde">~</span>
-        <span class="sub">curated</span>
+        <span class="sub">author</span>
       </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+      </nav>
       <div class="count-pill">
         <span class="num" id="count-num">0</span>
-        <span class="label" id="count-label">prompts</span>
+        <span class="label" id="count-label">contributions</span>
       </div>
     </div>
   </header>
@@ -30,19 +95,40 @@
       <span class="dot"></span>
       <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
     </div>
-    <h1>Prompts by <span class="accent" id="author-name"></span><span class="cursor" aria-hidden="true"></span></h1>
+    <h1>Contributions by <span class="accent" id="author-name"></span><span class="cursor" aria-hidden="true"></span></h1>
     <p class="lede" id="author-lede"></p>
   </section>
 
-  <main>
-    <div class="grid" id="grid" aria-live="polite"></div>
+  <!-- Filter row -->
+  <section class="controls" style="padding-bottom:8px;" aria-label="Filter by type">
+    <div class="filter-row" id="type-row" role="group" aria-label="Filter by content type">
+      <span class="label">show</span>
+      <button class="chip active" data-type="all">all</button>
+      <button class="chip" data-type="prompts">prompts</button>
+      <button class="chip" data-type="articles">articles</button>
+    </div>
+  </section>
+
+  <main id="main-content">
+    <!-- Prompts section -->
+    <div id="prompts-section">
+      <div class="section-label" id="prompts-label">prompts</div>
+      <div class="grid" id="prompts-grid" aria-live="polite"></div>
+    </div>
+
+    <!-- Articles section -->
+    <div id="articles-section">
+      <div class="section-label" id="articles-label">methodology articles</div>
+      <div class="grid" id="articles-grid" aria-live="polite"></div>
+    </div>
+
     <div class="empty hidden" id="empty">
-      <strong>No prompts found</strong>
-      This author hasn't contributed any prompts yet.
+      <strong>Nothing here</strong>
+      No contributions of this type from this author.
     </div>
   </main>
 
-  <!-- Modal -->
+  <!-- Prompt modal -->
   <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <article class="modal" id="modal">
       <header class="modal-head">
@@ -86,6 +172,7 @@
   <div class="toast" id="toast">Copied</div>
 
   <script src="prompts.js"></script>
+  <script src="articles.js"></script>
   <script>
     (function () {
       "use strict";
@@ -96,70 +183,98 @@
       document.title = author ? "prompt-library \u00b7 " + author : "prompt-library \u00b7 author";
       document.getElementById("author-name").textContent = author || "Unknown";
 
-      const $grid       = document.getElementById("grid");
-      const $empty      = document.getElementById("empty");
-      const $countNum   = document.getElementById("count-num");
-      const $countLabel = document.getElementById("count-label");
-      const $lede       = document.getElementById("author-lede");
+      const $countNum      = document.getElementById("count-num");
+      const $countLabel    = document.getElementById("count-label");
+      const $lede          = document.getElementById("author-lede");
+      const $promptsGrid   = document.getElementById("prompts-grid");
+      const $articlesGrid  = document.getElementById("articles-grid");
+      const $promptsSec    = document.getElementById("prompts-section");
+      const $articlesSec   = document.getElementById("articles-section");
+      const $empty         = document.getElementById("empty");
+      const $typeRow       = document.getElementById("type-row");
 
-      const $backdrop       = document.getElementById("modal-backdrop");
-      const $modalClose     = document.getElementById("modal-close");
-      const $modalMeta      = document.getElementById("modal-meta");
-      const $modalTitle     = document.getElementById("modal-title");
-      const $modalPurpose   = document.getElementById("modal-purpose");
-      const $modalPrompt    = document.getElementById("modal-prompt");
-      const $modalDetails   = document.getElementById("modal-details");
-      const $modalChaining  = document.getElementById("modal-chaining");
-      const $modalChainWrap = document.getElementById("modal-chaining-wrap");
-      const $modalNotes     = document.getElementById("modal-notes");
-      const $modalNotesWrap = document.getElementById("modal-notes-wrap");
-      const $copyBtn        = document.getElementById("copy-btn");
-      const $toast          = document.getElementById("toast");
+      const $backdrop      = document.getElementById("modal-backdrop");
+      const $modalClose    = document.getElementById("modal-close");
+      const $modalMeta     = document.getElementById("modal-meta");
+      const $modalTitle    = document.getElementById("modal-title");
+      const $modalPurpose  = document.getElementById("modal-purpose");
+      const $modalPrompt   = document.getElementById("modal-prompt");
+      const $modalDetails  = document.getElementById("modal-details");
+      const $modalChaining = document.getElementById("modal-chaining");
+      const $modalChainWrap= document.getElementById("modal-chaining-wrap");
+      const $modalNotes    = document.getElementById("modal-notes");
+      const $modalNotesWrap= document.getElementById("modal-notes-wrap");
+      const $copyBtn       = document.getElementById("copy-btn");
+      const $toast         = document.getElementById("toast");
 
-      if (typeof PROMPTS === "undefined") {
-        $grid.innerHTML = '<div style="color:#ff6b6b; font-family:var(--mono); padding:16px;">Failed to load prompts.js.</div>';
-        return;
-      }
+      const prompts  = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => (p.author || "") === author);
+      const articles = (typeof ARTICLES !== "undefined" ? ARTICLES : []).filter((a) => (a.author || "") === author);
 
-      const prompts = author
-        ? PROMPTS.filter((p) => (p.author || "") === author)
-        : [];
+      // Update chips with counts
+      $typeRow.querySelector('[data-type="all"]').innerHTML      = 'all <span class="count">' + (prompts.length + articles.length) + "</span>";
+      $typeRow.querySelector('[data-type="prompts"]').innerHTML  = 'prompts <span class="count">' + prompts.length + "</span>";
+      $typeRow.querySelector('[data-type="articles"]').innerHTML = 'articles <span class="count">' + articles.length + "</span>";
 
-      $countNum.textContent   = prompts.length;
-      $countLabel.textContent = "prompts";
-      $lede.textContent       = prompts.length
-        ? prompts.length + " prompt" + (prompts.length === 1 ? "" : "s") + " contributed to the library."
-        : "No prompts found for this author.";
+      let activeType = "all";
 
-      if (prompts.length === 0) {
-        $empty.classList.remove("hidden");
-      } else {
-        const frag = document.createDocumentFragment();
-        prompts.forEach((p) => frag.appendChild(buildCard(p)));
-        $grid.appendChild(frag);
-      }
-
+      render();
       wireEvents();
 
-      function buildCard(p) {
+      function render() {
+        const showPrompts  = activeType === "all" || activeType === "prompts";
+        const showArticles = activeType === "all" || activeType === "articles";
+
+        const visiblePrompts  = showPrompts  ? prompts  : [];
+        const visibleArticles = showArticles ? articles : [];
+
+        $countNum.textContent   = visiblePrompts.length + visibleArticles.length;
+        $countLabel.textContent = "contributions";
+        $lede.textContent       = prompts.length + " prompt" + (prompts.length === 1 ? "" : "s") +
+          " · " + articles.length + " article" + (articles.length === 1 ? "" : "s");
+
+        // Prompts section
+        $promptsGrid.innerHTML = "";
+        if (visiblePrompts.length > 0) {
+          $promptsSec.classList.remove("hidden");
+          const frag = document.createDocumentFragment();
+          visiblePrompts.forEach((p) => frag.appendChild(buildPromptCard(p)));
+          $promptsGrid.appendChild(frag);
+        } else {
+          $promptsSec.classList.add("hidden");
+        }
+
+        // Articles section
+        $articlesGrid.innerHTML = "";
+        if (visibleArticles.length > 0) {
+          $articlesSec.classList.remove("hidden");
+          const frag = document.createDocumentFragment();
+          visibleArticles.forEach((a) => frag.appendChild(buildArticleCard(a)));
+          $articlesGrid.appendChild(frag);
+        } else {
+          $articlesSec.classList.add("hidden");
+        }
+
+        const nothingVisible = visiblePrompts.length === 0 && visibleArticles.length === 0;
+        $empty.classList.toggle("hidden", !nothingVisible);
+      }
+
+      function buildPromptCard(p) {
         const card = document.createElement("div");
         card.className = "card";
         card.setAttribute("role", "button");
         card.setAttribute("tabindex", "0");
-        card.setAttribute("data-id", p.id);
         card.setAttribute("aria-label", p.title);
 
-        const catLabel = CATEGORIES[p.category] || p.category;
+        const catLabel = (typeof CATEGORIES !== "undefined" && CATEGORIES[p.category]) || p.category;
         const tags     = (p.tags || []).slice(0, 3);
         const models   = (p.models || []).slice(0, 3);
-
         const clipboardSvg =
           '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
             '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
             '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
           '</svg>';
-
         const idStr = String(p.id).padStart(3, "0");
+
         card.innerHTML =
           '<div class="card-head">' +
             '<div class="card-head-left">' +
@@ -170,41 +285,46 @@
           "</div>" +
           "<h3>" + escapeHtml(p.title) + "</h3>" +
           '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
-          '<div class="card-foot">' +
-            '<div class="card-tags">' +
-              tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
-              models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
-            "</div>" +
-            '<button class="card-copy" type="button" aria-label="Copy prompt">' +
-              clipboardSvg + '<span>copy</span>' +
-            "</button>" +
-          "</div>";
+          '<div class="card-foot"><div class="card-tags">' +
+            tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
+            models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+          '</div><button class="card-copy" type="button" aria-label="Copy prompt">' + clipboardSvg + '<span>copy</span></button></div>';
 
-        const openFromCard = (e) => {
-          if (e.target.closest(".card-copy")) return;
-          openModal(p);
-        };
+        const openFromCard = (e) => { if (!e.target.closest(".card-copy")) openModal(p); };
         card.addEventListener("click", openFromCard);
-        card.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFromCard(e); }
-        });
+        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFromCard(e); } });
 
-        const copyBtn = card.querySelector(".card-copy");
-        copyBtn.addEventListener("click", async (e) => {
+        card.querySelector(".card-copy").addEventListener("click", async (e) => {
           e.stopPropagation();
           await copyToClipboard(p.prompt);
-          copyBtn.classList.add("copied");
-          const labelSpan = copyBtn.querySelector("span");
-          labelSpan.textContent = "copied";
+          const btn = e.currentTarget;
+          btn.classList.add("copied");
+          btn.querySelector("span").textContent = "copied";
           showToast("Prompt copied");
-          setTimeout(() => { copyBtn.classList.remove("copied"); labelSpan.textContent = "copy"; }, 1500);
+          setTimeout(() => { btn.classList.remove("copied"); btn.querySelector("span").textContent = "copy"; }, 1500);
         });
 
         return card;
       }
 
+      function buildArticleCard(a) {
+        const el = document.createElement("a");
+        el.className = "article-card";
+        el.href = "article.html?id=" + a.id;
+        const tagsHtml = (a.tags || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join("");
+        el.innerHTML =
+          '<div class="card-head">' +
+            '<span class="card-cat">methodology</span>' +
+            '<span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">' + escapeHtml(a.readTime) + " read</span>" +
+          "</div>" +
+          "<h3>" + escapeHtml(a.title) + "</h3>" +
+          "<p>" + escapeHtml(a.summary) + "</p>" +
+          '<div class="article-card-foot">' + tagsHtml + '<span class="read-cta">read &rarr;</span></div>';
+        return el;
+      }
+
       function openModal(p) {
-        const catLabel = CATEGORIES[p.category] || p.category;
+        const catLabel = (typeof CATEGORIES !== "undefined" && CATEGORIES[p.category]) || p.category;
         $modalMeta.innerHTML =
           '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
           '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>";
@@ -212,9 +332,8 @@
         $modalPurpose.textContent = p.purpose;
         $modalPrompt.textContent  = p.prompt;
 
-        const tagsHtml   = (p.tags || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join(" ");
+        const tagsHtml   = (p.tags   || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join(" ");
         const modelsHtml = (p.models || []).map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join(" ");
-
         $modalDetails.innerHTML =
           "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
           "<dt>author</dt><dd class=\"mono\"><a href=\"author.html?name=" + encodeURIComponent(p.author || "") + "\" style=\"color:var(--accent);text-decoration:none;\">" + escapeHtml(p.author || "—") + "</a></dd>" +
@@ -222,15 +341,10 @@
           "<dt>models</dt><dd>" + (modelsHtml || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>" +
           "<dt>tags</dt><dd>"   + (tagsHtml   || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>";
 
-        if (p.chaining && p.chaining.trim()) {
-          $modalChaining.textContent = p.chaining;
-          $modalChainWrap.classList.remove("hidden");
-        } else { $modalChainWrap.classList.add("hidden"); }
-
-        if (p.notes && p.notes.trim()) {
-          $modalNotes.textContent = p.notes;
-          $modalNotesWrap.classList.remove("hidden");
-        } else { $modalNotesWrap.classList.add("hidden"); }
+        if (p.chaining && p.chaining.trim()) { $modalChaining.textContent = p.chaining; $modalChainWrap.classList.remove("hidden"); }
+        else { $modalChainWrap.classList.add("hidden"); }
+        if (p.notes && p.notes.trim()) { $modalNotes.textContent = p.notes; $modalNotesWrap.classList.remove("hidden"); }
+        else { $modalNotesWrap.classList.add("hidden"); }
 
         $backdrop.classList.remove("hidden");
         document.body.style.overflow = "hidden";
@@ -238,6 +352,15 @@
       }
 
       function wireEvents() {
+        $typeRow.addEventListener("click", (e) => {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $typeRow.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          activeType = chip.getAttribute("data-type");
+          render();
+        });
+
         $modalClose.addEventListener("click", closeModal);
         $backdrop.addEventListener("click", (e) => { if (e.target === $backdrop) closeModal(); });
         document.addEventListener("keydown", (e) => {
@@ -245,22 +368,17 @@
         });
         $copyBtn.addEventListener("click", async () => {
           await copyToClipboard($modalPrompt.textContent);
-          $copyBtn.classList.add("copied");
-          $copyBtn.textContent = "Copied";
+          $copyBtn.classList.add("copied"); $copyBtn.textContent = "Copied";
           showToast("Prompt copied");
           setTimeout(() => { $copyBtn.classList.remove("copied"); $copyBtn.textContent = "Copy"; }, 1500);
         });
       }
 
-      function closeModal() {
-        $backdrop.classList.add("hidden");
-        document.body.style.overflow = "";
-      }
+      function closeModal() { $backdrop.classList.add("hidden"); document.body.style.overflow = ""; }
 
       async function copyToClipboard(text) {
-        try {
-          await navigator.clipboard.writeText(text);
-        } catch {
+        try { await navigator.clipboard.writeText(text); }
+        catch {
           const ta = document.createElement("textarea");
           ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
           document.body.appendChild(ta); ta.select();
@@ -269,8 +387,7 @@
       }
 
       function showToast(msg) {
-        $toast.textContent = msg;
-        $toast.classList.add("show");
+        $toast.textContent = msg; $toast.classList.add("show");
         setTimeout(() => $toast.classList.remove("show"), 1400);
       }
 
@@ -279,9 +396,7 @@
           .replace(/&/g, "&amp;").replace(/</g, "&lt;")
           .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
       }
-      function escapeAttr(s) {
-        return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, "");
-      }
+      function escapeAttr(s) { return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, ""); }
     })();
   </script>
 

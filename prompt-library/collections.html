@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; collections</title>
+  <meta name="description" content="Curated prompt packs grouped by use case — Founder Stack, Dev Toolkit, Crypto Due Diligence, and more." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ---- collection card ---- */
+    .col-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .col-card.open { border-color: var(--accent-edge); }
+
+    .col-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 22px 22px 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .col-card-head:hover h3 { color: var(--accent); }
+
+    .col-card-head h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      transition: color 0.15s;
+      line-height: 1.3;
+    }
+    .col-card-head p {
+      margin: 0 0 10px;
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+    .col-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .col-prompt-count {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      padding: 2px 8px;
+    }
+    .col-toggle {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--accent);
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 2px;
+      transition: transform 0.2s;
+    }
+    .col-card.open .col-toggle { transform: rotate(45deg); }
+
+    /* ---- expanded prompt list ---- */
+    .col-body {
+      display: none;
+      border-top: 1px dashed var(--border-2);
+      padding: 16px 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .col-card:not(.open) .col-body { display: none; }
+    .col-card.open .col-body { display: flex; }
+
+    .col-prompt-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      transition: border-color 0.12s;
+    }
+    .col-prompt-row:hover { border-color: var(--border-2); }
+
+    .col-prompt-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      flex-shrink: 0;
+      padding-top: 3px;
+      min-width: 20px;
+    }
+    .col-prompt-info { flex: 1; min-width: 0; }
+    .col-prompt-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+    .col-prompt-purpose {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+    .col-prompt-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .col-copy-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    .col-copy-btn:hover,
+    .col-copy-btn.copied { background: var(--accent); color: var(--bg); }
+
+    .col-view-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .col-view-btn:hover { color: var(--accent); border-color: var(--accent-edge); text-decoration: none; }
+
+    /* ---- curator line ---- */
+    .col-curator {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+    }
+    .col-curator a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .col-curator a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html" style="text-decoration:none; color:inherit;">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">collections</span>
+      </a>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+        <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+        <a href="collections.html" style="color:var(--accent); text-decoration:none;">collections</a>
+        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
+      </nav>
+      <div class="count-pill">
+        <span class="num" id="count-num">0</span>
+        <span class="label">collections</span>
+      </div>
+      <a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">
+        <span class="av-circle">S</span>
+        <span class="av-handle">SarutobiSasuke</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:32px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+      <span class="sep">/</span>
+      <span>collections</span>
+    </div>
+    <h1>Curated prompt <span class="accent">packs</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">Hand-picked prompt stacks grouped by use case. Open a collection, copy what you need, or grab the whole pack.</p>
+  </section>
+
+  <main style="max-width:900px; margin:0 auto; padding:0 18px 80px;">
+    <div id="collections-grid" style="display:flex; flex-direction:column; gap:12px;"></div>
+    <div class="empty hidden" id="empty">
+      <strong>No collections yet</strong>
+      Check back soon.
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>&gt; built for people shipping with AI</div>
+      <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <a href="learn.html">methodology</a>
+        <a href="tools.html">tools</a>
+        <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
+        <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- toast -->
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="prompts.js"></script>
+  <script src="collections.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const $grid  = document.getElementById("collections-grid");
+      const $empty = document.getElementById("empty");
+      const $count = document.getElementById("count-num");
+      const $toast = document.getElementById("toast");
+
+      if (typeof COLLECTIONS === "undefined" || COLLECTIONS.length === 0) {
+        $empty.classList.remove("hidden");
+        return;
+      }
+
+      $count.textContent = COLLECTIONS.length;
+
+      const promptMap = {};
+      if (typeof PROMPTS !== "undefined") {
+        PROMPTS.forEach((p) => { promptMap[p.id] = p; });
+      }
+
+      COLLECTIONS.forEach((col) => {
+        $grid.appendChild(buildCard(col));
+      });
+
+      function buildCard(col) {
+        const prompts = (col.promptIds || [])
+          .map((id) => promptMap[id])
+          .filter(Boolean);
+
+        const tagsHtml = (col.tags || [])
+          .map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>")
+          .join("");
+
+        const wrap = document.createElement("div");
+        wrap.className = "col-card";
+        wrap.id = "col-" + col.id;
+
+        wrap.innerHTML =
+          '<div class="col-card-head">' +
+            '<div style="flex:1; min-width:0;">' +
+              "<h3>" + escapeHtml(col.title) + "</h3>" +
+              "<p>" + escapeHtml(col.description) + "</p>" +
+              '<div class="col-meta">' +
+                tagsHtml +
+                '<span class="col-prompt-count">' + prompts.length + " prompts</span>" +
+              "</div>" +
+            "</div>" +
+            '<span class="col-toggle" aria-hidden="true">+</span>' +
+          "</div>" +
+          '<div class="col-body">' +
+            prompts.map((p, i) => buildPromptRow(p, i + 1)).join("") +
+            '<div class="col-curator">curated by <a href="user.html?handle=' + encodeURIComponent(col.curator || "") + '">' + escapeHtml(col.curator || "—") + "</a></div>" +
+          "</div>";
+
+        // Toggle open/close on head click
+        const head = wrap.querySelector(".col-card-head");
+        head.addEventListener("click", () => {
+          wrap.classList.toggle("open");
+        });
+
+        // Wire copy buttons
+        wrap.querySelectorAll(".col-copy-btn").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const id = parseInt(btn.dataset.promptId, 10);
+            const p  = promptMap[id];
+            if (!p) return;
+            await copyToClipboard(p.prompt);
+            btn.textContent = "copied";
+            btn.classList.add("copied");
+            showToast("Prompt copied");
+            setTimeout(() => { btn.textContent = "copy"; btn.classList.remove("copied"); }, 1500);
+          });
+        });
+
+        return wrap;
+      }
+
+      function buildPromptRow(p, num) {
+        const catLabel = (typeof CATEGORIES !== "undefined" ? CATEGORIES[p.category] : null) || p.category;
+        return (
+          '<div class="col-prompt-row">' +
+            '<span class="col-prompt-num">' + num + ".</span>" +
+            '<div class="col-prompt-info">' +
+              '<div class="col-prompt-title">' + escapeHtml(p.title) + "</div>" +
+              '<div class="col-prompt-purpose">' + escapeHtml(p.purpose) + "</div>" +
+            "</div>" +
+            '<div class="col-prompt-actions">' +
+              '<button class="col-copy-btn" type="button" data-prompt-id="' + p.id + '">copy</button>' +
+              '<a class="col-view-btn" href="index.html#prompt-' + p.id + '" target="_blank" rel="noopener">view &rarr;</a>' +
+            "</div>" +
+          "</div>"
+        );
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+        }
+      }
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(() => $toast.classList.remove("show"), 1400);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+    })();
+  </script>
+
+</body>
+</html>

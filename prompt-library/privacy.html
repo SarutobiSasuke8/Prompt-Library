@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>privacy &middot; prompt-library</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    main { max-width: 720px; margin: 40px auto; padding: 0 20px; color: var(--text); font-family: var(--sans, 'Inter', sans-serif); line-height: 1.6; }
+    main h1 { font-size: 28px; margin-bottom: 8px; }
+    main h2 { font-size: 18px; margin-top: 32px; margin-bottom: 8px; color: var(--text); }
+    main p, main li { color: var(--text-dim); font-size: 15px; }
+    main ul { padding-left: 20px; }
+    main a { color: var(--accent); }
+    .meta { font-family: var(--mono, 'JetBrains Mono', monospace); font-size: 12px; color: var(--text-faint); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <div class="logo">
+        <span class="caret">&gt;</span>prompt-library
+        <span class="tilde">~</span>
+        <span class="sub">privacy</span>
+      </div>
+      <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
+        <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Privacy</h1>
+    <p class="meta">Last updated: 2026-04-23</p>
+
+    <p>prompt-library is a small experiment. This page describes what data we collect, why, and how long we keep it. If anything here is unclear, open an issue on the repo.</p>
+
+    <h2>What we store</h2>
+    <ul>
+      <li><strong>Email address</strong> — if you sign in with a magic link. Held by our auth provider (Supabase).</li>
+      <li><strong>GitHub handle and avatar URL</strong> — if you sign in with GitHub.</li>
+      <li><strong>Profile fields you enter</strong> — handle, bio, optional X handle.</li>
+      <li><strong>Prompts you submit</strong> — text, metadata, and a link back to your profile.</li>
+      <li><strong>Prompts you like</strong> — which prompt, which user or anonymous fingerprint.</li>
+      <li><strong>Anonymous like fingerprint</strong> — a hash of your browser user agent + language + screen size, used only to prevent duplicate anonymous likes. Not cross-site trackable.</li>
+    </ul>
+
+    <h2>What we do NOT do</h2>
+    <ul>
+      <li>No analytics trackers, ad pixels, or third-party embeds.</li>
+      <li>No selling or sharing of data with third parties.</li>
+      <li>No server-side logs of your browsing beyond Supabase's operational logs.</li>
+    </ul>
+
+    <h2>Who has access</h2>
+    <p>Only the project maintainer. Your email is never shown to other users. Your profile (handle, bio, avatar, submitted prompts) is public by design.</p>
+
+    <h2>Deleting your account</h2>
+    <p>Email the maintainer and your account plus all associated submissions and likes will be removed within a reasonable timeframe. A self-service delete button is on the roadmap.</p>
+
+    <h2>Cookies</h2>
+    <p>A single auth cookie from Supabase keeps you signed in. No analytics or advertising cookies.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes materially, the "Last updated" date above will change. For a site this small there is no mailing list; check back here.</p>
+
+    <h2>Contact</h2>
+    <p>Open an issue on the <a href="https://github.com/SarutobiSasuke8/Prompt-Library">GitHub repo</a>.</p>
+  </main>
+</body>
+</html>

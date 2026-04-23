@@ -63,6 +63,11 @@ Speculative. Park them; don't plan yet.
 
 - Prompt versioning — track edits, diff history, let users "fork" a prompt
 - Prompt chaining builder — visual flow to stitch prompts together
+- In-site "try this prompt" — run a prompt against a free model without leaving the page.
+  Viable paths: (a) Cloudflare Workers AI via a Worker proxy (free tier: 10k neurons/day,
+  Llama 3.1 8B etc.) — best balance; (b) WebLLM / Transformers.js running fully in-browser
+  (zero cost, 500MB+ first load); (c) Puter.js (user authenticates with Puter, they pay
+  their own quota). Do NOT put an API key directly in frontend JS.
 - Model benchmarks — same prompt, compared outputs across models
 - API — `GET /api/prompts` so other tools can consume the library
 - Browser extension — copy any prompt from the library into ChatGPT/Claude

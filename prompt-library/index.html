@@ -31,6 +31,7 @@
       <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
         <a href="index.html" style="color:var(--accent); text-decoration:none;">library</a>
         <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
+        <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
         <a href="user.html?handle=SarutobiSasuke" style="color:var(--text-dim); text-decoration:none;">profile</a>
       </nav>
       <div class="count-pill">
@@ -163,6 +164,9 @@
             <button id="comment-submit" type="button" style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--bg); background:var(--accent); border:none; padding:9px 16px; border-radius:var(--radius); cursor:pointer; transition:background 0.12s; white-space:nowrap;">post</button>
           </div>
         </div>
+
+        <!-- Related prompts -->
+        <div id="modal-related" style="margin-top:24px; padding-top:18px; border-top:1px solid var(--border);"></div>
       </div>
     </article>
   </div>
@@ -175,6 +179,7 @@
       <div>&gt; built for people shipping with AI</div>
       <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
         <a href="learn.html">methodology</a>
+        <a href="tools.html">tools</a>
         <a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>
         <a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>
       </div>
@@ -542,10 +547,64 @@
         document.getElementById("comment-submit").onclick = () => submitComment(p.id);
         document.getElementById("comment-input").onkeydown = (e) => { if (e.key === "Enter") submitComment(p.id); };
 
+        // ---- related prompts ----
+        renderRelated(p);
+
         $backdrop.dataset.promptId = p.id;
         $backdrop.classList.remove("hidden");
         document.body.style.overflow = "hidden";
         $modalClose.focus();
+      }
+
+      // ---- related prompts ----
+      function renderRelated(p) {
+        const $rel = document.getElementById("modal-related");
+        const tags = new Set(p.tags || []);
+
+        // Score every other prompt by tag overlap, break ties by same category
+        const scored = PROMPTS
+          .filter((q) => q.id !== p.id)
+          .map((q) => {
+            const overlap = (q.tags || []).filter((t) => tags.has(t)).length;
+            const catBonus = q.category === p.category ? 0.5 : 0;
+            return { prompt: q, score: overlap + catBonus };
+          })
+          .filter((x) => x.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+
+        if (scored.length === 0) {
+          $rel.innerHTML = "";
+          return;
+        }
+
+        const cards = scored.map(({ prompt: q }) => {
+          const catLabel = CATEGORIES[q.category] || q.category;
+          return (
+            '<div data-rel-id="' + q.id + '" style="cursor:pointer; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; transition:border-color 0.15s;" ' +
+            'onmouseenter="this.style.borderColor=\'var(--accent-edge)\'" onmouseleave="this.style.borderColor=\'var(--border)\'">' +
+              '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">' +
+                '<span class="card-cat" style="font-size:10px;">' + escapeHtml(catLabel) + '</span>' +
+                '<span class="badge ' + escapeAttr(q.complexity) + '" style="font-size:9px;">' + escapeHtml(q.complexity) + '</span>' +
+              '</div>' +
+              '<div style="font-weight:600; font-size:13.5px; color:var(--text); margin-bottom:4px;">' + escapeHtml(q.title) + '</div>' +
+              '<div style="font-size:12px; color:var(--text-dim); line-height:1.4;">' + escapeHtml(q.purpose) + '</div>' +
+            '</div>'
+          );
+        }).join("");
+
+        $rel.innerHTML =
+          '<div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:10px;">related prompts</div>' +
+          '<div style="display:flex; flex-direction:column; gap:8px;">' + cards + '</div>';
+
+        // Wire clicks on related cards to open that prompt
+        $rel.querySelectorAll("[data-rel-id]").forEach((el) => {
+          el.addEventListener("click", () => {
+            const rid = parseInt(el.dataset.relId, 10);
+            const rp = PROMPTS.find((x) => x.id === rid);
+            if (rp) openModal(rp);
+          });
+        });
       }
 
       // ---- ratings ----

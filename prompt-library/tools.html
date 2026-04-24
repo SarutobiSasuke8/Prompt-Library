@@ -49,16 +49,10 @@
     .tool-mark .fallback-glyph { width: 20px; height: 20px; color: var(--text-dim); position: relative; z-index: 2; }
     .tool-mark .fallback-glyph svg { width: 100%; height: 100%; display: block; }
 
-    .tool-star {
+    .tool-bookmark {
       position: absolute; top: 10px; right: 10px;
-      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-      background: transparent; border: 1px solid var(--border); border-radius: 2px;
-      color: var(--text-faint); cursor: pointer; padding: 0;
-      transition: color 120ms, border-color 120ms, background 120ms;
+      min-height: 0; padding: 5px 6px;
     }
-    .tool-star:hover { color: var(--text-dim); border-color: var(--text-faint); }
-    .tool-star.on { color: var(--accent); border-color: var(--accent); background: rgba(0,255,136,0.06); }
-    .tool-star svg { width: 14px; height: 14px; display: block; }
     .tool-title { font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.2; }
     .tool-sub   { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top: 3px; letter-spacing: 0.04em; }
 
@@ -82,6 +76,14 @@
       transition: border-color 120ms, color 120ms, background 120ms;
     }
     .tool-open:hover { border-color: var(--accent); color: var(--accent); }
+    .tool-share {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: 2px;
+      color: var(--text-faint); cursor: pointer; padding: 7px 8px;
+      transition: color 120ms, border-color 120ms;
+    }
+    .tool-share svg { width: 14px; height: 14px; display: block; }
+    .tool-share:hover { color: var(--text-dim); border-color: var(--text-faint); }
 
     .legend {
       font-family: var(--mono); font-size: 11px; color: var(--text-faint);
@@ -353,9 +355,36 @@
       open.href = t.url; open.target = '_blank'; open.rel = 'noopener';
       open.textContent = 'Open →';
       open.addEventListener('click', (e) => e.stopPropagation());
+      const share = document.createElement('button');
+      share.type = 'button';
+      share.className = 'tool-share';
+      share.setAttribute('aria-label', 'Share ' + t.name);
+      share.innerHTML =
+        '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M5 8H3v6h10V8h-2"/>' +
+          '<path d="M8 1v7M5.5 3.5L8 1l2.5 2.5"/>' +
+        '</svg>';
+      share.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (navigator.share) {
+          try { await navigator.share({ url: t.url, title: t.name, text: t.purpose }); return; } catch (_) {}
+        }
+        try { await navigator.clipboard.writeText(t.url); } catch (_) {
+          const ta = document.createElement('textarea');
+          ta.value = t.url; ta.style.cssText = 'position:fixed;opacity:0;';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        showToolToast('Link copied');
+        const orig = share.innerHTML;
+        share.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l4 4 6-7"/></svg>';
+        setTimeout(() => { share.innerHTML = orig; }, 1200);
+      });
+
       const actions = document.createElement('div');
       actions.className = 'tool-actions';
       actions.appendChild(open);
+      actions.appendChild(share);
 
       const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked('tool', t.id) : false;
       const bm = document.createElement('button');
@@ -420,6 +449,19 @@
     wireChips('pricing-row',  'pricing');
     wireChips('deeplink-row', 'deeplink');
     render();
+
+    function showToolToast(msg) {
+      let t = document.getElementById('tools-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'tools-toast';
+        t.className = 'toast';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    }
 
     // ---- export saved tools as JSON ----
     const $exportStars = document.getElementById('export-stars');

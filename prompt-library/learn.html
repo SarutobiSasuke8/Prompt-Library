@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>prompt-library &middot; learn</title>
-  <meta name="description" content="Prompt engineering methodology — techniques, patterns, and principles for building with AI." />
+  <meta name="description" content="Prompt engineering articles — techniques, patterns, and principles for building with AI." />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -90,6 +90,14 @@
       color: var(--accent);
       letter-spacing: 0.06em;
     }
+    .article-share {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text-faint); cursor: pointer; padding: 5px 6px;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .article-share svg { width: 13px; height: 13px; display: block; }
+    .article-share:hover { color: var(--text-dim); border-color: var(--text-faint); }
   </style>
 </head>
 <body>
@@ -106,9 +114,9 @@
       <span class="dot"></span>
       <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
       <span class="sep">/</span>
-      <span>methodology</span>
+      <span>articles</span>
     </div>
-    <h1>Prompt <span class="accent">methodology</span><span class="cursor" aria-hidden="true"></span></h1>
+    <h1>Prompt <span class="accent">articles</span><span class="cursor" aria-hidden="true"></span></h1>
     <p class="lede">Techniques, patterns, and principles for writing prompts that work in production — not just in demos.</p>
   </section>
 
@@ -123,6 +131,7 @@
   <div id="site-footer"></div>
 
   <script src="articles.js"></script>
+  <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script src="theme.js"></script>
@@ -142,6 +151,9 @@
 
       $countNum.textContent = ARTICLES.length;
 
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
       const frag = document.createDocumentFragment();
       ARTICLES.forEach((a) => frag.appendChild(buildCard(a)));
       $grid.appendChild(frag);
@@ -151,23 +163,106 @@
         el.className = "article-card";
         el.href = "article.html?id=" + a.id;
 
-        const tagsHtml = (a.tags || []).map((t) =>
-          '<span class="tag">#' + escapeHtml(t) + "</span>"
-        ).join("");
+        const head = document.createElement("div");
+        head.className = "article-card-head";
+        const typeBadge = document.createElement("span");
+        typeBadge.className = "card-cat";
+        typeBadge.textContent = "article";
+        const readTime = document.createElement("span");
+        readTime.className = "read-time";
+        readTime.textContent = a.readTime + " read";
 
-        el.innerHTML =
-          '<div class="article-card-head">' +
-            '<span class="card-cat">methodology</span>' +
-            '<span class="read-time">' + escapeHtml(a.readTime) + " read</span>" +
-          "</div>" +
-          "<h3>" + escapeHtml(a.title) + "</h3>" +
-          "<p>" + escapeHtml(a.summary) + "</p>" +
-          '<div class="article-card-foot">' +
-            tagsHtml +
-            '<span class="read-cta">read &rarr;</span>' +
-          "</div>";
+        const bmBtn = document.createElement("button");
+        bmBtn.type = "button";
+        bmBtn.className = "bookmark-btn article-bm";
+        bmBtn.setAttribute("aria-label", "Save " + a.title);
+        const isSaved = window.PL_BOOKMARKS && window.PL_BOOKMARKS.isBookmarked("article", a.id);
+        bmBtn.setAttribute("aria-pressed", isSaved ? "true" : "false");
+        bmBtn.innerHTML = isSaved ? BM_FILLED : BM_OUTLINE;
+        if (isSaved) bmBtn.classList.add("saved");
+        bmBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!window.PL_BOOKMARKS) return;
+          const nowSaved = window.PL_BOOKMARKS.toggle("article", a.id);
+          bmBtn.innerHTML = nowSaved ? BM_FILLED : BM_OUTLINE;
+          bmBtn.classList.toggle("saved", nowSaved);
+          bmBtn.setAttribute("aria-pressed", nowSaved ? "true" : "false");
+        });
 
+        head.appendChild(typeBadge);
+        head.appendChild(readTime);
+        head.appendChild(bmBtn);
+
+        const h3 = document.createElement("h3");
+        h3.textContent = a.title;
+
+        const p = document.createElement("p");
+        p.textContent = a.summary;
+
+        const foot = document.createElement("div");
+        foot.className = "article-card-foot";
+        (a.tags || []).forEach((t) => {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = "#" + t;
+          foot.appendChild(tag);
+        });
+
+        const shareBtn = document.createElement("button");
+        shareBtn.type = "button";
+        shareBtn.className = "article-share";
+        shareBtn.setAttribute("aria-label", "Share article");
+        shareBtn.innerHTML =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M5 8H3v6h10V8h-2"/>' +
+            '<path d="M8 1v7M5.5 3.5L8 1l2.5 2.5"/>' +
+          '</svg>';
+        shareBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const url = window.location.origin + window.location.pathname.replace(/[^/]*$/, "") + "article.html?id=" + a.id;
+          if (navigator.share) {
+            try { await navigator.share({ url, title: a.title, text: a.summary }); return; } catch (_) {}
+          }
+          try { await navigator.clipboard.writeText(url); } catch (_) {
+            const ta = document.createElement("textarea");
+            ta.value = url; ta.style.cssText = "position:fixed;opacity:0;";
+            document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+            document.body.removeChild(ta);
+          }
+          showLearnToast("Link copied");
+          const orig = shareBtn.innerHTML;
+          shareBtn.innerHTML =
+            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l4 4 6-7"/></svg>';
+          setTimeout(() => { shareBtn.innerHTML = orig; }, 1200);
+        });
+
+        const readCta = document.createElement("span");
+        readCta.className = "read-cta";
+        readCta.textContent = "read →";
+
+        foot.appendChild(shareBtn);
+        foot.appendChild(readCta);
+
+        el.appendChild(head);
+        el.appendChild(h3);
+        el.appendChild(p);
+        el.appendChild(foot);
         return el;
+      }
+
+      function showLearnToast(msg) {
+        let t = document.getElementById("learn-toast");
+        if (!t) {
+          t = document.createElement("div");
+          t.id = "learn-toast";
+          t.className = "toast";
+          document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 1800);
       }
 
       function escapeHtml(s) {

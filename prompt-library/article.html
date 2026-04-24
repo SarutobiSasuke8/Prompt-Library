@@ -216,7 +216,7 @@
   <section class="hero" style="padding-bottom:24px;">
     <div class="eyebrow">
       <span class="dot"></span>
-      <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to methodology</a>
+      <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to articles</a>
     </div>
   </section>
 
@@ -224,7 +224,7 @@
     <div id="article-root">
       <div class="empty">
         <strong>Article not found</strong>
-        <a href="learn.html">Back to methodology</a>
+        <a href="learn.html">Back to articles</a>
       </div>
     </div>
   </div>
@@ -232,6 +232,8 @@
   <div id="site-footer"></div>
 
   <script src="articles.js"></script>
+  <script src="bookmarks.js"></script>
+  <script src="ratings.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script src="theme.js"></script>
@@ -265,16 +267,43 @@
         ? '<a href="user.html?handle=' + encodeURIComponent(article.author) + '" style="color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none;">' + escapeHtml(article.author) + '</a>'
         : "";
 
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const isSaved = window.PL_BOOKMARKS && window.PL_BOOKMARKS.isBookmarked("article", article.id);
+      const bmHtml =
+        '<button type="button" class="bookmark-btn article-bm' + (isSaved ? " saved" : "") + '" ' +
+          'id="article-bookmark" aria-label="Save ' + escapeHtml(article.title) + '" ' +
+          'aria-pressed="' + (isSaved ? "true" : "false") + '" ' +
+          'style="margin-left:auto;">' +
+          (isSaved ? BM_FILLED : BM_OUTLINE) +
+        '</button>';
+
       let html =
         '<div class="article-meta">' +
-          '<span class="card-cat">methodology</span>' +
+          '<span class="card-cat">article</span>' +
           (tagsHtml ? tagsHtml : "") +
           '<span class="read-time">' + escapeHtml(article.readTime) + " read</span>" +
           (authorHtml ? authorHtml : "") +
+          bmHtml +
         "</div>" +
         "<h1>" + escapeHtml(article.title) + "</h1>" +
         '<p class="summary">' + escapeHtml(article.summary) + "</p>" +
-        '<div class="article-body">' + renderBody(article.body) + "</div>";
+        '<div class="article-body">' + renderBody(article.body) + "</div>" +
+        '<div class="section-divider"><span>rating</span><hr /></div>' +
+        '<div class="rating-widget">' +
+          '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this article"></div>' +
+          '<span class="rating-count" id="rating-count">not yet rated</span>' +
+        '</div>' +
+        '<div class="section-divider"><span>comments</span><hr /></div>' +
+        '<div class="comments-section">' +
+          '<div class="comment-list" id="comment-list">' +
+            '<div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>' +
+          '</div>' +
+          '<div class="comment-input-row">' +
+            '<input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />' +
+            '<button class="comment-submit" id="comment-submit" type="button">post</button>' +
+          '</div>' +
+        '</div>';
 
       // Prev / next navigation
       const idx  = ARTICLES.findIndex((a) => a.id === id);
@@ -290,6 +319,20 @@
       html += "</div>";
 
       $root.innerHTML = html;
+
+      if (window.PL_RATINGS) window.PL_RATINGS.mount({ type: "article", id: article.id });
+
+      // Wire article bookmark
+      const $bm = document.getElementById("article-bookmark");
+      if ($bm && window.PL_BOOKMARKS) {
+        $bm.addEventListener("click", (e) => {
+          e.preventDefault();
+          const nowSaved = window.PL_BOOKMARKS.toggle("article", article.id);
+          $bm.innerHTML = nowSaved ? BM_FILLED : BM_OUTLINE;
+          $bm.classList.toggle("saved", nowSaved);
+          $bm.setAttribute("aria-pressed", nowSaved ? "true" : "false");
+        });
+      }
 
       // Wire copy buttons on example blocks
       $root.querySelectorAll(".example-block").forEach((block) => {

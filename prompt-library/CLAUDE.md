@@ -36,6 +36,64 @@ don't. Read `ROADMAP.md`. Backend features are parked until v1 has users.
 
 ---
 
+## Terminology — locked
+
+These words have exact meanings. Use them consistently in code, UI copy,
+commit messages, and docs.
+
+- **Item** — a piece of content that has its own dedicated page. Every
+  item has one of the five type keys below. Items can be bookmarked,
+  rated, and commented on.
+- **Card** — the *preview* of an item on a listing page. Clicking a card
+  opens the item's dedicated page. A card is never the item itself; it
+  is a summary rendering of one.
+- **Collection** — an **aggregation of items**, not an item. Collections
+  live on `collections.html` but are explicitly **not** part of the item
+  taxonomy below. They have no bookmark / rating / comments affordances
+  of their own (follow-up decision tracked in `ROADMAP.md`).
+
+### Item taxonomy
+
+Every item is one of five types. All tooling (bookmarks, ratings, comments,
+profile surfacing) must use these exact type keys.
+
+| Type key  | Display name | Listing page   | Detail page            | Data source    |
+|-----------|--------------|----------------|------------------------|----------------|
+| `prompt`  | Prompt       | `index.html`   | `prompt.html?id=`      | `prompts.js`   |
+| `article` | Article      | `learn.html`   | `article.html?id=`     | `articles.js`  |
+| `tool`    | Tool         | `tools.html`   | `tool.html?id=`        | inline in page |
+| `agent`   | Agent        | `agents.html`  | inline (no detail yet) | inline         |
+| `doc`     | MD doc       | `mdrepo.html`  | `md.html?id=`          | `mds.js`       |
+
+### Bookmark behaviour per item type
+
+- `prompt`, `article`, `agent`, `doc` → bookmarked items surface in the
+  **Bookmarks panel** on `user.html`.
+- `tool` → bookmarked tools surface in the **My Tools** tab on `user.html`
+  (intentionally separate; tools are treated as a personal toolkit, not a
+  save-for-later list).
+
+### Bookmark button standard
+
+Every item card renders the bookmark button in the same visual position:
+**top-right of the card-head row**, next to the badge/complexity indicator.
+
+```html
+<button class="bookmark-btn [position-class]" type="button"
+        aria-label="Save [Name]" aria-pressed="false">
+  <!-- BM_OUTLINE when unsaved, BM_FILLED when saved -->
+</button>
+```
+
+- Base class `.bookmark-btn` lives in `style.css` and owns visuals.
+- Per-page position class (e.g. `.card-bookmark`, `.tool-bookmark`,
+  `.agent-bm`, `.article-bm`, `.doc-bm`) provides **positioning only**.
+- Toggle via `window.PL_BOOKMARKS.toggle(type, id)`.
+- The bookmark SVG strings (`BM_OUTLINE` / `BM_FILLED`) are byte-identical
+  across all pages. If one drifts, align it back before anything else.
+
+---
+
 ## File layout
 
 ```

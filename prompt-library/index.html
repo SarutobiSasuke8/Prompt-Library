@@ -224,6 +224,7 @@
        Data source — kept deliberately separate from UI code
        ========================================================== -->
   <script src="prompts.js"></script>
+  <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script src="theme.js"></script>
@@ -500,11 +501,16 @@
         const tags    = (p.tags || []).slice(0, 3);
         const models  = (p.models || []).slice(0, 3);
 
-        // Inline SVG clipboard icon — no external assets.
+        // Inline SVG icons — no external assets.
         const clipboardSvg =
           '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
             '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
             '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
+          '</svg>';
+        const shareSvg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M5 8H3v6h10V8h-2"/>' +
+            '<path d="M8 1v7M5.5 3.5L8 1l2.5 2.5"/>' +
           '</svg>';
 
         const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("prompt", p.id) : false;
@@ -532,9 +538,14 @@
               tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
               models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
             "</div>" +
-            '<button class="card-copy" type="button" aria-label="Copy prompt">' +
-              clipboardSvg + '<span>copy</span>' +
-            "</button>" +
+            '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+              '<button class="card-share" type="button" aria-label="Share prompt">' +
+                shareSvg +
+              "</button>" +
+              '<button class="card-copy" type="button" aria-label="Copy prompt">' +
+                clipboardSvg + '<span>copy</span>' +
+              "</button>" +
+            "</div>" +
           "</div>";
 
         // Card navigates to prompt detail page on click / Enter / Space.
@@ -566,6 +577,14 @@
           }, 1500);
         });
 
+        // In-card share button — copies permalink, or uses native share on mobile.
+        const shareBtn = card.querySelector(".card-share");
+        shareBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const permalink = window.location.origin + window.location.pathname.replace(/[^/]*$/, "") + "prompt.html?id=" + p.id;
+          await shareItem(permalink, p.title, p.purpose, shareBtn);
+        });
+
         // Bookmark button
         const bmEl = card.querySelector(".card-bookmark");
         if (bmEl) {
@@ -581,6 +600,20 @@
         }
 
         return card;
+      }
+
+      async function shareItem(url, title, text, btn) {
+        if (navigator.share) {
+          try { await navigator.share({ url, title, text }); return; } catch (_) {}
+        }
+        await copyToClipboard(url);
+        showToast("Link copied");
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML =
+            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l4 4 6-7"/></svg>';
+          setTimeout(() => { btn.innerHTML = orig; }, 1200);
+        }
       }
 
       async function copyToClipboard(text) {

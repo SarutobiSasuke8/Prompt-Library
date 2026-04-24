@@ -252,6 +252,21 @@
     }
     .panel-empty strong { display: block; color: var(--text-dim); margin-bottom: 6px; }
 
+    /* ---- bookmark sub-sections inside the Bookmarks panel ---- */
+    .bm-section { margin-bottom: 28px; }
+    .bm-section:last-child { margin-bottom: 0; }
+    .bm-section-head {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-faint);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .bm-section-grid { padding: 0; margin: 0; }
+
     /* ---- edit button ---- */
     .edit-profile-btn {
       font-family: var(--mono);
@@ -537,28 +552,51 @@
           <button class="privacy-toggle hidden" id="privacy-toggle" type="button">make public</button>
         </div>
         <div id="bookmarks-content">
-          <div class="locked-overlay" id="bookmarks-locked">
+          <div class="locked-overlay hidden" id="bookmarks-locked">
             <span class="lock-icon">&#x1F512;</span>
             <strong>Bookmarks are private</strong>
             Only this user can see what they've bookmarked.
           </div>
-          <div class="grid hidden" style="padding:0; margin:0;" id="bookmarks-grid"></div>
-          <div class="panel-empty hidden" id="bookmarks-empty">
-            <strong>No bookmarks yet</strong>
-            Nothing bookmarked yet.
-          </div>
-        </div>
 
-        <!-- Saved docs — always visible, pulled from localStorage via PL_BOOKMARKS -->
-        <div style="margin-top:28px;">
-          <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-faint);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">saved docs</div>
-          <div id="saved-docs-grid" class="grid" style="padding:0;margin:0;"></div>
-          <div class="panel-empty hidden" id="saved-docs-empty">
-            <strong>No saved docs</strong>
-            Bookmark any template in the <a href="docs.html" style="color:var(--accent);">md repo</a> to see it here.
+          <!-- Saved prompts -->
+          <div class="bm-section">
+            <div class="bm-section-head">saved prompts</div>
+            <div class="grid bm-section-grid" id="bookmarks-grid"></div>
+            <div class="panel-empty hidden" id="bookmarks-empty">
+              <strong>No saved prompts</strong>
+              Bookmark any prompt in the <a href="index.html" style="color:var(--accent);">library</a> to see it here.
+            </div>
           </div>
-        </div>
-        <div style="display:none">
+
+          <!-- Saved articles -->
+          <div class="bm-section">
+            <div class="bm-section-head">saved articles</div>
+            <div class="grid bm-section-grid" id="saved-articles-grid"></div>
+            <div class="panel-empty hidden" id="saved-articles-empty">
+              <strong>No saved articles</strong>
+              Bookmark any article in <a href="learn.html" style="color:var(--accent);">articles</a> to see it here.
+            </div>
+          </div>
+
+          <!-- Saved agents -->
+          <div class="bm-section">
+            <div class="bm-section-head">saved agents</div>
+            <div class="grid bm-section-grid" id="saved-agents-grid"></div>
+            <div class="panel-empty hidden" id="saved-agents-empty">
+              <strong>No saved agents</strong>
+              Bookmark any agent on the <a href="agents.html" style="color:var(--accent);">agents page</a> to see it here.
+            </div>
+          </div>
+
+          <!-- Saved docs -->
+          <div class="bm-section">
+            <div class="bm-section-head">saved docs</div>
+            <div class="grid bm-section-grid" id="saved-docs-grid"></div>
+            <div class="panel-empty hidden" id="saved-docs-empty">
+              <strong>No saved docs</strong>
+              Bookmark any template in the <a href="mdrepo.html" style="color:var(--accent);">md repo</a> to see it here.
+            </div>
+          </div>
         </div>
       </div>
 
@@ -689,7 +727,7 @@
 
   <script src="prompts.js"></script>
   <script src="articles.js"></script>
-  <script src="docs.js"></script>
+  <script src="mds.js"></script>
   <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
@@ -720,7 +758,9 @@
 
       // TODO: replace with Supabase fetch when auth is live:
       // sb.from('bookmarks').select('prompt_id').eq('user_id', profile.id)
-      let bookmarksPublic = false;
+      // v1 is a single-browser app — bookmarks are always visible to the
+      // local user. The privacy toggle becomes meaningful once auth lands.
+      let bookmarksPublic = true;
 
       // ---------------------------------------------------------------
       // Load profile
@@ -834,12 +874,12 @@
       // Render bookmarks grid (respects privacy)
       // ---------------------------------------------------------------
       renderBookmarks();
-      renderSavedDocs();
 
-      function renderSavedDocs() {
-        const $grid  = document.getElementById("saved-docs-grid");
-        const $empty = document.getElementById("saved-docs-empty");
+      function renderSavedDocs($grid, $empty) {
+        $grid = $grid || document.getElementById("saved-docs-grid");
+        $empty = $empty || document.getElementById("saved-docs-empty");
         if (!$grid || !$empty) return;
+        $grid.innerHTML = "";
 
         const savedIds = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.load().doc || [] : [];
         const docMap   = {};
@@ -854,7 +894,7 @@
         saved.forEach((d) => {
           const card = document.createElement("a");
           card.className = "article-card";
-          card.href = "docs.html";
+          card.href = "mdrepo.html";
           card.innerHTML =
             '<div class="article-card-head">' +
               '<span class="card-cat">' + escapeHtml(d.category || "doc") + '</span>' +
@@ -873,17 +913,20 @@
 
       function renderBookmarks() {
         const $locked = document.getElementById("bookmarks-locked");
-        const $grid   = document.getElementById("bookmarks-grid");
-        const $empty  = document.getElementById("bookmarks-empty");
         const $banner = document.getElementById("privacy-banner");
         const $icon   = document.getElementById("priv-icon");
         const $status = document.getElementById("priv-status");
         const $toggle = document.getElementById("privacy-toggle");
 
-        // TODO: replace with auth check — show toggle only to profile owner
-        // const isOwner = currentUser?.id === profile.id;
-        const isOwner = false; // stub — flip to true when auth is wired
-        if (isOwner) $toggle.classList.remove("hidden");
+        // Owner-only toggle. `isOwner` is set in the sidebar block (stubbed true in v1).
+        if (typeof isOwner !== "undefined" && isOwner) $toggle.classList.remove("hidden");
+
+        const sections = [
+          { grid: "bookmarks-grid",       empty: "bookmarks-empty",       render: renderSavedPrompts  },
+          { grid: "saved-articles-grid",  empty: "saved-articles-empty",  render: renderSavedArticles },
+          { grid: "saved-agents-grid",    empty: "saved-agents-empty",    render: renderSavedAgents   },
+          { grid: "saved-docs-grid",      empty: "saved-docs-empty",      render: renderSavedDocs     },
+        ];
 
         if (bookmarksPublic) {
           $icon.textContent   = "\uD83D\uDD13";
@@ -892,17 +935,13 @@
           $toggle.textContent = "make private";
           $toggle.classList.add("public");
           $locked.classList.add("hidden");
-          $grid.innerHTML = "";
-          const bookmarkedPrompts = getBookmarkedPrompts();
-          if (bookmarkedPrompts.length === 0) {
-            $empty.classList.remove("hidden");
-          } else {
-            $empty.classList.add("hidden");
-            $grid.classList.remove("hidden");
-            const frag = document.createDocumentFragment();
-            bookmarkedPrompts.forEach((p) => frag.appendChild(buildPromptCard(p)));
-            $grid.appendChild(frag);
-          }
+          sections.forEach((s) => {
+            const $g = document.getElementById(s.grid);
+            const $e = document.getElementById(s.empty);
+            if (!$g || !$e) return;
+            $g.classList.remove("hidden");
+            s.render($g, $e);
+          });
         } else {
           $icon.textContent   = "\uD83D\uDD12";
           $status.textContent = "Private";
@@ -910,9 +949,58 @@
           $toggle.textContent = "make public";
           $toggle.classList.remove("public");
           $locked.classList.remove("hidden");
-          $grid.classList.add("hidden");
-          $empty.classList.add("hidden");
+          sections.forEach((s) => {
+            const $g = document.getElementById(s.grid);
+            const $e = document.getElementById(s.empty);
+            if ($g) $g.classList.add("hidden");
+            if ($e) $e.classList.add("hidden");
+          });
         }
+      }
+
+      function renderSavedPrompts($grid, $empty) {
+        $grid.innerHTML = "";
+        const items = getBookmarkedPrompts();
+        $empty.classList.toggle("hidden", items.length > 0);
+        if (!items.length) return;
+        const frag = document.createDocumentFragment();
+        items.forEach((p) => frag.appendChild(buildPromptCard(p)));
+        $grid.appendChild(frag);
+      }
+
+      function renderSavedArticles($grid, $empty) {
+        $grid.innerHTML = "";
+        const ids = window.PL_BOOKMARKS ? new Set(window.PL_BOOKMARKS.load().article || []) : new Set();
+        const items = (typeof ARTICLES !== "undefined" ? ARTICLES : []).filter((a) => ids.has(a.id));
+        $empty.classList.toggle("hidden", items.length > 0);
+        if (!items.length) return;
+        const frag = document.createDocumentFragment();
+        items.forEach((a) => frag.appendChild(buildArticleCard(a)));
+        $grid.appendChild(frag);
+      }
+
+      function renderSavedAgents($grid, $empty) {
+        $grid.innerHTML = "";
+        const ids = window.PL_BOOKMARKS ? (window.PL_BOOKMARKS.load().agent || []) : [];
+        $empty.classList.toggle("hidden", ids.length > 0);
+        if (!ids.length) return;
+        const frag = document.createDocumentFragment();
+        ids.forEach((id) => {
+          const title = String(id).split("-").map((w) => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ");
+          const card = document.createElement("a");
+          card.className = "article-card";
+          card.href = "agents.html";
+          card.innerHTML =
+            '<div class="article-card-head">' +
+              '<span class="card-cat">agent</span>' +
+            '</div>' +
+            '<h3>' + escapeHtml(title) + '</h3>' +
+            '<div class="article-card-foot">' +
+              '<span class="read-cta" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--accent);">view &rarr;</span>' +
+            '</div>';
+          frag.appendChild(card);
+        });
+        $grid.appendChild(frag);
       }
 
       document.getElementById("privacy-toggle").addEventListener("click", () => {

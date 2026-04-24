@@ -17,8 +17,9 @@
         '<div>&gt; built for people shipping with AI</div>' +
         '<div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">' +
           '<a href="index.html">library</a>' +
-          '<a href="learn.html">methodology</a>' +
+          '<a href="learn.html">articles</a>' +
           '<a href="collections.html">collections</a>' +
+          '<a href="mdrepo.html">md repo</a>' +
           '<a href="tools.html">tools</a>' +
           '<a href="agents.html">agents</a>' +
           '<a href="playground.html">playground</a>' +

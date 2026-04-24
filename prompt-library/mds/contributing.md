@@ -80,7 +80,7 @@ MD templates live in `mds.js` and as files in `mds/`.
 
 1. Write the actual `.md` file in `mds/[slug].md`.
 2. Add an entry to `MDS` in `mds.js` with the same `file` path and embedded `content`.
-3. The card will appear automatically in `docs.html`.
+3. The card will appear automatically in `mdrepo.html`.
 
 ---
 

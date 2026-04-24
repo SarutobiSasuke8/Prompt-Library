@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>md repo &middot; prompt-library</title>
+  <meta name="description" content="Idealised MD templates for AI-assisted development — CLAUDE.md, AGENTS.md, CONTRIBUTING.md, and more." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .mdrepo-wrap { max-width: 1200px; margin: 0 auto; padding: 0 18px 80px; }
+    .mdrepo-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+    @media (min-width: 640px)  { .mdrepo-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1000px) { .mdrepo-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .md-card {
+      display: flex; flex-direction: column;
+      background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 18px 16px; gap: 10px;
+      cursor: pointer; text-decoration: none; color: inherit;
+      transition: border-color 0.15s, transform 0.15s, background 0.15s;
+      position: relative;
+    }
+    .md-card:hover { border-color: var(--accent-edge); background: var(--bg-2); transform: translateY(-1px); text-decoration: none; }
+    .md-card:hover h3 { color: var(--accent); }
+    .md-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .md-card h3 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--text); transition: color 0.15s; }
+    .md-card p { margin: 0; color: var(--text-dim); font-size: 13.5px; line-height: 1.55; flex: 1; }
+    .md-card .md-foot {
+      display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px;
+      border-top: 1px dashed var(--border); margin-top: auto; align-items: center;
+    }
+    .md-card .md-actions { margin-left: auto; display: flex; gap: 6px; }
+    .md-card .md-dl {
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+      color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-edge); border-radius: var(--radius);
+      padding: 5px 9px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      transition: background 0.12s, color 0.12s;
+    }
+    .md-card .md-dl:hover { background: var(--accent); color: var(--bg); text-decoration: none; }
+    .md-card .md-dl svg { width: 11px; height: 11px; }
+    .badge.md-file { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-size: 10px; }
+  </style>
+</head>
+<body>
+
+  <div id="site-nav" data-active="docs" data-sub="md repo">
+    <div class="count-pill">
+      <span class="num" id="count-num">0</span>
+      <span class="label">templates</span>
+    </div>
+  </div>
+
+  <section class="hero" style="padding-bottom: 32px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to library</a>
+      <span class="sep">/</span>
+      <span>md repo</span>
+    </div>
+    <h1>The markdown <span class="accent">repo</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">Idealised templates for AI-assisted development — drop-in starting points for CLAUDE.md, AGENTS.md, and other context files that make agents work better.</p>
+  </section>
+
+  <main>
+    <div class="mdrepo-wrap">
+      <div class="mdrepo-grid" id="grid" aria-live="polite"></div>
+      <div class="empty hidden" id="empty">
+        <strong>No templates yet</strong>
+        Check back soon.
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="mds.js"></script>
+  <script src="bookmarks.js"></script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const $grid  = document.getElementById("grid");
+      const $empty = document.getElementById("empty");
+      const $count = document.getElementById("count-num");
+      const $toast = document.getElementById("toast");
+
+      if (typeof MDS === "undefined" || MDS.length === 0) {
+        $empty.classList.remove("hidden");
+        return;
+      }
+
+      $count.textContent = MDS.length;
+
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const DL_SVG     = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>';
+
+      const frag = document.createDocumentFragment();
+      MDS.forEach((m) => frag.appendChild(buildCard(m)));
+      $grid.appendChild(frag);
+
+      function buildCard(m) {
+        const card = document.createElement("a");
+        card.className = "md-card";
+        card.href = "md.html?id=" + encodeURIComponent(m.id);
+
+        const head = document.createElement("div");
+        head.className = "md-card-head";
+        head.innerHTML =
+          '<span class="badge md-file">.md</span>' +
+          '<button type="button" class="bookmark-btn doc-bm" aria-label="Save ' + escapeHtml(m.title) + '"></button>';
+
+        const h3 = document.createElement("h3");
+        h3.textContent = m.title;
+
+        const p = document.createElement("p");
+        p.textContent = m.purpose;
+
+        const foot = document.createElement("div");
+        foot.className = "md-foot";
+        (m.tags || []).slice(0, 3).forEach((t) => {
+          const tag = document.createElement("span");
+          tag.className = "tag"; tag.textContent = "#" + t;
+          foot.appendChild(tag);
+        });
+
+        const actions = document.createElement("div");
+        actions.className = "md-actions";
+        const dl = document.createElement("a");
+        dl.className = "md-dl";
+        dl.href = m.file;
+        dl.download = m.file.split("/").pop();
+        dl.innerHTML = DL_SVG + "<span>download</span>";
+        dl.addEventListener("click", (e) => { e.stopPropagation(); });
+        actions.appendChild(dl);
+        foot.appendChild(actions);
+
+        card.appendChild(head);
+        card.appendChild(h3);
+        card.appendChild(p);
+        card.appendChild(foot);
+
+        // Bookmark
+        const bm = head.querySelector(".bookmark-btn");
+        const syncBm = (saved) => {
+          bm.classList.toggle("saved", saved);
+          bm.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+          bm.setAttribute("aria-pressed", saved ? "true" : "false");
+        };
+        if (window.PL_BOOKMARKS) {
+          syncBm(window.PL_BOOKMARKS.isBookmarked("doc", m.id));
+          bm.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            syncBm(window.PL_BOOKMARKS.toggle("doc", m.id));
+            showToast(bm.classList.contains("saved") ? "Saved" : "Removed");
+          });
+        }
+
+        return card;
+      }
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(() => $toast.classList.remove("show"), 1500);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+    })();
+  </script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+
+</body>
+</html>

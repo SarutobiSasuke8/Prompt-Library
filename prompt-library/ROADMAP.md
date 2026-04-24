@@ -5,6 +5,37 @@ Don't build anything in here until v1 has real users and real signal.
 
 ---
 
+## Parked / revisit soon
+
+Short-term items explicitly deferred during v1 polish. Revisit once the
+bookmark + item-page standardisation work lands.
+
+- **Collection bookmarks.** Collections are not part of the item taxonomy
+  (see `CLAUDE.md` → Terminology). Decide whether collection cards should
+  get a bookmark affordance and, if so, where bookmarked collections
+  surface on the profile (My Collections tab vs. Bookmarks panel vs.
+  dropped entirely).
+- **Export collection as `.md`.** Per-collection "export .md" button
+  producing a single markdown file with YAML frontmatter and a section
+  per prompt. Originally scoped on the `profile-folders-export` branch.
+  Spec for the Markdown/Obsidian format is still TBD — user will supply
+  before implementation.
+- **Profile `.md` export (full).** Obsidian-style dump of authored
+  prompts / articles, bookmarked items, collections, and starred tools
+  with `[[wikilinks]]`. Originally scoped on the same branch.
+- **Wire ratings + comments to a backend.** The rating stars and comment
+  threads on item detail pages (`prompt.html`, `article.html`, `tool.html`,
+  `md.html`) are currently **UI-only, persisted per-browser via
+  `localStorage`**. They render correctly and behave as if interactive but
+  do not sync across users, devices, or sessions after cache clear. When
+  v2 backend lands, replace the `pl_rating_<type>_<id>` and
+  `pl_comments_<type>_<id>` localStorage reads/writes in `ratings.js`
+  (and the equivalent inline code in `prompt.html`) with the real API.
+  Keep the same key format so historical local data can be migrated if
+  useful.
+
+---
+
 ## v1 — static curated library (current)
 
 Ship first. Everything after this depends on having users.

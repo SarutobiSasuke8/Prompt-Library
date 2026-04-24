@@ -18,7 +18,7 @@
   // Entries with dropdown:true render as an "explore ▾" flyout.
   var LINKS = [
     { key: "library", href: "index.html", label: "library" },
-    { key: "docs",    href: "docs.html",  label: "md repo" },
+    { key: "docs",    href: "mdrepo.html",  label: "md repo" },
     { key: "tools",   href: "tools.html", label: "tools" },
     {
       key: "explore", label: "explore", dropdown: true,

@@ -270,6 +270,9 @@
       const $copyBtn        = document.getElementById("copy-btn");
       const $toast          = document.getElementById("toast");
 
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
       // ---- boot ----
       if (typeof PROMPTS === "undefined" || typeof CATEGORIES === "undefined") {
         $grid.innerHTML = '<div style="color:#ff6b6b; font-family:var(--mono); padding:16px;">Failed to load prompts.js.</div>';
@@ -484,9 +487,6 @@
         $grid.innerHTML = "";
         $grid.appendChild(frag);
       }
-
-      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
-      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
 
       function buildCard(p) {
         const card = document.createElement("div");

@@ -718,12 +718,8 @@
         }
       };
 
-      // Mock bookmarked prompt IDs — replace with Supabase fetch when live
-      // TODO: sb.from('bookmarks').select('prompt_id').eq('user_id', profile.id)
-      const MOCK_BOOKMARKED_IDS = new Set([1, 3, 7, 12]);
-
-      // Mock visibility state — replace with profile.bookmarks_public field when live
-      // TODO: add bookmarks_public boolean column to profiles table
+      // TODO: replace with Supabase fetch when auth is live:
+      // sb.from('bookmarks').select('prompt_id').eq('user_id', profile.id)
       let bookmarksPublic = false;
 
       // ---------------------------------------------------------------
@@ -746,7 +742,11 @@
       // ---------------------------------------------------------------
       const authoredPrompts  = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => (p.author || "") === profile.handle);
       const authoredArticles = (typeof ARTICLES !== "undefined" ? ARTICLES : []).filter((a) => (a.author || "") === profile.handle);
-      const bookmarkedPrompts = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => MOCK_BOOKMARKED_IDS.has(p.id));
+
+      function getBookmarkedPrompts() {
+        const ids = window.PL_BOOKMARKS ? new Set(window.PL_BOOKMARKS.load().prompt || []) : new Set();
+        return (typeof PROMPTS !== "undefined" ? PROMPTS : []).filter((p) => ids.has(p.id));
+      }
 
       const totalContributions = authoredPrompts.length + authoredArticles.length;
 
@@ -783,7 +783,7 @@
       document.getElementById("profile-stats").innerHTML =
         statBlock(authoredPrompts.length,  "prompts") +
         statBlock(authoredArticles.length, "articles") +
-        statBlock(bookmarkedPrompts.length, "bookmarks") +
+        statBlock(getBookmarkedPrompts().length, "bookmarks") +
         statBlock(totalContributions,      "total");
 
       const joined = profile.created_at
@@ -893,6 +893,7 @@
           $toggle.classList.add("public");
           $locked.classList.add("hidden");
           $grid.innerHTML = "";
+          const bookmarkedPrompts = getBookmarkedPrompts();
           if (bookmarkedPrompts.length === 0) {
             $empty.classList.remove("hidden");
           } else {
@@ -979,8 +980,7 @@
         const grid  = document.getElementById('my-tools-grid');
         const empty = document.getElementById('tools-empty');
         const count = document.getElementById('tab-count-tools');
-        let starred = [];
-        try { starred = JSON.parse(localStorage.getItem('promptLibrary.starredTools') || '[]'); } catch (_) {}
+        const starred = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.load().tool || [] : [];
         const tools = starred.map((id) => TOOL_REGISTRY[id] && { id, ...TOOL_REGISTRY[id] }).filter(Boolean);
         count.textContent = tools.length;
         grid.innerHTML = '';
@@ -1032,11 +1032,9 @@
           unstar.textContent = 'unstar';
           unstar.style.cssText = 'font-family:var(--mono); font-size:11px; color:var(--text-faint); background:transparent; border:1px solid var(--border); padding:6px 10px; border-radius:2px; cursor:pointer;';
           unstar.addEventListener('click', () => {
-            try {
-              const cur = new Set(JSON.parse(localStorage.getItem('promptLibrary.starredTools') || '[]'));
-              cur.delete(t.id);
-              localStorage.setItem('promptLibrary.starredTools', JSON.stringify([...cur]));
-            } catch (_) {}
+            if (window.PL_BOOKMARKS && window.PL_BOOKMARKS.isBookmarked('tool', t.id)) {
+              window.PL_BOOKMARKS.toggle('tool', t.id);
+            }
             renderMyTools();
           });
           row.appendChild(mark); row.appendChild(info); row.appendChild(open); row.appendChild(unstar);

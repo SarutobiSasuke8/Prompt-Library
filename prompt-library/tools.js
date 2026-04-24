@@ -19,7 +19,7 @@ var TOOLS = [
 
   // ---- Chat UIs ----
   {
-    id: 'claude', group: 'chat', mark: 'CL', icon: 'anthropic', name: 'Claude', sub: 'Anthropic',
+    id: 'claude', group: 'chat', mark: 'CL', icon: 'claude', name: 'Claude', sub: 'Anthropic',
     pricing: 'freemium', url: 'https://claude.ai/', x: 'https://x.com/AnthropicAI', github: 'https://github.com/anthropics',
     deepLink: 'planned',
     purpose: 'The reference chat UI for long-context and hard-reasoning work. Strong defaults for structured outputs and agentic tasks.',
@@ -68,14 +68,14 @@ var TOOLS = [
     description: "A Chinese AI lab producing models that benchmark competitively against GPT-4o and Claude at a fraction of inference cost. The R1 reasoning model is particularly strong on logic, mathematics, and structured problem-solving. The V3 model is the faster, cheaper general-purpose option. Important caveat: DeepSeek is subject to Chinese data law — treat it as a public service and avoid sending proprietary, personal, or sensitive content. Strong picks for: competitive maths, logic puzzles, code generation on non-sensitive problems."
   },
   {
-    id: 'copilot-ms', group: 'chat', mark: 'MC', icon: 'microsoftcopilot', name: 'Microsoft Copilot', sub: 'Microsoft',
+    id: 'copilot-ms', group: 'chat', mark: 'MC', icon: '', name: 'Microsoft Copilot', sub: 'Microsoft',
     pricing: 'freemium', url: 'https://copilot.microsoft.com/', x: 'https://x.com/Microsoft', github: 'https://github.com/microsoft',
     deepLink: 'none',
     purpose: "Microsoft's consumer AI powered by GPT-4o. Tight Windows and Office 365 integration for enterprise users.",
     description: "Microsoft's AI layer, powered by GPT-4o via Azure OpenAI Service. The consumer version at copilot.microsoft.com is useful but conservative — safety filters are more aggressive than ChatGPT directly. The real value is inside Microsoft 365: Copilot in Word drafts documents from your brief, in Excel analyses data via natural language, in Teams summarises meeting transcripts, and in Outlook drafts replies. Microsoft Graph integration means it can reference your emails, calendar, and shared files. Weak point: the consumer product is noticeably more restricted than the enterprise version."
   },
   {
-    id: 'cohere', group: 'chat', mark: 'CO', icon: 'cohere', name: 'Coral', sub: 'Cohere',
+    id: 'cohere', group: 'chat', mark: 'CO', icon: '', name: 'Coral', sub: 'Cohere',
     pricing: 'freemium', url: 'https://coral.cohere.com/', x: 'https://x.com/cohere', github: 'https://github.com/cohere-ai',
     deepLink: 'none',
     purpose: 'Enterprise-focused chat with strong retrieval augmentation. Good for grounding answers in large document sets.',
@@ -105,14 +105,14 @@ var TOOLS = [
     description: "The most widely used AI IDE among working engineers. Built as a VS Code fork, so extensions, keybindings, and themes all transfer with near-zero friction. Agent mode (Cmd+K or Composer) handles multi-file edits with context from your full codebase; Tab autocomplete handles inline suggestions. Model choice is flexible — Claude 3.7, GPT-4o, and Gemini are all available in settings. Free tier is usable; Pro ($20/month) removes model limits for professionals. Weak point: Anysphere has access to your code via their API — check the privacy settings if that's a concern."
   },
   {
-    id: 'windsurf', group: 'coding', mark: 'WS', icon: 'codeium', name: 'Windsurf', sub: 'Codeium',
+    id: 'windsurf', group: 'coding', mark: 'WS', icon: 'windsurf', name: 'Windsurf', sub: 'Codeium',
     pricing: 'freemium', url: 'https://windsurf.com/', x: 'https://x.com/codeium', github: 'https://github.com/Exafunction/codeium',
     deepLink: 'none',
     purpose: 'IDE with agentic Cascade flows. Cursor competitor with stronger multi-step execution and background agents.',
     description: "Codeium's IDE, competing directly with Cursor. The key differentiator is Cascade — an agentic engine that can plan and execute multi-step coding tasks with less manual steering than Cursor's Composer. It maintains context across file edits, terminal runs, and browser previews in a single coherent flow. Background agent mode lets you kick off a task and keep working while it runs. Pricing has historically been more generous than Cursor for heavy users. Weak point: smaller community, fewer tutorials, and the extension ecosystem hasn't caught up to Cursor yet."
   },
   {
-    id: 'cline', group: 'coding', mark: 'CN', icon: 'visualstudiocode', name: 'Cline', sub: 'VS Code extension',
+    id: 'cline', group: 'coding', mark: 'CN', icon: 'cline', name: 'Cline', sub: 'VS Code extension',
     pricing: 'byok', url: 'https://cline.bot/', x: 'https://x.com/clinedotbot', github: 'https://github.com/cline/cline',
     deepLink: 'none',
     purpose: 'Open-source agentic coding extension for VS Code. Bring your own API key; no vendor lock-in.',
@@ -147,7 +147,7 @@ var TOOLS = [
     description: "A browser-based full-stack builder powered by StackBlitz's WebContainers technology, which runs Node.js directly in the browser. Describe an app in a prompt, watch it scaffold, install dependencies, and run — no local setup, no Docker, no config files. The output is editable in an in-browser VS Code interface and deployable to Netlify or Cloudflare in one click. Best for throwaway prototypes, client demos, and quickly validating an idea. Weak point: production-grade apps quickly hit the limits of the sandbox — complex backends, file system access, and native dependencies don't work."
   },
   {
-    id: 'v0', group: 'coding', mark: 'V0', icon: 'vercel', name: 'v0', sub: 'Vercel',
+    id: 'v0', group: 'coding', mark: 'V0', icon: 'v0', name: 'v0', sub: 'Vercel',
     pricing: 'freemium', url: 'https://v0.dev/', x: 'https://x.com/vercel', github: 'https://github.com/vercel',
     deepLink: 'none',
     purpose: 'UI generation from prompts. Outputs React and shadcn/ui code you can paste straight into your project.',
@@ -170,7 +170,7 @@ var TOOLS = [
     description: "A unified API proxy routing requests across 100+ models from Anthropic, OpenAI, Google, Meta, Mistral, Cohere, and open-source providers. One API key, one OpenAI-compatible base URL, every model. Routing rules can optimise for cost, latency, or fallback on failure — useful for production apps where model availability varies. Pricing passes through model costs with a small markup; some open-source models are free. The model list updates quickly as new releases drop. Weak point: you're adding a proxy hop; latency-sensitive applications should measure the overhead before committing."
   },
   {
-    id: 'groq', group: 'infra', mark: 'GQ', icon: 'groq', name: 'Groq', sub: 'inference',
+    id: 'groq', group: 'infra', mark: 'GQ', icon: '', name: 'Groq', sub: 'inference',
     pricing: 'freemium', url: 'https://groq.com/', x: 'https://x.com/GroqInc', github: 'https://github.com/groq',
     deepLink: 'none',
     purpose: 'Extremely fast inference on select open models via custom LPU hardware. Best for low-latency experimentation.',
@@ -205,7 +205,7 @@ var TOOLS = [
     description: "The official developer environment for Claude. Create and manage API keys, test prompts in the Workbench with configurable temperature and max tokens, define tool schemas for function calling, and monitor token usage and costs across projects. The Workbench is the fastest way to iterate on system prompts before integrating them into code — you can compare model versions side by side. Evaluations (evals) let you score prompt outputs against a test set to track quality regressions. The API keys created here are the same ones Claude Code and any SDK integration use. Weak point: no free tier for API access; all usage is metered."
   },
   {
-    id: 'together', group: 'infra', mark: 'TA', icon: 'togetherai', name: 'Together AI', sub: 'inference',
+    id: 'together', group: 'infra', mark: 'TA', icon: '', name: 'Together AI', sub: 'inference',
     pricing: 'paid', url: 'https://www.together.ai/', x: 'https://x.com/togethercompute', github: 'https://github.com/togethercomputer',
     deepLink: 'none',
     purpose: 'Fast, affordable inference for open-source models. Good for production workloads where Groq capacity is limited.',
@@ -302,14 +302,14 @@ var TOOLS = [
     description: "The most widely adopted Python and JavaScript framework for building LLM applications. Provides abstractions for chains (sequential prompt pipelines), agents (tool-using loops), memory (conversation and long-term), and retrieval (vector store integrations). The ecosystem of integrations is the key asset: 100+ data loaders, vector stores, tool wrappers, and model providers are maintained by the community. LangSmith handles observability, tracing, and prompt versioning for production deployments. Weak point: the abstraction layers add indirection that makes debugging harder; for complex agentic flows, LangGraph (the graph-based sibling) is now preferred."
   },
   {
-    id: 'langgraph', group: 'agents', mark: 'LG', icon: 'langchain', name: 'LangGraph', sub: 'orchestration',
+    id: 'langgraph', group: 'agents', mark: 'LG', icon: 'langgraph', name: 'LangGraph', sub: 'orchestration',
     pricing: 'free', url: 'https://langchain-ai.github.io/langgraph/', x: 'https://x.com/LangChainAI', github: 'https://github.com/langchain-ai/langgraph',
     deepLink: 'none',
     purpose: 'Graph-based agent orchestration from LangChain. Cleanly handles multi-step, branching, and cyclical agent flows.',
     description: "LangChain's graph-based orchestration layer for stateful, multi-step agents. Nodes are Python functions; edges define conditional transitions between them — including cycles (retry loops, reflection agents, self-critique patterns). Supports streaming, human-in-the-loop breakpoints, and persistent checkpointing across runs. The mental model maps directly to flowcharts, which makes complex agent behaviour easier to reason about and debug than a linear chain. LangGraph Cloud provides managed deployment and observability. The recommended path for production agents with branching logic, parallel tool calls, or long-horizon planning."
   },
   {
-    id: 'crewai', group: 'agents', mark: 'CW', icon: '', name: 'CrewAI', sub: 'multi-agent',
+    id: 'crewai', group: 'agents', mark: 'CW', icon: 'crewai', name: 'CrewAI', sub: 'multi-agent',
     pricing: 'free', url: 'https://crewai.com/', x: 'https://x.com/crewAIInc', github: 'https://github.com/crewAIInc/crewAI',
     deepLink: 'none',
     purpose: 'Role-based multi-agent framework. Agents get roles, goals, and backstories; tasks are delegated within the crew automatically.',

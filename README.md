@@ -23,6 +23,10 @@ no npm, no build step — three files and a browser tab.
 skills and CLI integrations installed into this workspace. Not part of the
 prompt-library product.
 
+## Site Screenshot
+
+![Prompt Library interface showing dark theme with prompt cards](./media/Site%20Screenshot%202026-04-24.png)
+
 ## Branches
 
 - `main` — deploy target. The Pages workflow ships `prompt-library/` on

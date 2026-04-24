@@ -79,6 +79,7 @@ deserves its own note.
 | 2026-04-22 | [[2026-04-22-frontend-visual-refresh\|frontend visual refresh + sessions system]]  | `claude/create-frontend-html-bnbEu`        | shipped |
 | 2026-04-23 | [[2026-04-23-supabase-backend-scaffold\|Supabase backend scaffold (v2 user mgmt)]] | `main`                                     | active  |
 | 2026-04-23 | [[2026-04-23-nav-agents-markdown-library\|Nav dropdown, agents page, md repo]]     | `main`                                     | shipped |
+| 2026-04-24 | [[2026-04-24-session-report-prompt-library\|Karpathy bundle, creative tools, MD rendering fix, README rewrite]] | `main` | shipped |
 
 ## Past work — reconstructed from git log
 

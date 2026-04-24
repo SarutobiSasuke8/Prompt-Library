@@ -1,6 +1,7 @@
-# testing
+# Prompt Library
 
-A shared workspace that currently hosts two unrelated things.
+A curated library of production-ready system prompts for building with AI.
+This repository also contains Teneo CLI tooling and workspace configuration.
 
 ## Contents
 

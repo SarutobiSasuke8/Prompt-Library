@@ -261,10 +261,10 @@
   (function () {
     "use strict";
 
-    // ---- resolve the MD from the query string ----
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    const m  = (typeof MDS !== "undefined") ? MDS.find((x) => x.id === id) : null;
+    // ---- resolve the MD — hash takes priority, query string as fallback ----
+    const hash = window.location.hash.slice(1); // strip leading #
+    const id   = hash ? decodeURIComponent(hash) : new URLSearchParams(window.location.search).get("id");
+    const m    = (typeof MDS !== "undefined") ? MDS.find((x) => x.id === id) : null;
 
     if (!m) {
       document.getElementById("md-title").textContent = "Template not found";
@@ -325,15 +325,15 @@
           };
         })(f.content, copyBtn));
 
-        var dlBtn = document.createElement("a");
-        dlBtn.className = "md-bundle-dl";
-        dlBtn.innerHTML = DL_SVG2 + "<span>download</span>";
-        dlBtn.href = f.file;
-        dlBtn.download = f.filename;
+        var fileDlBtn = document.createElement("a");
+        fileDlBtn.className = "md-bundle-dl";
+        fileDlBtn.innerHTML = DL_SVG2 + "<span>download</span>";
+        fileDlBtn.href = f.file;
+        fileDlBtn.download = f.filename;
 
         row.appendChild(fname);
         row.appendChild(copyBtn);
-        row.appendChild(dlBtn);
+        row.appendChild(fileDlBtn);
         bundleWrap.appendChild(row);
       });
 

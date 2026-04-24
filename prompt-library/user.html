@@ -485,6 +485,7 @@
       <div class="profile-joined" id="profile-joined"></div>
       <!-- shown only to profile owner — toggled by JS when auth is wired -->
       <button class="edit-profile-btn hidden" id="edit-profile-btn" type="button">edit profile</button>
+      <button class="edit-profile-btn" id="export-profile-btn" type="button" title="Download your profile as an Obsidian-compatible markdown file">export profile (.md)</button>
     </aside>
 
     <!-- Main content -->
@@ -734,6 +735,163 @@
       const likedPrompts     = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => MOCK_LIKED_IDS.has(p.id));
 
       const totalContributions = authoredPrompts.length + authoredArticles.length;
+
+      // ---------------------------------------------------------------
+      // Export helpers — provisional formatting.
+      // Final Markdown / Obsidian spec is TBD; see ROADMAP.md
+      // "Profile organisation & export". Do not treat this layout as
+      // frozen — user will supply the canonical spec.
+      // ---------------------------------------------------------------
+      function exportDownload(filename, text) {
+        const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement("a");
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 0);
+      }
+      function exportSlug(s) {
+        return String(s || "untitled").toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "untitled";
+      }
+      function exportPromptNoteTitle(p) {
+        return "#" + String(p.id).padStart(3, "0") + " " + p.title;
+      }
+      function exportPromptBody(p) {
+        const cat = (typeof CATEGORIES !== "undefined" && CATEGORIES[p.category]) || p.category;
+        const tags   = (p.tags   || []).map((t) => "[[" + t + "]]").join(", ");
+        const models = (p.models || []).join(", ");
+        const out = [];
+        out.push("## " + exportPromptNoteTitle(p));
+        out.push("");
+        out.push("- id: " + p.id);
+        out.push("- category: " + cat);
+        out.push("- complexity: " + p.complexity);
+        if (tags)          out.push("- tags: " + tags);
+        if (models)        out.push("- models: " + models);
+        if (p.temperature) out.push("- temperature: " + p.temperature);
+        out.push("");
+        out.push("### purpose");
+        out.push(p.purpose || "");
+        out.push("");
+        out.push("### system prompt");
+        out.push("```");
+        out.push(p.prompt || "");
+        out.push("```");
+        if (p.chaining) { out.push(""); out.push("### chaining"); out.push(p.chaining); }
+        if (p.notes)    { out.push(""); out.push("### notes");    out.push(p.notes); }
+        return out.join("\n");
+      }
+      function exportCollection(name, ids) {
+        const all   = (typeof PROMPTS !== "undefined" ? PROMPTS : []);
+        const items = (ids || []).map((id) => all.find((p) => p.id === id)).filter(Boolean);
+        const today = new Date().toISOString().slice(0, 10);
+        const header = [
+          "---",
+          'title: "' + name.replace(/"/g, '\\"') + '"',
+          "type: prompt-library-collection",
+          "owner: " + (profile.handle || ""),
+          "count: " + items.length,
+          "exported: " + today,
+          "---",
+          "",
+          "# " + name,
+          ""
+        ].join("\n");
+        const body = items.length
+          ? items.map(exportPromptBody).join("\n\n---\n\n")
+          : "_empty collection_";
+        exportDownload(exportSlug(name) + ".md", header + body + "\n");
+      }
+      function exportProfileObsidian() {
+        const today = new Date().toISOString().slice(0, 10);
+        let collections = {};
+        try { collections = JSON.parse(localStorage.getItem("promptLibrary.collections") || "{}"); } catch (_) {}
+        let starredIds = [];
+        try { starredIds = JSON.parse(localStorage.getItem("promptLibrary.starredTools") || "[]"); } catch (_) {}
+        const registry = (typeof TOOL_REGISTRY !== "undefined") ? TOOL_REGISTRY : {};
+        const starred  = starredIds.map((id) => registry[id] && Object.assign({ id: id }, registry[id])).filter(Boolean);
+
+        const out = [];
+        out.push("---");
+        out.push('title: "@' + profile.handle + ' — prompt-library profile"');
+        out.push("type: prompt-library-profile-export");
+        out.push("handle: " + profile.handle);
+        out.push("exported: " + today);
+        out.push("source: " + location.origin + location.pathname + "?handle=" + profile.handle);
+        out.push("---");
+        out.push("");
+        out.push("# @" + profile.handle);
+        if (profile.bio) { out.push(""); out.push(profile.bio); }
+        out.push("");
+
+        out.push("## prompts authored (" + authoredPrompts.length + ")");
+        out.push("");
+        if (authoredPrompts.length) {
+          authoredPrompts.forEach((p) => out.push("- [[" + exportPromptNoteTitle(p) + "]] — " + (p.purpose || "")));
+        } else out.push("_none_");
+        out.push("");
+
+        out.push("## articles authored (" + authoredArticles.length + ")");
+        out.push("");
+        if (authoredArticles.length) {
+          authoredArticles.forEach((a) => out.push("- [[" + a.title + "]] — " + (a.summary || "")));
+        } else out.push("_none_");
+        out.push("");
+
+        out.push("## liked prompts (" + likedPrompts.length + ")");
+        out.push("");
+        if (likedPrompts.length) {
+          likedPrompts.forEach((p) => out.push("- [[" + exportPromptNoteTitle(p) + "]]"));
+        } else out.push("_none_");
+        out.push("");
+
+        const colNames = Object.keys(collections).sort();
+        out.push("## collections (" + colNames.length + ")");
+        out.push("");
+        if (colNames.length) {
+          const all = (typeof PROMPTS !== "undefined" ? PROMPTS : []);
+          colNames.forEach((name) => {
+            const ids = collections[name] || [];
+            out.push("### " + name + " (" + ids.length + ")");
+            ids.forEach((id) => {
+              const p = all.find((pp) => pp.id === id);
+              if (p) out.push("- [[" + exportPromptNoteTitle(p) + "]]");
+              else   out.push("- #" + String(id).padStart(3, "0") + " _(not in library)_");
+            });
+            out.push("");
+          });
+        } else { out.push("_none_"); out.push(""); }
+
+        out.push("## starred tools (" + starred.length + ")");
+        out.push("");
+        if (starred.length) {
+          starred.forEach((t) => out.push("- [[" + t.name + "]] — " + t.url));
+        } else out.push("_none_");
+        out.push("");
+
+        out.push("---");
+        out.push("");
+        out.push("# prompt bodies");
+        out.push("");
+        const seen = new Set();
+        const bodyPrompts = authoredPrompts.concat(likedPrompts);
+        const all = (typeof PROMPTS !== "undefined" ? PROMPTS : []);
+        colNames.forEach((name) => {
+          (collections[name] || []).forEach((id) => {
+            const p = all.find((pp) => pp.id === id);
+            if (p) bodyPrompts.push(p);
+          });
+        });
+        bodyPrompts.forEach((p) => {
+          if (seen.has(p.id)) return;
+          seen.add(p.id);
+          out.push(exportPromptBody(p));
+          out.push("");
+        });
+
+        exportDownload(exportSlug(profile.handle) + "-profile.md", out.join("\n") + "\n");
+      }
 
       // ---------------------------------------------------------------
       // Render sidebar
@@ -1031,10 +1189,16 @@
           const title = document.createElement("div");
           title.style.cssText = "font-family:var(--mono); font-size:13px; font-weight:600; color:var(--text);";
           title.textContent = name + " (" + items.length + ")";
+          const exportBtn = document.createElement("button");
+          exportBtn.type = "button";
+          exportBtn.textContent = "export .md";
+          exportBtn.title = "Download this folder as a markdown file (provisional format)";
+          exportBtn.style.cssText = "margin-left:auto; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); background:none; border:1px solid var(--border-2); padding:3px 8px; border-radius:var(--radius); cursor:pointer;";
+          exportBtn.addEventListener("click", () => exportCollection(name, cols[name] || []));
           const del = document.createElement("button");
           del.type = "button";
           del.textContent = "delete";
-          del.style.cssText = "margin-left:auto; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); background:none; border:1px solid var(--border-2); padding:3px 8px; border-radius:var(--radius); cursor:pointer;";
+          del.style.cssText = "font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); background:none; border:1px solid var(--border-2); padding:3px 8px; border-radius:var(--radius); cursor:pointer;";
           del.addEventListener("click", () => {
             if (!confirm('Delete collection "' + name + '"?')) return;
             const all = loadCollections();
@@ -1043,6 +1207,7 @@
             renderMyCollections();
           });
           head.appendChild(title);
+          head.appendChild(exportBtn);
           head.appendChild(del);
           section.appendChild(head);
 
@@ -1200,6 +1365,10 @@
       const $avatarFile   = document.getElementById("avatar-file-input");
 
       document.getElementById("edit-profile-btn").addEventListener("click", openEditModal);
+      document.getElementById("export-profile-btn").addEventListener("click", () => {
+        try { exportProfileObsidian(); showToast("Profile exported"); }
+        catch (err) { console.error(err); showToast("Export failed"); }
+      });
       $editClose.addEventListener("click",  closeEditModal);
       $editCancel.addEventListener("click", closeEditModal);
       $editBackdrop.addEventListener("click", (e) => { if (e.target === $editBackdrop) closeEditModal(); });

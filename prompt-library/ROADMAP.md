@@ -62,8 +62,31 @@ across every content type the site carries.
   every folder across every bucket, using Obsidian conventions
   (`[[wikilinks]]`, YAML frontmatter, folder-as-directory) so the export
   drops straight into an Obsidian vault with a working graph
-- Exact MD / Obsidian formatting spec **TBD — user will supply**. Do not
-  invent a schema; wait for the spec before implementing.
+
+#### Status
+- [x] **Export tool shipped (provisional formatting).** `user.html` now has:
+  - `export .md` button on every collection (prompt folder) → downloads
+    a single markdown file with YAML frontmatter + per-prompt sections.
+  - `export profile (.md)` button in the sidebar → downloads a single
+    Obsidian-style markdown file bundling authored prompts, authored
+    articles, liked prompts, collections, and starred tools, with a
+    "prompt bodies" appendix. Cross-references use `[[wikilinks]]`.
+  - See `exportCollection` / `exportProfileObsidian` helpers inside the
+    `user.html` IIFE. Format is intentionally provisional.
+- [ ] **Finalise formatting spec.** User will supply the canonical Markdown
+  / Obsidian schema (frontmatter keys, wikilink targets, folder-as-directory
+  layout, filename conventions). Current output is a working placeholder
+  and should be replaced once that spec lands. Do not invent additional
+  schema in the meantime.
+- [ ] **Folder-per-bucket data model.** Today only the prompts bucket has
+  user-defined folders (localStorage `promptLibrary.collections`). Articles,
+  tools, and markdown notes are flat. Adding folders to the other buckets
+  needs a schema (likely a single `folders` table keyed by `owner_id`,
+  `bucket`, `name`) + per-bucket tables for the tools/notes content the
+  user wants to save beyond starring.
+- [ ] **Markdown notes bucket.** Not yet built. Requires a `notes` table
+  (user-owned, folder-scoped) and a UI for creating/editing. Park until the
+  above spec lands.
 
 ### Ratings / reviews
 - 1–5 star ratings with optional short review

@@ -45,6 +45,18 @@
     .md-card .md-dl:hover { background: var(--accent); color: var(--bg); text-decoration: none; }
     .md-card .md-dl svg { width: 11px; height: 11px; }
     .badge.md-file { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-size: 10px; }
+    .badge.md-version {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+      color: var(--text-faint); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2px 7px; background: var(--bg-2);
+      white-space: nowrap;
+    }
+    .badge.md-bundle {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+      color: #ffb020; border: 1px solid rgba(255,176,32,0.35);
+      border-radius: var(--radius); padding: 2px 7px; background: rgba(255,176,32,0.08);
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -115,8 +127,15 @@
 
         const head = document.createElement("div");
         head.className = "md-card-head";
+        var headBadges = '<span class="badge md-file">.md</span>';
+        if (m.files && m.files.length) {
+          headBadges += '<span class="badge md-bundle">bundle &middot; ' + m.files.length + ' files</span>';
+        }
+        if (m.version) {
+          headBadges += '<span class="badge md-version">v ' + escapeHtml(m.version) + '</span>';
+        }
         head.innerHTML =
-          '<span class="badge md-file">.md</span>' +
+          headBadges +
           '<button type="button" class="bookmark-btn doc-bm" aria-label="Save ' + escapeHtml(m.title) + '"></button>';
 
         const h3 = document.createElement("h3");

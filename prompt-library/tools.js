@@ -9,6 +9,7 @@
 var TOOL_GROUPS = {
   'chat':      'Chat UIs',
   'coding':    'Coding',
+  'creative':  'Creative AI',
   'infra':     'Infra',
   'local':     'Local / Self-host',
   'knowledge': 'Knowledge',
@@ -80,6 +81,57 @@ var TOOLS = [
     deepLink: 'none',
     purpose: 'Enterprise-focused chat with strong retrieval augmentation. Good for grounding answers in large document sets.',
     description: "Cohere's enterprise chat product, built on their Command R+ model and optimised for retrieval-augmented generation. The standout feature is document grounding: connect Coral to a search index, file store, or SharePoint, and every answer cites the source document. Designed for B2B deployments where hallucination is costly, accuracy is auditable, and traceability to source matters. Pricing targets enterprise contracts rather than individual users. Weak point: it's not a general-purpose tool — personal productivity, creative writing, and coding are secondary use cases at best."
+  },
+
+  // ---- Creative AI ----
+  {
+    id: 'suno', group: 'creative', mark: 'SN', icon: 'suno', name: 'Suno', sub: 'music generation',
+    pricing: 'freemium', url: 'https://suno.com/', x: 'https://x.com/suno_ai', github: '',
+    deepLink: 'none',
+    purpose: 'Text-to-music AI. Generates full songs — vocals, lyrics, instrumentation, mastering — from a single prompt in seconds.',
+    description: "Suno generates complete songs from a text description: lyrics, vocals, genre, instrumentation, and mastering all in one pass. The v4 model produces output that most non-musicians would struggle to distinguish from low-budget produced tracks. Custom mode lets you write your own lyrics and control the structure (verse, chorus, bridge). Free tier gives a daily credit allowance; Pro unlocks commercial licensing and higher-quality exports. Weakest on technical genres that require precise timing — jazz, classical, and complex polyrhythm."
+  },
+  {
+    id: 'kling', group: 'creative', mark: 'KL', icon: '', name: 'Kling AI', sub: 'video generation',
+    pricing: 'freemium', url: 'https://klingai.com/', x: 'https://x.com/Kling_ai', github: '',
+    deepLink: 'none',
+    purpose: 'High-fidelity text-to-video and image-to-video. Strong motion consistency and photorealism across longer clips.',
+    description: "Kling is a video generation model from Kuaishou, China's second-largest short video platform. It generates up to 3-minute clips from text or image prompts with notably strong motion physics and subject consistency — areas where most early video models struggle. Camera control mode lets you define movement paths (zoom, pan, orbit) independently of the scene prompt. Free tier outputs 720p watermarked clips; Standard and Pro tiers unlock 1080p, extended duration, and no watermark. Data residency is subject to Chinese law — avoid generating content involving proprietary IP or identifiable individuals."
+  },
+  {
+    id: 'higgsfield', group: 'creative', mark: 'HF', icon: '', name: 'Higgsfield', sub: 'cinematic video',
+    pricing: 'freemium', url: 'https://higgsfield.ai/', x: 'https://x.com/higgsfield_ai', github: '',
+    deepLink: 'none',
+    purpose: 'Cinematic AI video generation with fine-grained camera control. Built for filmmakers who need specific motion dynamics.',
+    description: "Higgsfield is designed for filmmakers and video creators who need control over camera movement, not just scene content. The model specialises in dynamic shots — dolly, crane, whip-pan, and slow motion — with stronger motion fidelity than general-purpose video generators. Upload a reference frame or describe a shot and the model maintains consistent lighting and subject identity across the clip. The web interface is production-oriented: project folders, timeline review, and export in multiple aspect ratios. Early access pricing is competitive; the target user is a professional who previously needed a full crew for the same camera move."
+  },
+  {
+    id: 'runway', group: 'creative', mark: 'RW', icon: 'runway', name: 'Runway', sub: 'video & image AI',
+    pricing: 'freemium', url: 'https://runwayml.com/', x: 'https://x.com/runwayml', github: 'https://github.com/runwayml',
+    deepLink: 'none',
+    purpose: 'Professional AI video and image editing suite. Gen-4 video generation used by working filmmakers and VFX teams.',
+    description: "Runway is the established professional platform in AI video, with Gen-4 Turbo as the current production model. It goes beyond pure generation: inpainting, outpainting, background removal, motion tracking, and green-screen replacement are all AI-powered and integrated into a web editor. Used by studios on A24 and Netflix productions for specific VFX tasks. The API exposes video generation programmatically, which no major competitor matches for reliability. Weak point: Gen-4 Turbo trails the best consumer-grade models on raw visual quality for simple clips, though it wins on controllability and tool depth."
+  },
+  {
+    id: 'midjourney', group: 'creative', mark: 'MJ', icon: 'midjourney', name: 'Midjourney', sub: 'image generation',
+    pricing: 'paid', url: 'https://midjourney.com/', x: 'https://x.com/midjourney', github: '',
+    deepLink: 'none',
+    purpose: 'The benchmark for AI image quality. Cinematic, painterly output with a distinct aesthetic that defines the genre.',
+    description: "Midjourney remains the reference model for AI image generation on pure visual quality. The v6 and v7 models produce cinematic, painterly output with coherent lighting and depth that competing models match only inconsistently. Originally Discord-only, the web interface at midjourney.com now handles prompting, editing, and variation in a browser. Niji mode is specifically tuned for anime and illustration styles. No free tier — the cheapest plan is $10/month for limited fast GPU time. Weak point: text rendering in images and precise spatial control are still areas where Flux and DALL-E 3 compete more directly."
+  },
+  {
+    id: 'elevenlabs', group: 'creative', mark: 'EL', icon: 'elevenlabs', name: 'ElevenLabs', sub: 'voice & audio AI',
+    pricing: 'freemium', url: 'https://elevenlabs.io/', x: 'https://x.com/elevenlabsio', github: 'https://github.com/elevenlabs',
+    deepLink: 'none',
+    purpose: 'Best-in-class voice synthesis and cloning. Generates natural speech in 29 languages from a short audio sample.',
+    description: "ElevenLabs produces the most natural-sounding AI voice synthesis currently available. Voice cloning creates a persistent voice profile from as little as one minute of audio; the cloned voice maintains consistent tone, pace, and emotional range across long-form content. Supports 29 languages with native-level accent quality. The API powers AI agents, audiobook production, video dubbing, and podcast generation at scale. Projects mode handles multi-voice narration with automatic speaker assignment. Weak point: cloning lifelike emotional range (laughter, crying, shouting) is still inconsistent compared to flat narration."
+  },
+  {
+    id: 'luma', group: 'creative', mark: 'LM', icon: '', name: 'Luma AI', sub: '3D & video AI',
+    pricing: 'freemium', url: 'https://lumalabs.ai/', x: 'https://x.com/LumaLabsAI', github: '',
+    deepLink: 'none',
+    purpose: 'Dream Machine video generation plus photorealistic 3D asset capture. Strong for product visualisation and cinematic shots.',
+    description: "Luma covers two distinct capabilities: Dream Machine generates video clips from text or image prompts with strong photorealism and motion, and NeRF-based 3D capture reconstructs a physical object into a digital 3D asset from a phone scan. Dream Machine is particularly strong on product shots, food, and architectural visualization where surface quality matters. The 3D capture workflow is the fastest way to put a real-world object into a 3D pipeline — scan it with an iPhone, export as GLB. Weak point: Dream Machine's motion physics lags Kling and Runway on complex human movement, and the 3D capture requires good lighting and a deliberate scan path."
   },
 
   // ---- Coding ----

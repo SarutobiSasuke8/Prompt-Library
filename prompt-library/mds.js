@@ -2,9 +2,401 @@
 // Each entry mirrors the file in mds/{file}.md
 // `content` is the raw markdown (used for display + copy)
 // `file` is the download path relative to the site root
+// Bundle entries also have `version` (date string) and `files[]` (per-file copy/download)
 
 /* global MDS */
 var MDS = [
+  {
+    id: "andrej-karpathy-skills",
+    title: "andrej-karpathy-skills",
+    purpose: "Four principles derived from Andrej Karpathy's observations on LLM coding pitfalls — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution. Drop into any project as a CLAUDE.md.",
+    tags: ["claude-code", "karpathy", "best-practices", "ai-guidelines", "developer-tooling"],
+    file: "mds/andrej-karpathy-skills-readme.md",
+    added: "2026-04-24",
+    version: "2026-04-24",
+    files: [
+      {
+        label: "CLAUDE.md",
+        filename: "andrej-karpathy-skills-claude.md",
+        file: "mds/andrej-karpathy-skills-claude.md",
+        content: `# CLAUDE.md
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+\`\`\`
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+\`\`\`
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.`
+      },
+      {
+        label: "EXAMPLES.md",
+        filename: "andrej-karpathy-skills-examples.md",
+        file: "mds/andrej-karpathy-skills-examples.md",
+        content: `# Examples
+
+Real-world code examples demonstrating the four principles. Each example shows what LLMs commonly do wrong and how to fix it.
+
+---
+
+## 1. Think Before Coding
+
+### Example: Hidden Assumptions
+
+**User Request:** "Add a feature to export user data"
+
+**❌ What LLMs Do (Wrong Assumptions)**
+
+Immediately writes \`export_users()\` that dumps all users to a hardcoded file path, assumes JSON/CSV formats, picks field names without checking the schema.
+
+**Problems:**
+- Assumed it should export ALL users (what about pagination? privacy?)
+- Assumed file location without asking
+- Assumed which fields to include
+
+**✅ What Should Happen (Surface Assumptions)**
+
+\`\`\`
+Before implementing, I need to clarify:
+
+1. Scope: Export all users or filtered subset? (privacy implications)
+2. Format: Did you mean download file in browser, background job, or API endpoint?
+3. Fields: Which user fields? (some might be sensitive)
+4. Volume: How many users typically? (affects approach)
+
+Simplest approach: Add an API endpoint returning paginated JSON.
+What's your preference?
+\`\`\`
+
+---
+
+## 2. Simplicity First
+
+### Example: Over-abstraction
+
+**User Request:** "Add a function to calculate discount"
+
+**❌ What LLMs Do (Overengineered)**
+
+\`\`\`python
+class DiscountStrategy(ABC):
+    @abstractmethod
+    def calculate(self, amount: float) -> float: ...
+# ... 80 more lines for a single calculation
+\`\`\`
+
+**✅ What Should Happen (Simple)**
+
+\`\`\`python
+def calculate_discount(amount: float, percent: float) -> float:
+    """Calculate discount amount. percent should be 0-100."""
+    return amount * (percent / 100)
+\`\`\`
+
+---
+
+## 3. Surgical Changes
+
+### Example: Drive-by Refactoring
+
+**User Request:** "Fix the bug where empty emails crash the validator"
+
+**✅ What Should Happen (Surgical)**
+
+\`\`\`diff
+  def validate_user(user_data):
+      # Check email format
+-     if not user_data.get('email'):
++     email = user_data.get('email', '')
++     if not email or not email.strip():
+          raise ValueError("Email required")
+-     if '@' not in user_data['email']:
++     if '@' not in email:
+          raise ValueError("Invalid email")
+      if not user_data.get('username'):
+          raise ValueError("Username required")
+      return True
+\`\`\`
+
+Only changed: the specific lines that fix empty email handling.
+
+---
+
+## 4. Goal-Driven Execution
+
+### Example: Vague vs. Verifiable
+
+**User Request:** "Fix the authentication system"
+
+**✅ What Should Happen (Verifiable Goals)**
+
+\`\`\`
+Plan:
+1. Write test: Change password → verify old session invalidated
+   Verify: Test fails (reproduces bug)
+2. Implement: Invalidate sessions on password change
+   Verify: Test passes
+3. Verify no regression: Existing auth tests still pass
+   Verify: Full test suite green
+\`\`\`
+
+---
+
+## Anti-Patterns Summary
+
+| Principle | Anti-Pattern | Fix |
+|-----------|-------------|-----|
+| Think Before Coding | Silently assumes file format, fields, scope | List assumptions explicitly, ask for clarification |
+| Simplicity First | Strategy pattern for single discount calculation | One function until complexity is actually needed |
+| Surgical Changes | Reformats quotes, adds type hints while fixing bug | Only change lines that fix the reported issue |
+| Goal-Driven | "I'll review and improve the code" | "Write test for bug X → make it pass → verify no regressions" |
+
+**Good code is code that solves today's problem simply, not tomorrow's problem prematurely.**`
+      },
+      {
+        label: "README.md",
+        filename: "andrej-karpathy-skills-readme.md",
+        file: "mds/andrej-karpathy-skills-readme.md",
+        content: `# Karpathy-Inspired Claude Code Guidelines
+
+A single \`CLAUDE.md\` file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.
+
+## The Problems
+
+From Andrej's post:
+
+> "The models make wrong assumptions on your behalf and just run along with them without checking."
+
+> "They really like to overcomplicate code and APIs, bloat abstractions, don't clean up dead code."
+
+> "They still sometimes change/remove comments and code they don't sufficiently understand as side effects."
+
+## The Solution
+
+Four principles in one file:
+
+| Principle | Addresses |
+|-----------|-----------|
+| **Think Before Coding** | Wrong assumptions, hidden confusion, missing tradeoffs |
+| **Simplicity First** | Overcomplication, bloated abstractions |
+| **Surgical Changes** | Orthogonal edits, touching code you shouldn't |
+| **Goal-Driven Execution** | Leverage through tests-first, verifiable success criteria |
+
+## Install
+
+**Option A: Claude Code Plugin (recommended)**
+
+\`\`\`
+/plugin marketplace add forrestchang/andrej-karpathy-skills
+/plugin install andrej-karpathy-skills@karpathy-skills
+\`\`\`
+
+**Option B: CLAUDE.md (per-project)**
+
+\`\`\`bash
+curl -o CLAUDE.md https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/CLAUDE.md
+\`\`\`
+
+## Key Insight
+
+From Andrej: "LLMs are exceptionally good at looping until they meet specific goals... Don't tell it what to do, give it success criteria and watch it go."
+
+## License
+
+MIT`
+      }
+    ],
+    content: `# Karpathy-Inspired Claude Code Guidelines
+
+A single \`CLAUDE.md\` file to improve Claude Code behavior, derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls.
+
+## The Problems
+
+From Andrej's post:
+
+> "The models make wrong assumptions on your behalf and just run along with them without checking. They don't manage their confusion, don't seek clarifications, don't surface inconsistencies, don't present tradeoffs, don't push back when they should."
+
+> "They really like to overcomplicate code and APIs, bloat abstractions, don't clean up dead code... implement a bloated construction over 1000 lines when 100 would do."
+
+> "They still sometimes change/remove comments and code they don't sufficiently understand as side effects, even if orthogonal to the task."
+
+## The Solution
+
+Four principles in one file that directly address these issues:
+
+| Principle | Addresses |
+|-----------|-----------|
+| **Think Before Coding** | Wrong assumptions, hidden confusion, missing tradeoffs |
+| **Simplicity First** | Overcomplication, bloated abstractions |
+| **Surgical Changes** | Orthogonal edits, touching code you shouldn't |
+| **Goal-Driven Execution** | Leverage through tests-first, verifiable success criteria |
+
+## The Four Principles in Detail
+
+### 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+LLMs often pick an interpretation silently and run with it. This principle forces explicit reasoning:
+
+- **State assumptions explicitly** — If uncertain, ask rather than guess
+- **Present multiple interpretations** — Don't pick silently when ambiguity exists
+- **Push back when warranted** — If a simpler approach exists, say so
+- **Stop when confused** — Name what's unclear and ask for clarification
+
+### 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+Combat the tendency toward overengineering:
+
+- No features beyond what was asked
+- No abstractions for single-use code
+- No "flexibility" or "configurability" that wasn't requested
+- No error handling for impossible scenarios
+- If 200 lines could be 50, rewrite it
+
+**The test:** Would a senior engineer say this is overcomplicated? If yes, simplify.
+
+### 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+
+- Don't "improve" adjacent code, comments, or formatting
+- Don't refactor things that aren't broken
+- Match existing style, even if you'd do it differently
+- If you notice unrelated dead code, mention it — don't delete it
+
+When your changes create orphans:
+
+- Remove imports/variables/functions that YOUR changes made unused
+- Don't remove pre-existing dead code unless asked
+
+**The test:** Every changed line should trace directly to the user's request.
+
+### 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform imperative tasks into verifiable goals:
+
+| Instead of... | Transform to... |
+|--------------|-----------------|
+| "Add validation" | "Write tests for invalid inputs, then make them pass" |
+| "Fix the bug" | "Write a test that reproduces it, then make it pass" |
+| "Refactor X" | "Ensure tests pass before and after" |
+
+For multi-step tasks, state a brief plan:
+
+\`\`\`
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+\`\`\`
+
+Strong success criteria let the LLM loop independently. Weak criteria ("make it work") require constant clarification.
+
+## Install
+
+**Option A: Claude Code Plugin (recommended)**
+
+\`\`\`
+/plugin marketplace add forrestchang/andrej-karpathy-skills
+/plugin install andrej-karpathy-skills@karpathy-skills
+\`\`\`
+
+**Option B: CLAUDE.md (per-project)**
+
+\`\`\`bash
+curl -o CLAUDE.md https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/CLAUDE.md
+\`\`\`
+
+## Key Insight
+
+From Andrej:
+
+> "LLMs are exceptionally good at looping until they meet specific goals... Don't tell it what to do, give it success criteria and watch it go."
+
+## How to Know It's Working
+
+These guidelines are working if you see:
+
+- **Fewer unnecessary changes in diffs** — Only requested changes appear
+- **Fewer rewrites due to overcomplication** — Code is simple the first time
+- **Clarifying questions come before implementation** — Not after mistakes
+- **Clean, minimal PRs** — No drive-by refactoring or "improvements"
+
+## Customization
+
+These guidelines are designed to be merged with project-specific instructions. Add them to your existing \`CLAUDE.md\` or create a new one.
+
+## Tradeoff Note
+
+These guidelines bias toward **caution over speed**. For trivial tasks (simple typo fixes, obvious one-liners), use judgment — not every change needs the full rigor.
+
+## License
+
+MIT`
+  },
+
   {
     id: "claude-md",
     title: "CLAUDE.md",

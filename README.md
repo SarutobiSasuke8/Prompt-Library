@@ -25,7 +25,7 @@ prompt-library product.
 
 ## Site Screenshot
 
-![Prompt Library interface showing dark theme with prompt cards](./media/Site%20Screenshot%202026-04-24.png)
+![Prompt Library interface showing dark theme with prompt cards](./media/site-screenshot-2026-04-24.png)
 
 ## Branches
 

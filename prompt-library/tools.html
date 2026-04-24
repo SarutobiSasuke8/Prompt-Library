@@ -53,6 +53,10 @@
       position: absolute; top: 10px; right: 10px;
       min-height: 0; padding: 5px 6px;
     }
+    .my-tools-chip { display: inline-flex; align-items: center; }
+    .my-tools-chip.active { color: var(--bg) !important; background: var(--accent) !important; border-color: var(--accent) !important; }
+    .my-tools-chip.active svg { fill: var(--bg); }
+
     .tool-title { font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.2; }
     .tool-sub   { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top: 3px; letter-spacing: 0.04em; }
 
@@ -125,16 +129,24 @@
        Controls — filter chips (same pattern as library page)
        ========================================================== -->
   <section class="controls" aria-label="Filter tools">
+    <div class="filter-row" id="view-row" role="group" aria-label="View all or saved tools">
+      <span class="label">view</span>
+      <button class="chip active" data-view="all">all tools</button>
+      <button class="chip my-tools-chip" data-view="saved">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="width:10px;height:10px;display:inline-block;vertical-align:-1px;margin-right:4px;"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>my tools
+      </button>
+    </div>
+
     <div class="filter-row" id="group-row" role="group" aria-label="Filter by category">
       <span class="label">category</span>
       <button class="chip active" data-group="all">all</button>
       <button class="chip" data-group="chat">chat UIs</button>
       <button class="chip" data-group="coding">coding</button>
+      <button class="chip" data-group="creative">creative AI</button>
       <button class="chip" data-group="infra">infra</button>
       <button class="chip" data-group="local">local / self-host</button>
       <button class="chip" data-group="knowledge">knowledge</button>
       <button class="chip" data-group="agents">agents</button>
-      <button class="chip" data-group="saved">saved</button>
     </div>
 
     <div class="filter-row" id="pricing-row" role="group" aria-label="Filter by pricing">
@@ -240,7 +252,7 @@
       { id: 'agentops',   group: 'agents', mark: 'AO', icon: '',          name: 'AgentOps',   sub: 'observability',    pricing: 'freemium', url: 'https://agentops.ai/',                                      deepLink: 'none', purpose: 'Monitoring and observability for AI agents. Traces token usage, cost, and step-by-step execution across runs.' }
     ];
 
-    const state = { group: 'all', pricing: 'all', deeplink: 'all' };
+    const state = { view: 'all', group: 'all', pricing: 'all', deeplink: 'all' };
 
     // ---- Bookmarks — unified PL_BOOKMARKS store (bookmarks.js) ----
     const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
@@ -401,7 +413,7 @@
         bm.setAttribute('aria-pressed', on ? 'true' : 'false');
         bm.setAttribute('aria-label', on ? 'Remove from saved' : 'Save ' + t.name);
         bm.innerHTML = on ? BM_FILLED : BM_OUTLINE;
-        if (state.group === 'saved') render();
+        if (state.view === 'saved') render();
       });
 
       const el = document.createElement('div');
@@ -414,11 +426,10 @@
     }
 
     function matches(t) {
-      if (state.group === 'saved') {
+      if (state.view === 'saved') {
         if (!window.PL_BOOKMARKS || !window.PL_BOOKMARKS.isBookmarked('tool', t.id)) return false;
-      } else if (state.group !== 'all' && t.group !== state.group) {
-        return false;
       }
+      if (state.group !== 'all' && t.group !== state.group) return false;
       if (state.pricing  !== 'all' && t.pricing  !== state.pricing)  return false;
       if (state.deeplink !== 'all' && t.deepLink !== state.deeplink) return false;
       return true;
@@ -445,6 +456,7 @@
       });
     }
 
+    wireChips('view-row',     'view');
     wireChips('group-row',    'group');
     wireChips('pricing-row',  'pricing');
     wireChips('deeplink-row', 'deeplink');

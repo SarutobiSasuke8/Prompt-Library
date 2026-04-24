@@ -103,6 +103,37 @@
     .md-body a:hover { text-decoration: underline; }
     .md-body strong { color: var(--text); font-weight: 600; }
 
+    /* ---- bundle files ---- */
+    .md-bundle-files {
+      display: flex; flex-direction: column; gap: 8px;
+      margin: 0 0 24px;
+    }
+    .md-bundle-label {
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--text-faint); margin-bottom: 2px;
+    }
+    .md-bundle-row {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px;
+    }
+    .md-bundle-filename {
+      font-family: var(--mono); font-size: 12px; color: var(--text); flex: 1;
+    }
+    .md-bundle-copy, .md-bundle-dl {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 5px 10px; border-radius: var(--radius);
+      cursor: pointer; white-space: nowrap; transition: background 120ms, color 120ms;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .md-bundle-copy { color: var(--text-faint); background: var(--bg-2); border: 1px solid var(--border); }
+    .md-bundle-copy svg, .md-bundle-dl svg { width: 11px; height: 11px; display: block; }
+    .md-bundle-copy:hover { color: var(--accent); border-color: var(--accent-edge); }
+    .md-bundle-copy.copied { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+    .md-bundle-dl { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-edge); }
+    .md-bundle-dl:hover { background: var(--accent); color: var(--bg); }
+
     /* ---- tags row ---- */
     .md-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
 
@@ -258,6 +289,61 @@
     const dlBtn = document.getElementById("dl-btn");
     dlBtn.href     = m.file;
     dlBtn.download = m.file.split("/").pop();
+
+    // ---- bundle files section ----
+    if (m.files && m.files.length) {
+      var COPY_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>';
+      var DL_SVG2  = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>';
+
+      var bundleWrap = document.createElement("div");
+      bundleWrap.className = "md-bundle-files";
+      var lbl = document.createElement("div");
+      lbl.className = "md-bundle-label";
+      lbl.textContent = "Files in this bundle";
+      bundleWrap.appendChild(lbl);
+
+      m.files.forEach(function (f) {
+        var row = document.createElement("div");
+        row.className = "md-bundle-row";
+
+        var fname = document.createElement("span");
+        fname.className = "md-bundle-filename";
+        fname.textContent = f.label;
+
+        var copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "md-bundle-copy";
+        copyBtn.innerHTML = COPY_SVG + "<span>copy</span>";
+        copyBtn.addEventListener("click", (function (content, btn) {
+          return function () {
+            copyText(content).then(function () {
+              btn.querySelector("span").textContent = "copied";
+              btn.classList.add("copied");
+              showToast("Copied " + f.label);
+              setTimeout(function () { btn.querySelector("span").textContent = "copy"; btn.classList.remove("copied"); }, 1500);
+            });
+          };
+        })(f.content, copyBtn));
+
+        var dlBtn = document.createElement("a");
+        dlBtn.className = "md-bundle-dl";
+        dlBtn.innerHTML = DL_SVG2 + "<span>download</span>";
+        dlBtn.href = f.file;
+        dlBtn.download = f.filename;
+
+        row.appendChild(fname);
+        row.appendChild(copyBtn);
+        row.appendChild(dlBtn);
+        bundleWrap.appendChild(row);
+      });
+
+      var actionBar = document.getElementById("action-bar");
+      actionBar.parentNode.insertBefore(bundleWrap, actionBar.nextSibling);
+
+      // Update the main download button label for bundles
+      document.getElementById("dl-btn").querySelector("span").textContent = "readme";
+      document.getElementById("copy-btn").querySelector("span").textContent = "copy readme";
+    }
 
     // ---- render markdown ----
     document.getElementById("md-body").innerHTML = renderMd(m.content);

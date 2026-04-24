@@ -206,7 +206,7 @@
 </head>
 <body>
 
-  <div id="site-nav" data-active="methodology" data-sub="learn">
+  <div id="site-nav" data-active="articles" data-sub="learn">
     <div class="count-pill" id="read-time-pill" style="display:none;">
       <span class="num" id="read-time-val"></span>
       <span class="label">read</span>
@@ -280,7 +280,7 @@
 
       let html =
         '<div class="article-meta">' +
-          '<span class="card-cat">article</span>' +
+          '<span class="card-cat">' + escapeHtml(article.articleType || "article") + '</span>' +
           (tagsHtml ? tagsHtml : "") +
           '<span class="read-time">' + escapeHtml(article.readTime) + " read</span>" +
           (authorHtml ? authorHtml : "") +

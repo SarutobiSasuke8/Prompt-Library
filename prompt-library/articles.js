@@ -1,13 +1,14 @@
 // prompt-library — article data source
 // ---------------------------------------------------------------
 // Each entry follows this schema:
-//   id        unique integer, increment on add
-//   title     article title
-//   summary   one-line description shown on the listing card
-//   tags      array of lowercase tag strings
-//   readTime  estimated read time string e.g. "5 min"
-//   author    article author handle
-//   body      array of content blocks (see block types below)
+//   id          unique integer, increment on add
+//   title       article title
+//   summary     one-line description shown on the listing card
+//   articleType article classification — e.g. "methodology", "guide", "tutorial"
+//   tags        array of lowercase tag strings
+//   readTime    estimated read time string e.g. "5 min"
+//   author      article author handle
+//   body        array of content blocks (see block types below)
 //
 // Block types:
 //   { type: "p",       text: "..." }          paragraph
@@ -25,6 +26,7 @@ const ARTICLES = [
     title: "Role Prompting",
     summary: "How assigning a persona shapes model behaviour — and when it backfires.",
     tags: ["fundamentals", "technique", "persona"],
+    articleType: "methodology",
     readTime: "5 min",
     author: "SarutobiSasuke",
     body: [
@@ -54,6 +56,7 @@ const ARTICLES = [
     title: "Chain-of-Thought Prompting",
     summary: "Getting models to reason step-by-step before answering — and why it matters for accuracy.",
     tags: ["reasoning", "technique", "accuracy"],
+    articleType: "methodology",
     readTime: "6 min",
     author: "SarutobiSasuke",
     body: [
@@ -82,6 +85,7 @@ const ARTICLES = [
     title: "Temperature & Sampling",
     summary: "What temperature actually controls, and how to set it for your task.",
     tags: ["fundamentals", "parameters", "tuning"],
+    articleType: "methodology",
     readTime: "4 min",
     author: "SarutobiSasuke",
     body: [
@@ -109,6 +113,7 @@ const ARTICLES = [
     title: "Output Structuring",
     summary: "How to get reliable, parseable output from language models in production.",
     tags: ["production", "technique", "structured-output"],
+    articleType: "methodology",
     readTime: "5 min",
     author: "SarutobiSasuke",
     body: [
@@ -139,6 +144,7 @@ const ARTICLES = [
     title: "Prompt Chaining",
     summary: "Breaking complex tasks into sequential steps — and how to design the handoffs.",
     tags: ["architecture", "technique", "agents"],
+    articleType: "methodology",
     readTime: "6 min",
     author: "SarutobiSasuke",
     body: [
@@ -170,6 +176,7 @@ const ARTICLES = [
     title: "Red-Teaming Your Prompts",
     summary: "How to stress-test prompts before they hit production users.",
     tags: ["evaluation", "production", "testing"],
+    articleType: "methodology",
     readTime: "5 min",
     author: "SarutobiSasuke",
     body: [
@@ -209,6 +216,7 @@ const ARTICLES = [
     title: "The CRIT Framework",
     summary: "A four-part prompting structure — Context, Role, Interview, Task — for getting sharper AI output in business decisions.",
     tags: ["framework", "business", "technique", "fundamentals"],
+    articleType: "methodology",
     readTime: "7 min",
     author: "SarutobiSasuke",
     body: [
@@ -249,6 +257,7 @@ const ARTICLES = [
     title: "Obsidian as an AI Brain for Agents and Coding Agents",
     summary: "Why a plain-markdown vault is the highest-leverage long-term memory you can give an LLM — and how to wire it up.",
     tags: ["obsidian", "knowledge-management", "agents", "coding-agents", "mcp"],
+    articleType: "methodology",
     readTime: "8 min",
     author: "SarutobiSasuke",
     body: [

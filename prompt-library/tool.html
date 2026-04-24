@@ -59,7 +59,13 @@
     /* ---- Purpose ---- */
     .td-purpose {
       font-size: 16px; line-height: 1.7; color: var(--text-dim);
-      padding: 28px 0; border-bottom: 1px solid var(--border);
+      padding: 28px 0 20px;
+    }
+
+    /* ---- Description ---- */
+    .td-description {
+      font-size: 14px; line-height: 1.8; color: var(--text-dim);
+      padding-bottom: 28px; border-bottom: 1px solid var(--border);
     }
 
     /* ---- Action buttons ---- */
@@ -289,10 +295,17 @@
     heroDiv.appendChild(logoDiv);
     heroDiv.appendChild(identityDiv);
 
-    // ---- Purpose ----
+    // ---- Purpose + Description ----
     var purposeDiv = document.createElement('div');
     purposeDiv.className = 'td-purpose';
     purposeDiv.textContent = tool.purpose;
+
+    var descDiv = null;
+    if (tool.description) {
+      descDiv = document.createElement('div');
+      descDiv.className = 'td-description';
+      descDiv.textContent = tool.description;
+    }
 
     // ---- Action buttons ----
     var actionsDiv = document.createElement('div');
@@ -415,6 +428,7 @@
     wrap.appendChild(backLink);
     wrap.appendChild(heroDiv);
     wrap.appendChild(purposeDiv);
+    if (descDiv) wrap.appendChild(descDiv);
     wrap.appendChild(actionsDiv);
     while (rcDiv.firstChild) wrap.appendChild(rcDiv.firstChild);
     if (relatedDiv) wrap.appendChild(relatedDiv);

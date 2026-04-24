@@ -123,7 +123,7 @@
       function buildCard(m) {
         const card = document.createElement("a");
         card.className = "md-card";
-        card.href = "md.html?id=" + encodeURIComponent(m.id);
+        card.href = "md.html#" + encodeURIComponent(m.id);
 
         const head = document.createElement("div");
         head.className = "md-card-head";

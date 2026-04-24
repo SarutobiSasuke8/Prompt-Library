@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent &middot; prompt-library</title>
+  <meta name="description" content="AI agent detail — prompt-library" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .agent-detail-wrap { max-width: 800px; margin: 0 auto 80px; padding: 0 18px; }
+
+    /* ---- Hero ---- */
+    .ad-hero {
+      display: flex; align-items: flex-start; gap: 24px;
+      padding: 32px 0 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ad-logo {
+      width: 72px; height: 72px; flex: 0 0 72px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; position: relative; overflow: hidden;
+    }
+    .ad-logo img.si-logo { width: 36px; height: 36px; display: block; filter: var(--logo-filter); }
+    .ad-logo img.cb-logo { width: 52px; height: 52px; display: block; border-radius: 4px; }
+    .ad-logo .ad-monogram {
+      font-family: var(--mono); font-size: 20px; font-weight: 600;
+      color: var(--text-dim); letter-spacing: -0.03em;
+    }
+
+    .ad-identity { flex: 1 1 auto; min-width: 0; }
+    .ad-name { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.15; }
+    .ad-sub  { font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin-top: 4px; letter-spacing: 0.04em; }
+    .ad-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .ad-badge {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+      padding: 3px 8px; border: 1px solid var(--border); color: var(--text-faint);
+      border-radius: 2px; text-transform: lowercase;
+    }
+    .ad-badge.group { color: var(--text-dim); }
+
+    .ad-bm-btn {
+      position: absolute; top: 14px; right: 14px;
+    }
+
+    /* ---- Purpose + context ---- */
+    .ad-purpose {
+      font-size: 16px; line-height: 1.7; color: var(--text-dim);
+      padding: 28px 0 20px;
+    }
+    .ad-context {
+      font-size: 14px; line-height: 1.8; color: var(--text-dim);
+      padding-bottom: 28px; border-bottom: 1px solid var(--border);
+      white-space: pre-wrap;
+    }
+
+    /* ---- Actions ---- */
+    .ad-actions {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .ad-btn {
+      font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+      color: var(--text); text-decoration: none;
+      border: 1px solid var(--border); background: var(--bg-1);
+      padding: 9px 16px; border-radius: 2px;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: border-color 120ms, color 120ms;
+    }
+    .ad-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ad-btn.primary {
+      background: var(--accent); border-color: var(--accent);
+      color: var(--bg); font-weight: 600;
+    }
+    .ad-btn.primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); color: var(--bg); }
+    .ad-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    /* ---- Tags ---- */
+    .ad-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 24px 0 0; }
+
+    /* ---- Related ---- */
+    .ad-related { padding-top: 28px; }
+    .ad-related-title {
+      font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-faint); margin-bottom: 14px;
+    }
+    .ad-related-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+    @media (min-width: 560px) { .ad-related-grid { grid-template-columns: repeat(2, 1fr); } }
+    .ad-rel-card {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 2px; padding: 12px 14px;
+      text-decoration: none; color: inherit;
+      transition: border-color 120ms;
+    }
+    .ad-rel-card:hover { border-color: var(--text-faint); }
+    .ad-rel-mark {
+      width: 36px; height: 36px; flex: 0 0 36px;
+      background: var(--bg-2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 2px; overflow: hidden; position: relative;
+    }
+    .ad-rel-mark img { width: 18px; height: 18px; display: block; filter: var(--logo-filter); }
+    .ad-rel-mark .rel-mono { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text-dim); }
+    .ad-rel-name { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text); }
+    .ad-rel-sub  { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+
+    .ad-back {
+      font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      padding: 32px 0 12px;
+      transition: color 120ms;
+    }
+    .ad-back:hover { color: var(--text); }
+
+    .ad-404 { padding: 80px 0; text-align: center; color: var(--text-dim); }
+    .ad-404 strong { display: block; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div id="site-nav" data-active="agents" data-sub="agent"></div>
+
+  <div class="agent-detail-wrap" id="agent-detail">
+    <div class="ad-404 hidden" id="ad-404">
+      <strong>Agent not found</strong>
+      <a href="agents.html" style="color:var(--accent);">Browse all agents</a>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="agents.js"></script>
+  <script src="bookmarks.js"></script>
+  <script src="ratings.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var EXTERNAL_ICON =
+      '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M7 1h4v4M11 1 5 7"/>' +
+        '<path d="M5 3H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V8"/>' +
+      '</svg>';
+    var GITHUB_ICON =
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>' +
+      '</svg>';
+    var X_ICON =
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>' +
+      '</svg>';
+    var BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+    var BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
+    function domainFrom(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ''); } catch (_) { return ''; }
+    }
+    function siUrl(slug) { return slug ? 'https://cdn.simpleicons.org/' + slug + '/e6e6e6' : ''; }
+    function clearbitUrl(domain) { return domain ? 'https://logo.clearbit.com/' + domain : ''; }
+    function groupLabel(g) {
+      return (typeof AGENT_GROUPS !== 'undefined' && AGENT_GROUPS[g]) ? AGENT_GROUPS[g] : g;
+    }
+
+    var params  = new URLSearchParams(window.location.search);
+    var agentId = params.get('id') || '';
+    var agent   = (typeof AGENTS !== 'undefined') ? AGENTS.filter(function (a) { return a.id === agentId; })[0] : null;
+
+    var wrap = document.getElementById('agent-detail');
+    if (!agent) {
+      document.getElementById('ad-404').classList.remove('hidden');
+      return;
+    }
+
+    document.title = agent.name + ' \u00B7 prompt-library';
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.content = agent.purpose;
+    var navMount = document.getElementById('site-nav');
+    if (navMount) navMount.setAttribute('data-sub', agent.name.toLowerCase());
+
+    var domain = domainFrom(agent.url);
+
+    // ---- Logo ----
+    var logoDiv = document.createElement('div');
+    logoDiv.className = 'ad-logo';
+    if (agent.icon) {
+      var siImg = document.createElement('img');
+      siImg.className = 'si-logo';
+      siImg.alt = ''; siImg.src = siUrl(agent.icon);
+      siImg.onerror = function () { siImg.remove(); tryClearbit(); };
+      logoDiv.appendChild(siImg);
+    } else {
+      tryClearbit();
+    }
+    function tryClearbit() {
+      if (!domain) { showMonogram(); return; }
+      var cbImg = document.createElement('img');
+      cbImg.className = 'cb-logo';
+      cbImg.alt = ''; cbImg.src = clearbitUrl(domain);
+      cbImg.onerror = function () { cbImg.remove(); showMonogram(); };
+      logoDiv.appendChild(cbImg);
+    }
+    function showMonogram() {
+      var el = document.createElement('span');
+      el.className = 'ad-monogram';
+      el.textContent = agent.mark;
+      logoDiv.appendChild(el);
+    }
+
+    // ---- Badges ----
+    function badge(text, cls) {
+      var s = document.createElement('span');
+      s.className = 'ad-badge' + (cls ? ' ' + cls : '');
+      s.textContent = text;
+      return s;
+    }
+    var badgesDiv = document.createElement('div');
+    badgesDiv.className = 'ad-badges';
+    badgesDiv.appendChild(badge(groupLabel(agent.group), 'group'));
+
+    // ---- Identity ----
+    var nameEl = document.createElement('div'); nameEl.className = 'ad-name'; nameEl.textContent = agent.name;
+    var subEl  = document.createElement('div'); subEl.className  = 'ad-sub';  subEl.textContent  = agent.sub;
+
+    var identityDiv = document.createElement('div');
+    identityDiv.className = 'ad-identity';
+    identityDiv.appendChild(nameEl);
+    identityDiv.appendChild(subEl);
+    identityDiv.appendChild(badgesDiv);
+
+    // ---- Bookmark ----
+    var bmBtn = document.createElement('button');
+    bmBtn.type = 'button';
+    bmBtn.className = 'bookmark-btn ad-bm-btn';
+    bmBtn.setAttribute('aria-label', 'Save ' + agent.name);
+    function applyBm(saved) {
+      bmBtn.classList.toggle('saved', saved);
+      bmBtn.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+      bmBtn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    }
+    if (window.PL_BOOKMARKS) {
+      applyBm(window.PL_BOOKMARKS.isBookmarked('agent', agent.id));
+      bmBtn.addEventListener('click', function () {
+        applyBm(window.PL_BOOKMARKS.toggle('agent', agent.id));
+      });
+    } else {
+      applyBm(false);
+    }
+
+    var heroDiv = document.createElement('div');
+    heroDiv.className = 'ad-hero';
+    heroDiv.style.position = 'relative';
+    heroDiv.appendChild(logoDiv);
+    heroDiv.appendChild(identityDiv);
+    heroDiv.appendChild(bmBtn);
+
+    // ---- Purpose + context ----
+    var purposeDiv = document.createElement('div');
+    purposeDiv.className = 'ad-purpose';
+    purposeDiv.textContent = agent.purpose;
+
+    var contextDiv = null;
+    if (agent.context) {
+      contextDiv = document.createElement('div');
+      contextDiv.className = 'ad-context';
+      contextDiv.textContent = agent.context;
+    }
+
+    // ---- Actions ----
+    var actionsDiv = document.createElement('div');
+    actionsDiv.className = 'ad-actions';
+    function actionBtn(href, iconSvg, label, primary) {
+      if (!href) return null;
+      var a = document.createElement('a');
+      a.href = href; a.target = '_blank'; a.rel = 'noopener';
+      a.className = 'ad-btn' + (primary ? ' primary' : '');
+      a.innerHTML = iconSvg + label + (primary ? ' ' + EXTERNAL_ICON : '');
+      return a;
+    }
+    var visitBtn = actionBtn(agent.url, '', 'Visit website', true);
+    if (visitBtn) actionsDiv.appendChild(visitBtn);
+    if (agent.github) {
+      var ghBtn = actionBtn(agent.github, GITHUB_ICON, 'GitHub', false);
+      if (ghBtn) actionsDiv.appendChild(ghBtn);
+    }
+    if (agent.x) {
+      var xBtn = actionBtn(agent.x, X_ICON, 'Follow on X', false);
+      if (xBtn) actionsDiv.appendChild(xBtn);
+    }
+
+    // ---- Tags ----
+    var tagsDiv = null;
+    if (agent.tags && agent.tags.length) {
+      tagsDiv = document.createElement('div');
+      tagsDiv.className = 'ad-tags';
+      agent.tags.forEach(function (t) {
+        var s = document.createElement('span');
+        s.className = 'tag'; s.textContent = '#' + t;
+        tagsDiv.appendChild(s);
+      });
+    }
+
+    // ---- Related (same group) ----
+    var related = (typeof AGENTS !== 'undefined')
+      ? AGENTS.filter(function (a) { return a.id !== agent.id && a.group === agent.group; }).slice(0, 4)
+      : [];
+    var relatedDiv = null;
+    if (related.length > 0) {
+      relatedDiv = document.createElement('div');
+      relatedDiv.className = 'ad-related';
+      var relTitle = document.createElement('div');
+      relTitle.className = 'ad-related-title';
+      relTitle.textContent = 'More ' + groupLabel(agent.group).toLowerCase() + 's';
+      relatedDiv.appendChild(relTitle);
+      var grid = document.createElement('div');
+      grid.className = 'ad-related-grid';
+      related.forEach(function (rt) {
+        var card = document.createElement('a');
+        card.href = 'agent.html?id=' + encodeURIComponent(rt.id);
+        card.className = 'ad-rel-card';
+        var markDiv = document.createElement('div');
+        markDiv.className = 'ad-rel-mark';
+        if (rt.icon) {
+          var img = document.createElement('img');
+          img.alt = ''; img.src = siUrl(rt.icon);
+          img.onerror = function () {
+            img.remove();
+            var mono = document.createElement('span');
+            mono.className = 'rel-mono'; mono.textContent = rt.mark;
+            markDiv.appendChild(mono);
+          };
+          markDiv.appendChild(img);
+        } else {
+          var mono = document.createElement('span');
+          mono.className = 'rel-mono'; mono.textContent = rt.mark;
+          markDiv.appendChild(mono);
+        }
+        var info = document.createElement('div');
+        var rName = document.createElement('div'); rName.className = 'ad-rel-name'; rName.textContent = rt.name;
+        var rSub  = document.createElement('div'); rSub.className  = 'ad-rel-sub';  rSub.textContent  = rt.sub;
+        info.appendChild(rName); info.appendChild(rSub);
+        card.appendChild(markDiv); card.appendChild(info);
+        grid.appendChild(card);
+      });
+      relatedDiv.appendChild(grid);
+    }
+
+    // ---- Back link ----
+    var backLink = document.createElement('a');
+    backLink.href = 'agents.html';
+    backLink.className = 'ad-back';
+    backLink.innerHTML = '&larr; all agents';
+
+    // ---- Rating + comments ----
+    var rcHtml =
+      '<div class="section-divider"><span>rating</span><hr /></div>' +
+      '<div class="rating-widget">' +
+        '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this agent"></div>' +
+        '<span class="rating-count" id="rating-count">not yet rated</span>' +
+      '</div>' +
+      '<div class="section-divider"><span>comments</span><hr /></div>' +
+      '<div class="comments-section">' +
+        '<div class="comment-list" id="comment-list">' +
+          '<div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>' +
+        '</div>' +
+        '<div class="comment-input-row">' +
+          '<input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />' +
+          '<button class="comment-submit" id="comment-submit" type="button">post</button>' +
+        '</div>' +
+      '</div>';
+    var rcDiv = document.createElement('div');
+    rcDiv.innerHTML = rcHtml;
+
+    // ---- Assemble ----
+    wrap.appendChild(backLink);
+    wrap.appendChild(heroDiv);
+    wrap.appendChild(purposeDiv);
+    if (contextDiv) wrap.appendChild(contextDiv);
+    wrap.appendChild(actionsDiv);
+    if (tagsDiv) wrap.appendChild(tagsDiv);
+    while (rcDiv.firstChild) wrap.appendChild(rcDiv.firstChild);
+    if (relatedDiv) wrap.appendChild(relatedDiv);
+
+    if (window.PL_RATINGS) window.PL_RATINGS.mount({ type: 'agent', id: agent.id });
+
+  })();
+  </script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+</body>
+</html>

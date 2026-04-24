@@ -185,45 +185,7 @@
       <span>frameworks &amp; models</span><hr />
     </div>
 
-    <div class="pattern-grid">
-
-      <!-- OpenClaw -->
-      <div class="pattern-card">
-        <div class="pattern-head">
-          <div class="pattern-title">OpenClaw</div>
-          <span class="pattern-badge">framework</span>
-        </div>
-        <p class="pattern-desc">
-          An open-source agent framework for building autonomous AI systems with
-          structured tool use and multi-step reasoning.
-        </p>
-        <div class="pattern-footer">
-          <span class="pattern-tag">agent</span>
-          <span class="pattern-tag">framework</span>
-          <span class="pattern-tag">open-source</span>
-          <a class="pattern-link" href="https://openclaw.ai/" target="_blank" rel="noopener">visit &rarr;</a>
-        </div>
-      </div>
-
-      <!-- Hermes -->
-      <div class="pattern-card">
-        <div class="pattern-head">
-          <div class="pattern-title">Hermes</div>
-          <span class="pattern-badge">model</span>
-        </div>
-        <p class="pattern-desc">
-          Nous Research's fine-tuned model series optimised for instruction-following,
-          function calling, and agentic task execution.
-        </p>
-        <div class="pattern-footer">
-          <span class="pattern-tag">model</span>
-          <span class="pattern-tag">fine-tuned</span>
-          <span class="pattern-tag">function-calling</span>
-          <a class="pattern-link" href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener">visit &rarr;</a>
-        </div>
-      </div>
-
-    </div>
+    <div class="pattern-grid" id="agents-grid"></div>
 
     <!-- ---- Patterns ---- -->
     <div class="section-rule">
@@ -495,10 +457,48 @@
        ================================================================ -->
   <div id="site-footer"></div>
 
+  <script src="agents.js"></script>
   <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script>
+    (function () {
+      "use strict";
+
+      // Render Frameworks & Models cards from AGENTS data.
+      const agentsGrid = document.getElementById("agents-grid");
+      if (agentsGrid && typeof AGENTS !== "undefined") {
+        const frag = document.createDocumentFragment();
+        AGENTS.forEach(function (a) {
+          const card = document.createElement("a");
+          card.className = "pattern-card";
+          card.href = "agent.html?id=" + encodeURIComponent(a.id);
+          card.style.textDecoration = "none";
+          card.style.color = "inherit";
+          card.innerHTML =
+            '<div class="pattern-head">' +
+              '<div class="pattern-title">' + escapeHtml(a.name) + '</div>' +
+              '<span class="pattern-badge">' + escapeHtml(a.group) + '</span>' +
+            '</div>' +
+            '<p class="pattern-desc">' + escapeHtml(a.purpose) + '</p>' +
+            '<div class="pattern-footer">' +
+              (a.tags || []).slice(0, 3).map(function (t) {
+                return '<span class="pattern-tag">' + escapeHtml(t) + '</span>';
+              }).join("") +
+              '<span class="pattern-link" style="margin-left:auto;">open &rarr;</span>' +
+            '</div>';
+          frag.appendChild(card);
+        });
+        agentsGrid.appendChild(frag);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+    })();
+
     (function () {
       "use strict";
       const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';

@@ -728,6 +728,7 @@
   <script src="prompts.js"></script>
   <script src="articles.js"></script>
   <script src="mds.js"></script>
+  <script src="agents.js"></script>
   <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
@@ -984,20 +985,36 @@
         const ids = window.PL_BOOKMARKS ? (window.PL_BOOKMARKS.load().agent || []) : [];
         $empty.classList.toggle("hidden", ids.length > 0);
         if (!ids.length) return;
+        const agentMap = {};
+        if (typeof AGENTS !== "undefined") AGENTS.forEach((a) => { agentMap[a.id] = a; });
         const frag = document.createDocumentFragment();
         ids.forEach((id) => {
-          const title = String(id).split("-").map((w) => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ");
+          const a = agentMap[id];
           const card = document.createElement("a");
           card.className = "article-card";
-          card.href = "agents.html";
-          card.innerHTML =
-            '<div class="article-card-head">' +
-              '<span class="card-cat">agent</span>' +
-            '</div>' +
-            '<h3>' + escapeHtml(title) + '</h3>' +
-            '<div class="article-card-foot">' +
-              '<span class="read-cta" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--accent);">view &rarr;</span>' +
-            '</div>';
+          if (a) {
+            card.href = "agent.html?id=" + encodeURIComponent(id);
+            card.innerHTML =
+              '<div class="article-card-head">' +
+                '<span class="card-cat">' + escapeHtml(a.group || "agent") + '</span>' +
+              '</div>' +
+              '<h3>' + escapeHtml(a.name) + '</h3>' +
+              '<p>' + escapeHtml(a.purpose || "") + '</p>' +
+              '<div class="article-card-foot">' +
+                (a.tags || []).slice(0, 3).map((t) => '<span class="tag">#' + escapeHtml(t) + '</span>').join("") +
+                '<span class="read-cta" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--accent);">view &rarr;</span>' +
+              '</div>';
+          } else {
+            // Legacy / pattern-card bookmark without a detail page — link back to agents.html.
+            const title = String(id).split("-").map((w) => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ");
+            card.href = "agents.html";
+            card.innerHTML =
+              '<div class="article-card-head"><span class="card-cat">agent pattern</span></div>' +
+              '<h3>' + escapeHtml(title) + '</h3>' +
+              '<div class="article-card-foot">' +
+                '<span class="read-cta" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--accent);">view &rarr;</span>' +
+              '</div>';
+          }
           frag.appendChild(card);
         });
         $grid.appendChild(frag);

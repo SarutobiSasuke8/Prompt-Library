@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt &middot; prompt-library</title>
+  <meta name="description" content="Prompt detail — prompt-library" />
+
+  <meta property="og:title" content="prompt-library" />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .pd-wrap {
+      max-width: 800px; margin: 0 auto 80px; padding: 0 18px;
+    }
+
+    /* ---- back + breadcrumb ---- */
+    .pd-back {
+      font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      padding: 28px 0 16px;
+      transition: color 120ms;
+    }
+    .pd-back:hover { color: var(--text); }
+
+    /* ---- header ---- */
+    .pd-header {
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pd-meta {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .pd-id {
+      font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+    .pd-title {
+      font-family: var(--sans); font-size: 26px; font-weight: 700;
+      color: var(--text); line-height: 1.2; margin: 0 0 10px;
+    }
+    .pd-purpose {
+      font-size: 15px; color: var(--text-dim); line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ---- action toolbar ---- */
+    .pd-toolbar {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 20px 0; border-bottom: 1px solid var(--border);
+    }
+    .pd-btn {
+      font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+      color: var(--text); text-decoration: none;
+      border: 1px solid var(--border); background: var(--bg-1);
+      padding: 8px 14px; border-radius: 2px;
+      display: inline-flex; align-items: center; gap: 6px;
+      cursor: pointer; transition: border-color 120ms, color 120ms;
+    }
+    .pd-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .pd-btn.primary {
+      background: var(--accent); border-color: var(--accent);
+      color: var(--bg); font-weight: 600;
+    }
+    .pd-btn.primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); color: var(--bg); }
+    .pd-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+    /* "Use in" dropdown */
+    .use-in-wrap { position: relative; }
+    .use-in-menu {
+      display: none; position: absolute; top: calc(100% + 4px); right: 0;
+      background: var(--bg-1); border: 1px solid var(--border-2);
+      border-radius: var(--radius); z-index: 10;
+      min-width: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .use-in-menu.open { display: block; }
+    .use-in-menu a {
+      display: block; padding: 8px 12px;
+      font-family: var(--mono); font-size: 12px; color: var(--text);
+      text-decoration: none; border-bottom: 1px solid var(--border);
+      transition: color 100ms, background 100ms;
+    }
+    .use-in-menu a:last-child { border-bottom: none; }
+    .use-in-menu a:hover { color: var(--accent); background: var(--bg-2); }
+
+    /* ---- prompt block ---- */
+    .pd-section { padding: 24px 0; border-bottom: 1px solid var(--border); }
+    .pd-section-title {
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--text-faint); margin: 0 0 12px;
+    }
+    .prompt-block {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 2px; overflow: hidden;
+    }
+    .prompt-block pre {
+      margin: 0; padding: 18px;
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.65;
+      color: var(--text); white-space: pre-wrap; word-break: break-word;
+      max-height: 440px; overflow-y: auto;
+    }
+
+    /* ---- details grid ---- */
+    .pd-details {
+      display: grid; grid-template-columns: auto 1fr;
+      gap: 8px 20px; font-size: 13px;
+    }
+    .pd-details dt {
+      font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+      letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+      padding-top: 2px;
+    }
+    .pd-details dd {
+      margin: 0; color: var(--text-dim); word-break: break-word;
+    }
+
+    /* ---- variable slots ---- */
+    .vars-panel {
+      background: var(--bg-1); border: 1px solid var(--border-2);
+      border-radius: 2px; padding: 16px;
+    }
+    .vars-panel-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .vars-panel-label {
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--text-faint);
+    }
+    .vars-reset {
+      font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+      background: none; border: none; cursor: pointer; padding: 0;
+      transition: color 120ms;
+    }
+    .vars-reset:hover { color: var(--text); }
+    .vars-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+    @media (min-width: 560px) { .vars-grid { grid-template-columns: repeat(2, 1fr); } }
+    .var-field label {
+      display: block; font-family: var(--mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-faint); margin-bottom: 5px;
+    }
+    .var-field input {
+      width: 100%; background: var(--bg-2); border: 1px solid var(--border-2);
+      border-radius: var(--radius); color: var(--text);
+      font-family: var(--mono); font-size: 12.5px; padding: 8px 10px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .var-field input:focus { border-color: var(--accent); }
+
+    /* ---- ratings ---- */
+    .pd-stars { display: flex; gap: 4px; align-items: center; }
+    .pd-star {
+      font-size: 22px; background: none; border: none;
+      cursor: pointer; padding: 0 2px; line-height: 1; transition: transform 0.1s;
+    }
+    .pd-star:hover { transform: scale(1.15); }
+
+    /* ---- comments ---- */
+    .pd-comments-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+    .comment {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .comment-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg-3); border: 1px solid var(--border-2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0;
+    }
+    .comment-meta {
+      display: flex; gap: 8px; align-items: baseline; margin-bottom: 3px;
+    }
+    .comment-author { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+    .comment-time   { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
+    .comment-body   { font-size: 13.5px; color: var(--text-dim); line-height: 1.5; }
+    .comment-input-row { display: flex; gap: 8px; }
+    .comment-input-row input {
+      flex: 1; background: var(--bg-2); border: 1px solid var(--border-2);
+      border-radius: var(--radius); color: var(--text);
+      font-family: var(--mono); font-size: 13px; padding: 9px 12px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .comment-input-row input:focus { border-color: var(--accent); }
+    .comment-submit {
+      font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--bg); background: var(--accent);
+      border: none; padding: 9px 16px; border-radius: var(--radius);
+      cursor: pointer; transition: background 0.12s; white-space: nowrap;
+    }
+    .comment-submit:hover { background: var(--accent-dim); }
+
+    /* ---- related prompts ---- */
+    .pd-related-grid { display: flex; flex-direction: column; gap: 8px; }
+    .pd-rel-card {
+      display: block; text-decoration: none; color: inherit;
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 2px; padding: 12px 14px;
+      transition: border-color 120ms;
+    }
+    .pd-rel-card:hover { border-color: var(--accent-edge); }
+    .pd-rel-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .pd-rel-title { font-weight: 600; font-size: 13.5px; color: var(--text); margin-bottom: 4px; }
+    .pd-rel-purpose { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+
+    /* ---- 404 ---- */
+    .pd-404 { padding: 80px 0; text-align: center; color: var(--text-dim); }
+    .pd-404 strong { display: block; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+
+    /* ---- toast ---- */
+    /* uses global .toast from style.css */
+
+    /* ---- social row ---- */
+    .pd-social {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="site-nav" data-active="library" data-sub="prompt"></div>
+
+  <div class="pd-wrap" id="pd-wrap">
+    <div class="pd-404 hidden" id="pd-404">
+      <strong>Prompt not found</strong>
+      <a href="index.html" style="color:var(--accent);">Browse all prompts</a>
+    </div>
+  </div>
+
+  <div class="toast" id="pd-toast"></div>
+  <div id="site-footer"></div>
+
+  <script src="prompts.js"></script>
+  <script src="bookmarks.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    // ---- helpers ----
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function el(tag, cls, html) {
+      var d = document.createElement(tag);
+      if (cls) d.className = cls;
+      if (html != null) d.innerHTML = html;
+      return d;
+    }
+    function showToast(msg) {
+      var t = document.getElementById("pd-toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(function () { t.classList.remove("show"); }, 1400);
+    }
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); }
+      catch (_) {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.cssText = "position:fixed;opacity:0;";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+    }
+
+    // ---- resolve prompt ----
+    var params = new URLSearchParams(window.location.search);
+    var promptId = parseInt(params.get("id") || "0", 10);
+    var p = (typeof PROMPTS !== "undefined") ? PROMPTS.filter(function (x) { return x.id === promptId; })[0] : null;
+
+    var wrap = document.getElementById("pd-wrap");
+
+    if (!p) {
+      document.getElementById("pd-404").classList.remove("hidden");
+      return;
+    }
+
+    var catLabel = (typeof CATEGORIES !== "undefined" && CATEGORIES[p.category]) ? CATEGORIES[p.category] : p.category;
+
+    // ---- update page meta ----
+    document.title = p.title + " \u00B7 prompt-library";
+    var metaDesc = document.querySelector("meta[name='description']");
+    if (metaDesc) metaDesc.content = p.purpose;
+    var ogTitle = document.querySelector("meta[property='og:title']");
+    if (ogTitle) ogTitle.content = p.title + " \u00B7 prompt-library";
+
+    // ---- update nav sub ----
+    var navMount = document.getElementById("site-nav");
+    if (navMount) navMount.setAttribute("data-sub", catLabel.toLowerCase());
+
+    // --------------------------------------------------------
+    // Build page
+    // --------------------------------------------------------
+    var isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("prompt", p.id) : false;
+    var idStr = String(p.id).padStart(3, "0");
+    var rawPrompt = p.prompt;
+
+    // ---- back link ----
+    var backLink = el("a", "pd-back", "&larr; all prompts");
+    backLink.href = "index.html";
+
+    // ---- header ----
+    var meta = el("div", "pd-meta");
+
+    var idSpan = el("span", "pd-id", "#" + esc(idStr));
+    meta.appendChild(idSpan);
+
+    var catSpan = el("span", "card-cat", esc(catLabel));
+    meta.appendChild(catSpan);
+
+    var complexitySpan = el("span", "badge " + p.complexity, esc(p.complexity));
+    meta.appendChild(complexitySpan);
+
+    // Bookmark button in meta
+    var bkSvgOutline = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+    var bkSvgFilled  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+    var bkBtn = el("button", "bookmark-btn" + (isSaved ? " saved" : ""), isSaved ? bkSvgFilled : bkSvgOutline);
+    bkBtn.type = "button";
+    bkBtn.setAttribute("aria-label", isSaved ? "Remove from saved" : "Save");
+    bkBtn.setAttribute("aria-pressed", isSaved ? "true" : "false");
+    bkBtn.style.marginLeft = "auto";
+    bkBtn.addEventListener("click", function () {
+      if (!window.PL_BOOKMARKS) return;
+      var now = window.PL_BOOKMARKS.toggle("prompt", p.id);
+      bkBtn.classList.toggle("saved", now);
+      bkBtn.setAttribute("aria-pressed", now ? "true" : "false");
+      bkBtn.setAttribute("aria-label", now ? "Remove from saved" : "Save");
+      bkBtn.innerHTML = now ? bkSvgFilled : bkSvgOutline;
+      showToast(now ? "Saved" : "Removed");
+    });
+    meta.appendChild(bkBtn);
+
+    var title = el("h2", "pd-title", esc(p.title));
+    var purpose = el("p", "pd-purpose", esc(p.purpose));
+
+    var header = el("div", "pd-header");
+    header.appendChild(meta);
+    header.appendChild(title);
+    header.appendChild(purpose);
+
+    // ---- toolbar ----
+    var toolbar = el("div", "pd-toolbar");
+
+    // Copy button
+    var copyBtn = el("button", "pd-btn primary", "Copy");
+    copyBtn.type = "button";
+    copyBtn.addEventListener("click", async function () {
+      await copyText($promptPre.textContent);
+      copyBtn.classList.add("copied");
+      copyBtn.classList.remove("primary");
+      copyBtn.textContent = "Copied ✓";
+      showToast("Prompt copied");
+      var key = "pl_copies_" + p.id;
+      var next = parseInt(localStorage.getItem(key) || "0", 10) + 1;
+      localStorage.setItem(key, next);
+      var countEl = document.getElementById("pd-copy-count");
+      if (countEl) countEl.textContent = next;
+      setTimeout(function () {
+        copyBtn.classList.remove("copied");
+        copyBtn.classList.add("primary");
+        copyBtn.textContent = "Copy";
+      }, 1500);
+    });
+    toolbar.appendChild(copyBtn);
+
+    // Use in dropdown
+    var useInWrap = el("div", "use-in-wrap");
+    var useInBtn = el("button", "pd-btn", "Use in ▾");
+    useInBtn.type = "button";
+    var useInMenu = el("div", "use-in-menu");
+    var USE_IN_TARGETS = {
+      "ChatGPT":    "https://chat.openai.com/",
+      "Claude":     "https://claude.ai/new",
+      "Perplexity": "https://www.perplexity.ai/",
+      "t3.chat":    "https://t3.chat/"
+    };
+    Object.keys(USE_IN_TARGETS).forEach(function (label) {
+      var a = el("a", "", esc(label));
+      a.href = "#";
+      a.addEventListener("click", async function (e) {
+        e.preventDefault();
+        await copyText($promptPre.textContent);
+        showToast("Copied — paste into " + label);
+        useInMenu.classList.remove("open");
+        window.open(USE_IN_TARGETS[label], "_blank", "noopener");
+      });
+      useInMenu.appendChild(a);
+    });
+    useInBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      useInMenu.classList.toggle("open");
+    });
+    document.addEventListener("click", function () { useInMenu.classList.remove("open"); });
+    useInWrap.appendChild(useInBtn);
+    useInWrap.appendChild(useInMenu);
+    toolbar.appendChild(useInWrap);
+
+    // Run in playground
+    var runBtn = el("a", "pd-btn", "&#9654; Run");
+    runBtn.href = "playground.html?id=" + p.id;
+    runBtn.style.color = "var(--accent)";
+    runBtn.style.borderColor = "var(--accent-edge)";
+    toolbar.appendChild(runBtn);
+
+    // Share button
+    var shareSvg =
+      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:13px;height:13px;">' +
+        '<path d="M5 8H3v6h10V8h-2"/>' +
+        '<path d="M8 1v7M5.5 3.5L8 1l2.5 2.5"/>' +
+      '</svg>';
+    var shareBtn = el("button", "pd-btn", shareSvg + " Share");
+    shareBtn.type = "button";
+    shareBtn.addEventListener("click", async function () {
+      var url = window.location.href;
+      if (navigator.share) {
+        try { await navigator.share({ url: url, title: p.title, text: p.purpose }); return; } catch (_) {}
+      }
+      await copyText(url);
+      showToast("Link copied");
+    });
+    toolbar.appendChild(shareBtn);
+
+    // ---- prompt pre ----
+    var $promptPre = el("pre", "", "");
+    $promptPre.textContent = rawPrompt;
+    var promptBlock = el("div", "prompt-block");
+    promptBlock.appendChild($promptPre);
+
+    var promptSection = el("div", "pd-section");
+    promptSection.appendChild(el("div", "pd-section-title", "System prompt"));
+    promptSection.appendChild(promptBlock);
+
+    // ---- variable slots ----
+    var vars = p.variables || [];
+    if (!vars.length) {
+      var seen = {};
+      var re = /\{\{([A-Z0-9_]+)\}\}/g;
+      var m;
+      while ((m = re.exec(rawPrompt)) !== null) {
+        if (!seen[m[1]]) {
+          seen[m[1]] = true;
+          vars.push({ key: m[1], label: m[1].toLowerCase().replace(/_/g, " "), placeholder: "" });
+        }
+      }
+    }
+    var varsSection = null;
+    if (vars.length) {
+      var fieldsHtml = vars.map(function (v) {
+        return '<div class="var-field">' +
+          '<label for="var-' + esc(v.key) + '">' + esc(v.label) + '</label>' +
+          '<input id="var-' + esc(v.key) + '" data-var-key="' + esc(v.key) + '" type="text" placeholder="' + esc(v.placeholder || "") + '" autocomplete="off" spellcheck="false" />' +
+        '</div>';
+      }).join("");
+      var varsPanel = el("div", "vars-panel",
+        '<div class="vars-panel-head"><span class="vars-panel-label">fill variables</span><button class="vars-reset" type="button">reset ↺</button></div>' +
+        '<div class="vars-grid">' + fieldsHtml + '</div>'
+      );
+      function applyVars() {
+        var vals = {};
+        varsPanel.querySelectorAll("input[data-var-key]").forEach(function (i) { vals[i.dataset.varKey] = i.value; });
+        $promptPre.textContent = rawPrompt.replace(/\{\{([A-Z0-9_]+)\}\}/g, function (_, k) { return vals[k] || "{{" + k + "}}"; });
+      }
+      varsPanel.querySelectorAll("input[data-var-key]").forEach(function (i) { i.addEventListener("input", applyVars); });
+      varsPanel.querySelector(".vars-reset").addEventListener("click", function () {
+        varsPanel.querySelectorAll("input[data-var-key]").forEach(function (i) { i.value = ""; });
+        $promptPre.textContent = rawPrompt;
+      });
+      varsSection = el("div", "pd-section");
+      varsSection.appendChild(varsPanel);
+    }
+
+    // ---- details ----
+    var tags   = (p.tags   || []).map(function (t) { return '<span class="tag">#' + esc(t) + "</span>"; }).join(" ");
+    var models = (p.models || []).map(function (m) { return '<span class="model-pill">' + esc(m) + "</span>"; }).join(" ");
+    var authorLink = p.author
+      ? '<a href="user.html?handle=' + encodeURIComponent(p.author) + '" style="color:var(--accent); text-decoration:none;">' + esc(p.author) + '</a>'
+      : '<span class="mono" style="color:var(--text-faint)">—</span>';
+
+    var detailsGrid = el("dl", "pd-details",
+      "<dt>id</dt><dd class='mono'>#" + p.id + "</dd>" +
+      "<dt>author</dt><dd>" + authorLink + "</dd>" +
+      "<dt>temperature</dt><dd class='mono'>" + esc(p.temperature) + "</dd>" +
+      "<dt>models</dt><dd>" + (models || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>" +
+      "<dt>tags</dt><dd>" + (tags || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>"
+    );
+    var detailsSection = el("div", "pd-section");
+    detailsSection.appendChild(el("div", "pd-section-title", "Details"));
+    detailsSection.appendChild(detailsGrid);
+
+    // ---- chaining ----
+    var chainingSection = null;
+    if (p.chaining && p.chaining.trim()) {
+      chainingSection = el("div", "pd-section");
+      chainingSection.appendChild(el("div", "pd-section-title", "Chaining"));
+      var cp = el("p", "pd-purpose", esc(p.chaining));
+      cp.style.margin = "0";
+      chainingSection.appendChild(cp);
+    }
+
+    // ---- notes ----
+    var notesSection = null;
+    if (p.notes && p.notes.trim()) {
+      notesSection = el("div", "pd-section");
+      notesSection.appendChild(el("div", "pd-section-title", "Notes"));
+      var np = el("p", "pd-purpose", esc(p.notes));
+      np.style.margin = "0";
+      notesSection.appendChild(np);
+    }
+
+    // ---- ratings + copy count ----
+    var socialSection = el("div", "pd-section");
+    var socialRow = el("div", "pd-social");
+
+    var ratingDiv = el("div", "");
+    var ratingLabel = el("div", "pd-section-title", "Rating");
+    var starsDiv = el("div", "pd-stars");
+    var ratingText = el("div", "", "be the first to rate");
+    ratingText.style.cssText = "font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:4px;";
+    ratingDiv.appendChild(ratingLabel);
+    ratingDiv.appendChild(starsDiv);
+    ratingDiv.appendChild(ratingText);
+
+    var copyCountDiv = el("div", "");
+    copyCountDiv.style.textAlign = "right";
+    var copyCountLabel = el("div", "pd-section-title", "Times copied");
+    var copyCountNum = el("div", "", "");
+    copyCountNum.id = "pd-copy-count";
+    copyCountNum.style.cssText = "font-family:var(--mono); font-size:22px; font-weight:600; color:var(--accent); line-height:1;";
+    copyCountDiv.appendChild(copyCountLabel);
+    copyCountDiv.appendChild(copyCountNum);
+
+    socialRow.appendChild(ratingDiv);
+    socialRow.appendChild(copyCountDiv);
+    socialSection.appendChild(socialRow);
+
+    function renderStars(myRating) {
+      var ratingKey = "pl_rating_" + p.id;
+      var allRatings = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
+      var vals = Object.values(allRatings[p.id] || {});
+      var avg = vals.length ? (vals.reduce(function (a, b) { return a + b; }, 0) / vals.length).toFixed(1) : null;
+      ratingText.textContent = avg ? "\u2605 " + avg + " avg" : "be the first to rate";
+      starsDiv.innerHTML = "";
+      for (var i = 1; i <= 5; i++) {
+        (function (idx) {
+          var star = document.createElement("button");
+          star.type = "button";
+          star.className = "pd-star";
+          star.setAttribute("aria-label", idx + " star");
+          star.textContent = idx <= myRating ? "\u2605" : "\u2606";
+          star.style.color = idx <= myRating ? "var(--accent)" : "var(--text-faint)";
+          star.addEventListener("mouseenter", function () { highlightStars(idx); });
+          star.addEventListener("mouseleave", function () { highlightStars(myRating); });
+          star.addEventListener("click", function () {
+            localStorage.setItem("pl_rating_" + p.id, idx);
+            var all = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
+            if (!all[p.id]) all[p.id] = {};
+            all[p.id]["local"] = idx;
+            localStorage.setItem("pl_ratings_all", JSON.stringify(all));
+            renderStars(idx);
+            showToast("Rating saved");
+          });
+          starsDiv.appendChild(star);
+        })(i);
+      }
+      function highlightStars(n) {
+        starsDiv.querySelectorAll(".pd-star").forEach(function (s, i) {
+          s.textContent = i < n ? "\u2605" : "\u2606";
+          s.style.color = i < n ? "var(--accent)" : "var(--text-faint)";
+        });
+      }
+    }
+    var myRating = parseInt(localStorage.getItem("pl_rating_" + p.id) || "0", 10);
+    renderStars(myRating);
+    var copies = parseInt(localStorage.getItem("pl_copies_" + p.id) || "0", 10);
+    copyCountNum.textContent = copies;
+
+    // ---- comments ----
+    var commentsSection = el("div", "pd-section");
+    commentsSection.appendChild(el("div", "pd-section-title", "Comments"));
+    var commentsList = el("div", "pd-comments-list");
+    var commentInputRow = el("div", "comment-input-row",
+      '<input type="text" id="pd-comment-input" placeholder="Add a comment…" maxlength="300" autocomplete="off" />' +
+      '<button type="button" class="comment-submit" id="pd-comment-submit">Post</button>'
+    );
+    commentsSection.appendChild(commentsList);
+    commentsSection.appendChild(commentInputRow);
+
+    function getComments() {
+      try { return JSON.parse(localStorage.getItem("pl_comments_" + p.id) || "[]"); } catch (_) { return []; }
+    }
+    function renderComments() {
+      var comments = getComments();
+      if (!comments.length) {
+        commentsList.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No comments yet. Be the first.</div>';
+        return;
+      }
+      commentsList.innerHTML = comments.map(function (c) {
+        return '<div class="comment">' +
+          '<div class="comment-avatar">' + esc((c.author || "A").charAt(0).toUpperCase()) + '</div>' +
+          '<div style="flex:1; min-width:0;">' +
+            '<div class="comment-meta">' +
+              '<span class="comment-author">' + esc(c.author || "anonymous") + '</span>' +
+              '<span class="comment-time">' + esc(c.time || "") + '</span>' +
+            '</div>' +
+            '<div class="comment-body">' + esc(c.body) + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+    function submitComment() {
+      var input = document.getElementById("pd-comment-input");
+      var body = input.value.trim();
+      if (!body) return;
+      var comments = getComments();
+      comments.push({
+        author: "SarutobiSasuke",
+        body: body,
+        time: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+      });
+      localStorage.setItem("pl_comments_" + p.id, JSON.stringify(comments));
+      input.value = "";
+      renderComments();
+      showToast("Comment posted");
+    }
+    renderComments();
+    commentsSection.querySelector("#pd-comment-submit").addEventListener("click", submitComment);
+    commentsSection.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && e.target.id === "pd-comment-input") submitComment();
+    });
+
+    // ---- related prompts ----
+    var relatedSection = null;
+    if (typeof PROMPTS !== "undefined") {
+      var tags2 = new Set(p.tags || []);
+      var scored = PROMPTS
+        .filter(function (q) { return q.id !== p.id; })
+        .map(function (q) {
+          var overlap = (q.tags || []).filter(function (t) { return tags2.has(t); }).length;
+          var catBonus = q.category === p.category ? 0.5 : 0;
+          return { prompt: q, score: overlap + catBonus };
+        })
+        .filter(function (x) { return x.score > 0; })
+        .sort(function (a, b) { return b.score - a.score; })
+        .slice(0, 3);
+
+      if (scored.length > 0) {
+        relatedSection = el("div", "pd-section");
+        relatedSection.appendChild(el("div", "pd-section-title", "Related prompts"));
+        var relGrid = el("div", "pd-related-grid");
+        scored.forEach(function (item) {
+          var q = item.prompt;
+          var qCat = (typeof CATEGORIES !== "undefined" && CATEGORIES[q.category]) ? CATEGORIES[q.category] : q.category;
+          var card = el("a", "pd-rel-card");
+          card.href = "prompt.html?id=" + q.id;
+          card.innerHTML =
+            '<div class="pd-rel-meta">' +
+              '<span class="card-cat" style="font-size:10px;">' + esc(qCat) + '</span>' +
+              '<span class="badge ' + q.complexity + '" style="font-size:9px;">' + esc(q.complexity) + '</span>' +
+            '</div>' +
+            '<div class="pd-rel-title">' + esc(q.title) + '</div>' +
+            '<div class="pd-rel-purpose">' + esc(q.purpose) + '</div>';
+          relGrid.appendChild(card);
+        });
+        relatedSection.appendChild(relGrid);
+      }
+    }
+
+    // ---- assemble ----
+    wrap.appendChild(backLink);
+    wrap.appendChild(header);
+    wrap.appendChild(toolbar);
+    wrap.appendChild(promptSection);
+    if (varsSection) wrap.appendChild(varsSection);
+    wrap.appendChild(detailsSection);
+    if (chainingSection) wrap.appendChild(chainingSection);
+    if (notesSection) wrap.appendChild(notesSection);
+    wrap.appendChild(socialSection);
+    wrap.appendChild(commentsSection);
+    if (relatedSection) wrap.appendChild(relatedSection);
+
+  })();
+  </script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+</body>
+</html>

@@ -137,7 +137,10 @@
           <div class="meta" id="modal-meta"></div>
           <h2 id="modal-title"></h2>
         </div>
-        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <button class="bookmark-btn" id="modal-bm-btn" type="button" aria-label="Save"></button>
+          <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+        </div>
       </header>
       <div class="modal-body">
         <p class="purpose" id="modal-desc"></p>
@@ -194,6 +197,7 @@
   </footer>
 
   <script src="docs.js"></script>
+  <script src="bookmarks.js"></script>
   <script src="theme.js"></script>
   <script src="nav.js"></script>
 
@@ -209,6 +213,7 @@
       var $catRow      = document.getElementById("category-row");
       var $backdrop    = document.getElementById("modal-backdrop");
       var $modalClose  = document.getElementById("modal-close");
+      var $modalBmBtn  = document.getElementById("modal-bm-btn");
       var $modalMeta   = document.getElementById("modal-meta");
       var $modalTitle  = document.getElementById("modal-title");
       var $modalDesc   = document.getElementById("modal-desc");
@@ -222,6 +227,9 @@
       var $toast       = document.getElementById("toast");
 
       var currentText = "";
+
+      var BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      var BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
 
       if (typeof DOCS === "undefined") {
         $grid.innerHTML = '<div style="color:#ff6b6b;font-family:var(--mono);padding:16px;">Failed to load docs.js.</div>';
@@ -306,6 +314,8 @@
             '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
           '</svg>';
 
+        var isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("doc", d.id) : false;
+
         card.innerHTML =
           '<div class="card-head">' +
             '<div class="card-head-left">' +
@@ -319,14 +329,31 @@
             '<div class="card-tags">' +
               tags.map(function (t) { return '<span class="tag">#' + escapeHtml(t) + '</span>'; }).join("") +
             '</div>' +
-            '<button class="card-copy" type="button" aria-label="Copy markdown">' +
-              clipSvg + '<span>copy</span>' +
-            '</button>' +
+            '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+              '<button class="card-bookmark bookmark-btn' + (isSaved ? ' saved' : '') + '" type="button" aria-label="' + (isSaved ? 'Remove from saved' : 'Save') + '">' +
+                (isSaved ? BM_FILLED : BM_OUTLINE) +
+              '</button>' +
+              '<button class="card-copy" type="button" aria-label="Copy markdown">' +
+                clipSvg + '<span>copy</span>' +
+              '</button>' +
+            '</div>' +
           '</div>';
 
-        // Open modal on card click (not copy button)
+        // Bookmark toggle
+        var bmBtn = card.querySelector(".card-bookmark");
+        bmBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (!window.PL_BOOKMARKS) return;
+          var nowSaved = window.PL_BOOKMARKS.toggle("doc", d.id);
+          bmBtn.classList.toggle("saved", nowSaved);
+          bmBtn.setAttribute("aria-label", nowSaved ? "Remove from saved" : "Save");
+          bmBtn.innerHTML = nowSaved ? BM_FILLED : BM_OUTLINE;
+          showToast(nowSaved ? "Saved" : "Removed");
+        });
+
+        // Open modal on card click (not copy or bookmark)
         var openCard = function (e) {
-          if (e.target.closest(".card-copy")) return;
+          if (e.target.closest(".card-copy") || e.target.closest(".card-bookmark")) return;
           openModal(d);
         };
         card.addEventListener("click", openCard);
@@ -400,6 +427,23 @@
             $modalContent.textContent =
               "// File not yet available.\n// Add agents/" + d.filename + " to the repository.";
           });
+
+        // Bookmark button in modal
+        if ($modalBmBtn && window.PL_BOOKMARKS) {
+          var modalSaved = window.PL_BOOKMARKS.isBookmarked("doc", d.id);
+          $modalBmBtn.classList.toggle("saved", modalSaved);
+          $modalBmBtn.setAttribute("aria-label", modalSaved ? "Remove from saved" : "Save");
+          $modalBmBtn.innerHTML = modalSaved ? BM_FILLED : BM_OUTLINE;
+          $modalBmBtn.onclick = function () {
+            var nowSaved = window.PL_BOOKMARKS.toggle("doc", d.id);
+            $modalBmBtn.classList.toggle("saved", nowSaved);
+            $modalBmBtn.setAttribute("aria-label", nowSaved ? "Remove from saved" : "Save");
+            $modalBmBtn.innerHTML = nowSaved ? BM_FILLED : BM_OUTLINE;
+            // sync the card bookmark if visible
+            var cardBm = document.querySelector('[aria-label][data-doc-id="' + d.id + '"]');
+            showToast(nowSaved ? "Saved" : "Removed");
+          };
+        }
 
         $backdrop.classList.remove("hidden");
         document.body.style.overflow = "hidden";

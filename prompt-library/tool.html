@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tool &middot; prompt-library</title>
+  <meta name="description" content="AI tool detail — prompt-library" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .tool-detail-wrap {
+      max-width: 800px; margin: 0 auto 80px; padding: 0 18px;
+    }
+
+    /* ---- Hero logo + identity ---- */
+    .td-hero {
+      display: flex; align-items: flex-start; gap: 24px;
+      padding: 32px 0 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .td-logo {
+      width: 72px; height: 72px; flex: 0 0 72px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; position: relative; overflow: hidden;
+    }
+    .td-logo img.si-logo {
+      width: 36px; height: 36px; display: block;
+      filter: var(--logo-filter);
+    }
+    .td-logo img.cb-logo {
+      width: 52px; height: 52px; display: block;
+      border-radius: 4px;
+    }
+    .td-logo .td-monogram {
+      font-family: var(--mono); font-size: 20px; font-weight: 600;
+      color: var(--text-dim); letter-spacing: -0.03em;
+    }
+    .td-logo .td-glyph { width: 28px; height: 28px; color: var(--text-dim); }
+    .td-logo .td-glyph svg { width: 100%; height: 100%; display: block; }
+
+    .td-identity { flex: 1 1 auto; min-width: 0; }
+    .td-name { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.15; }
+    .td-sub  { font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin-top: 4px; letter-spacing: 0.04em; }
+    .td-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .td-badge {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+      padding: 3px 8px; border: 1px solid var(--border); color: var(--text-faint);
+      border-radius: 2px; text-transform: lowercase;
+    }
+    .td-badge.group     { color: var(--text-dim); }
+    .td-badge.supported { color: var(--accent); border-color: var(--accent); }
+    .td-badge.pending   { color: var(--warn);   border-color: var(--warn);   }
+
+    /* ---- Purpose ---- */
+    .td-purpose {
+      font-size: 16px; line-height: 1.7; color: var(--text-dim);
+      padding: 28px 0; border-bottom: 1px solid var(--border);
+    }
+
+    /* ---- Action buttons ---- */
+    .td-actions {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .td-btn {
+      font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+      color: var(--text); text-decoration: none;
+      border: 1px solid var(--border); background: var(--bg-1);
+      padding: 9px 16px; border-radius: 2px;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: border-color 120ms, color 120ms;
+    }
+    .td-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .td-btn.primary {
+      background: var(--accent); border-color: var(--accent);
+      color: var(--bg); font-weight: 600;
+    }
+    .td-btn.primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); color: var(--bg); }
+    .td-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    /* ---- Related tools ---- */
+    .td-related { padding-top: 28px; }
+    .td-related-title {
+      font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-faint); margin-bottom: 14px;
+    }
+    .td-related-grid {
+      display: grid; gap: 10px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 560px) { .td-related-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .td-rel-card {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: 2px; padding: 12px 14px;
+      text-decoration: none; color: inherit;
+      transition: border-color 120ms;
+    }
+    .td-rel-card:hover { border-color: var(--text-faint); }
+    .td-rel-mark {
+      width: 36px; height: 36px; flex: 0 0 36px;
+      background: var(--bg-2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 2px; overflow: hidden; position: relative;
+    }
+    .td-rel-mark img { width: 18px; height: 18px; display: block; filter: var(--logo-filter); }
+    .td-rel-mark .rel-mono {
+      font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text-dim);
+    }
+    .td-rel-name { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text); }
+    .td-rel-sub  { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+
+    /* ---- Back link ---- */
+    .td-back {
+      font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      padding: 32px 0 12px;
+      transition: color 120ms;
+    }
+    .td-back:hover { color: var(--text); }
+
+    /* ---- 404 state ---- */
+    .td-404 {
+      padding: 80px 0; text-align: center; color: var(--text-dim);
+    }
+    .td-404 strong { display: block; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div id="site-nav" data-active="tools" data-sub="tool"></div>
+
+  <div class="tool-detail-wrap" id="tool-detail">
+    <div class="td-404 hidden" id="td-404">
+      <strong>Tool not found</strong>
+      <a href="tools.html" style="color:var(--accent);">Browse all tools</a>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="tools.js"></script>
+  <script src="bookmarks.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    var FALLBACK_GLYPH_SVG =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' +
+        '<path d="M3 7.5 12 3l9 4.5v9L12 21 3 16.5z"/>' +
+        '<path d="M3 7.5 12 12l9-4.5"/>' +
+        '<path d="M12 12v9"/>' +
+      '</svg>';
+
+    var EXTERNAL_ICON =
+      '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M7 1h4v4M11 1 5 7"/>' +
+        '<path d="M5 3H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V8"/>' +
+      '</svg>';
+
+    function domainFrom(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ''); } catch (_) { return ''; }
+    }
+
+    function siUrl(slug) {
+      return slug ? 'https://cdn.simpleicons.org/' + slug + '/e6e6e6' : '';
+    }
+    function clearbitUrl(domain) {
+      return domain ? 'https://logo.clearbit.com/' + domain : '';
+    }
+
+    function pricingLabel(p) { return p === 'byok' ? 'BYO key' : p; }
+
+    function groupLabel(g) {
+      return (typeof TOOL_GROUPS !== 'undefined' && TOOL_GROUPS[g]) ? TOOL_GROUPS[g] : g;
+    }
+
+    // Read ?id= from URL
+    var params = new URLSearchParams(window.location.search);
+    var toolId  = params.get('id') || '';
+    var tool    = (typeof TOOLS !== 'undefined') ? TOOLS.filter(function (t) { return t.id === toolId; })[0] : null;
+
+    var wrap = document.getElementById('tool-detail');
+
+    if (!tool) {
+      document.getElementById('td-404').classList.remove('hidden');
+      return;
+    }
+
+    // Update page title + meta
+    document.title = tool.name + ' \u00B7 prompt-library';
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.content = tool.purpose;
+
+    // Update nav sub-label
+    var navMount = document.getElementById('site-nav');
+    if (navMount) navMount.setAttribute('data-sub', tool.name.toLowerCase());
+
+    var domain = domainFrom(tool.url);
+
+    // ---- Logo element ----
+    var logoDiv = document.createElement('div');
+    logoDiv.className = 'td-logo';
+
+    if (tool.icon) {
+      var siImg = document.createElement('img');
+      siImg.className = 'si-logo';
+      siImg.alt = '';
+      siImg.src = siUrl(tool.icon);
+      siImg.onerror = function () {
+        siImg.remove();
+        tryClearbit();
+      };
+      logoDiv.appendChild(siImg);
+    } else {
+      tryClearbit();
+    }
+
+    function tryClearbit() {
+      if (!domain) { showMonogram(); return; }
+      var cbImg = document.createElement('img');
+      cbImg.className = 'cb-logo';
+      cbImg.alt = '';
+      cbImg.src = clearbitUrl(domain);
+      cbImg.onerror = function () { cbImg.remove(); showMonogram(); };
+      logoDiv.appendChild(cbImg);
+    }
+
+    function showMonogram() {
+      var el = document.createElement('span');
+      el.className = 'td-monogram';
+      el.textContent = tool.mark;
+      logoDiv.appendChild(el);
+    }
+
+    // ---- Badges ----
+    function badge(text, cls) {
+      var s = document.createElement('span');
+      s.className = 'td-badge' + (cls ? ' ' + cls : '');
+      s.textContent = text;
+      return s;
+    }
+    var badgesDiv = document.createElement('div');
+    badgesDiv.className = 'td-badges';
+    badgesDiv.appendChild(badge(groupLabel(tool.group), 'group'));
+    badgesDiv.appendChild(badge(pricingLabel(tool.pricing)));
+    if (tool.deepLink === 'supported') {
+      badgesDiv.appendChild(badge('deep-link', 'supported'));
+    } else if (tool.deepLink === 'planned') {
+      badgesDiv.appendChild(badge('planned', 'pending'));
+    } else {
+      badgesDiv.appendChild(badge('copy-only'));
+    }
+
+    // ---- Identity block ----
+    var nameEl = document.createElement('div');
+    nameEl.className = 'td-name';
+    nameEl.textContent = tool.name;
+
+    var subEl = document.createElement('div');
+    subEl.className = 'td-sub';
+    subEl.textContent = tool.sub;
+
+    var identityDiv = document.createElement('div');
+    identityDiv.className = 'td-identity';
+    identityDiv.appendChild(nameEl);
+    identityDiv.appendChild(subEl);
+    identityDiv.appendChild(badgesDiv);
+
+    var heroDiv = document.createElement('div');
+    heroDiv.className = 'td-hero';
+    heroDiv.appendChild(logoDiv);
+    heroDiv.appendChild(identityDiv);
+
+    // ---- Purpose ----
+    var purposeDiv = document.createElement('div');
+    purposeDiv.className = 'td-purpose';
+    purposeDiv.textContent = tool.purpose;
+
+    // ---- Action buttons ----
+    var actionsDiv = document.createElement('div');
+    actionsDiv.className = 'td-actions';
+
+    function actionBtn(href, label, primary) {
+      if (!href) return null;
+      var a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'td-btn' + (primary ? ' primary' : '');
+      a.innerHTML = label + ' ' + EXTERNAL_ICON;
+      return a;
+    }
+
+    var visitBtn = actionBtn(tool.url, 'Visit website', true);
+    if (visitBtn) actionsDiv.appendChild(visitBtn);
+
+    if (tool.github) {
+      var ghBtn = actionBtn(tool.github, 'GitHub', false);
+      if (ghBtn) actionsDiv.appendChild(ghBtn);
+    }
+    if (tool.x) {
+      var xBtn = actionBtn(tool.x, 'Follow on X', false);
+      if (xBtn) actionsDiv.appendChild(xBtn);
+    }
+
+    // ---- Related tools (same group, max 4) ----
+    var related = (typeof TOOLS !== 'undefined')
+      ? TOOLS.filter(function (t) { return t.id !== tool.id && t.group === tool.group; }).slice(0, 4)
+      : [];
+
+    var relatedSection = '';
+    var relatedDiv = null;
+    if (related.length > 0) {
+      relatedDiv = document.createElement('div');
+      relatedDiv.className = 'td-related';
+
+      var relTitle = document.createElement('div');
+      relTitle.className = 'td-related-title';
+      relTitle.textContent = 'More in ' + groupLabel(tool.group);
+      relatedDiv.appendChild(relTitle);
+
+      var grid = document.createElement('div');
+      grid.className = 'td-related-grid';
+
+      related.forEach(function (rt) {
+        var card = document.createElement('a');
+        card.href = 'tool.html?id=' + encodeURIComponent(rt.id);
+        card.className = 'td-rel-card';
+
+        var markDiv = document.createElement('div');
+        markDiv.className = 'td-rel-mark';
+
+        if (rt.icon) {
+          var img = document.createElement('img');
+          img.alt = '';
+          img.src = siUrl(rt.icon);
+          img.onerror = function () {
+            img.remove();
+            var mono = document.createElement('span');
+            mono.className = 'rel-mono';
+            mono.textContent = rt.mark;
+            markDiv.appendChild(mono);
+          };
+          markDiv.appendChild(img);
+        } else {
+          var mono = document.createElement('span');
+          mono.className = 'rel-mono';
+          mono.textContent = rt.mark;
+          markDiv.appendChild(mono);
+        }
+
+        var info = document.createElement('div');
+        var rName = document.createElement('div');
+        rName.className = 'td-rel-name';
+        rName.textContent = rt.name;
+        var rSub = document.createElement('div');
+        rSub.className = 'td-rel-sub';
+        rSub.textContent = rt.sub;
+        info.appendChild(rName);
+        info.appendChild(rSub);
+
+        card.appendChild(markDiv);
+        card.appendChild(info);
+        grid.appendChild(card);
+      });
+
+      relatedDiv.appendChild(grid);
+    }
+
+    // ---- Back link ----
+    var backLink = document.createElement('a');
+    backLink.href = 'tools.html';
+    backLink.className = 'td-back';
+    backLink.innerHTML = '&larr; all tools';
+
+    // ---- Assemble ----
+    wrap.appendChild(backLink);
+    wrap.appendChild(heroDiv);
+    wrap.appendChild(purposeDiv);
+    wrap.appendChild(actionsDiv);
+    if (relatedDiv) wrap.appendChild(relatedDiv);
+
+  })();
+  </script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+</body>
+</html>

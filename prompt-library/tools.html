@@ -132,7 +132,7 @@
       <button class="chip" data-group="local">local / self-host</button>
       <button class="chip" data-group="knowledge">knowledge</button>
       <button class="chip" data-group="agents">agents</button>
-      <button class="chip" data-group="starred">★ starred</button>
+      <button class="chip" data-group="saved">saved</button>
     </div>
 
     <div class="filter-row" id="pricing-row" role="group" aria-label="Filter by pricing">
@@ -176,22 +176,17 @@
        ========================================================== -->
   <div id="site-footer"></div>
 
+  <script src="tools.js"></script>
+  <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script>
   (function () {
     "use strict";
 
-    // -----------------------------------------------------------
-    // Tools data. Kept inline so the page stays self-contained.
-    //
-    //   group    : 'chat' | 'coding' | 'infra'
-    //   pricing  : 'free' | 'freemium' | 'paid' | 'byok'
-    //   deepLink : 'supported' | 'planned' | 'none'
-    //   icon     : simple-icons slug (rendered via cdn.simpleicons.org);
-    //              if the image fails to load, the `mark` monogram shows.
-    // -----------------------------------------------------------
-    const TOOLS = [
+    // TOOLS and TOOL_GROUPS are defined in tools.js (loaded above).
+    // Inline array removed — edit tools.js to add/change tools.
+    const _TOOLS_UNUSED = [
       // ---- Chat UIs ----
       { id: 'claude',      group: 'chat',   mark: 'CL', icon: 'anthropic',       name: 'Claude',           sub: 'Anthropic',          pricing: 'freemium', url: 'https://claude.ai/',                                     deepLink: 'planned',   purpose: 'The reference chat UI for long-context and hard-reasoning work. Strong defaults for structured outputs.' },
       { id: 'chatgpt',     group: 'chat',   mark: 'GP', icon: 'openai',          name: 'ChatGPT',          sub: 'OpenAI',             pricing: 'freemium', url: 'https://chatgpt.com/',                                   deepLink: 'supported', purpose: 'Most popular chat UI. Widest ecosystem of GPTs, tools, and integrations.' },
@@ -245,19 +240,9 @@
 
     const state = { group: 'all', pricing: 'all', deeplink: 'all' };
 
-    // ---- Starred tools (localStorage, anon-friendly) ----
-    const STAR_KEY = 'promptLibrary.starredTools';
-    function loadStars() {
-      try { return new Set(JSON.parse(localStorage.getItem(STAR_KEY) || '[]')); }
-      catch (_) { return new Set(); }
-    }
-    function saveStars(set) {
-      try { localStorage.setItem(STAR_KEY, JSON.stringify([...set])); } catch (_) {}
-    }
-    const stars = loadStars();
-
-    const STAR_SVG_OUTLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.7 1.4 6.6L12 17.3l-5.9 3.4 1.4-6.6-5-4.7 6.6-.7z"/></svg>';
-    const STAR_SVG_FILLED  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.7 1.4 6.6L12 17.3l-5.9 3.4 1.4-6.6-5-4.7 6.6-.7z"/></svg>';
+    // ---- Bookmarks — unified PL_BOOKMARKS store (bookmarks.js) ----
+    const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+    const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
 
     const $grid  = document.getElementById('grid');
     const $empty = document.getElementById('empty');
@@ -283,11 +268,21 @@
     }
 
     function iconUrl(slug) {
-      // Simple Icons: monochrome SVG logos, free to use, match the dark theme.
-      // e6e6e6 mirrors --text. If the slug doesn't exist, image onerror falls
-      // back to the letter monogram.
       if (!slug) return '';
       return 'https://cdn.simpleicons.org/' + slug + '/e6e6e6';
+    }
+    function domainFrom(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ''); } catch (_) { return ''; }
+    }
+    function tryClearbit(markEl, monoEl, url) {
+      const domain = domainFrom(url);
+      if (!domain) { showFallbackGlyph(markEl, monoEl); return; }
+      const cb = document.createElement('img');
+      cb.alt = ''; cb.loading = 'lazy';
+      cb.style.cssText = 'width:26px;height:26px;display:block;border-radius:2px;filter:none;';
+      cb.src = 'https://logo.clearbit.com/' + domain;
+      cb.onerror = () => { cb.remove(); showFallbackGlyph(markEl, monoEl); };
+      markEl.appendChild(cb);
     }
 
     function pricingLabel(p) {
@@ -309,12 +304,10 @@
         // Hide monogram immediately when we have a slug; restore it if
         // the CDN returns 404 (keeps a graceful fallback for unknown tools).
         mono.style.display = 'none';
-        img.onerror = () => { img.remove(); showFallbackGlyph(mark, mono); };
+        img.onerror = () => { img.remove(); tryClearbit(mark, mono, t.url); };
         mark.appendChild(img);
       } else {
-        // No Simple Icons coverage — use an inline glyph instead of a bare
-        // monogram so visual density stays consistent across cards.
-        showFallbackGlyph(mark, mono);
+        tryClearbit(mark, mono, t.url);
       }
 
       const titleEl = document.createElement('div');
@@ -359,40 +352,41 @@
       open.className = 'tool-open';
       open.href = t.url; open.target = '_blank'; open.rel = 'noopener';
       open.textContent = 'Open →';
+      open.addEventListener('click', (e) => e.stopPropagation());
       const actions = document.createElement('div');
       actions.className = 'tool-actions';
       actions.appendChild(open);
 
-      const star = document.createElement('button');
-      star.type = 'button';
-      star.className = 'tool-star' + (stars.has(t.id) ? ' on' : '');
-      star.setAttribute('aria-label', stars.has(t.id) ? 'Unstar ' + t.name : 'Star ' + t.name);
-      star.setAttribute('aria-pressed', stars.has(t.id) ? 'true' : 'false');
-      star.innerHTML = stars.has(t.id) ? STAR_SVG_FILLED : STAR_SVG_OUTLINE;
-      star.addEventListener('click', (e) => {
+      const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked('tool', t.id) : false;
+      const bm = document.createElement('button');
+      bm.type = 'button';
+      bm.className = 'bookmark-btn tool-bookmark' + (isSaved ? ' saved' : '');
+      bm.setAttribute('aria-label', isSaved ? 'Remove from saved' : 'Save ' + t.name);
+      bm.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+      bm.innerHTML = isSaved ? BM_FILLED : BM_OUTLINE;
+      bm.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (stars.has(t.id)) { stars.delete(t.id); }
-        else { stars.add(t.id); }
-        saveStars(stars);
-        const on = stars.has(t.id);
-        star.classList.toggle('on', on);
-        star.setAttribute('aria-pressed', on ? 'true' : 'false');
-        star.setAttribute('aria-label', (on ? 'Unstar ' : 'Star ') + t.name);
-        star.innerHTML = on ? STAR_SVG_FILLED : STAR_SVG_OUTLINE;
-        // Re-render if the starred filter is active so toggling removes the card.
-        if (state.group === 'starred') render();
+        if (!window.PL_BOOKMARKS) return;
+        const on = window.PL_BOOKMARKS.toggle('tool', t.id);
+        bm.classList.toggle('saved', on);
+        bm.setAttribute('aria-pressed', on ? 'true' : 'false');
+        bm.setAttribute('aria-label', on ? 'Remove from saved' : 'Save ' + t.name);
+        bm.innerHTML = on ? BM_FILLED : BM_OUTLINE;
+        if (state.group === 'saved') render();
       });
 
       const el = document.createElement('div');
       el.className = 'tool-card';
-      el.appendChild(star);
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => { window.location.href = 'tool.html?id=' + encodeURIComponent(t.id); });
+      el.appendChild(bm);
       el.appendChild(head); el.appendChild(purpose); el.appendChild(badges); el.appendChild(actions);
       return el;
     }
 
     function matches(t) {
-      if (state.group === 'starred') {
-        if (!stars.has(t.id)) return false;
+      if (state.group === 'saved') {
+        if (!window.PL_BOOKMARKS || !window.PL_BOOKMARKS.isBookmarked('tool', t.id)) return false;
       } else if (state.group !== 'all' && t.group !== state.group) {
         return false;
       }
@@ -427,11 +421,11 @@
     wireChips('deeplink-row', 'deeplink');
     render();
 
-    // ---- export starred tools as JSON ----
+    // ---- export saved tools as JSON ----
     const $exportStars = document.getElementById('export-stars');
     if ($exportStars) {
       $exportStars.addEventListener('click', () => {
-        const ids = [...loadStars()];
+        const ids = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.load().tool : [];
         const items = ids.map((id) => {
           const t = TOOLS.find((x) => x.id === id);
           return t ? { id: t.id, name: t.name, url: t.url, group: t.group } : { id: id };
@@ -444,7 +438,7 @@
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'prompt-library-starred-tools.json';
+        a.download = 'prompt-library-saved-tools.json';
         document.body.appendChild(a);
         a.click();
         setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 100);

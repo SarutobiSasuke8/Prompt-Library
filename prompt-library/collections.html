@@ -208,6 +208,7 @@
 
   <script src="prompts.js"></script>
   <script src="collections.js"></script>
+  <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script>
@@ -235,6 +236,9 @@
         $grid.appendChild(buildCard(col));
       });
 
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
       function buildCard(col) {
         const prompts = (col.promptIds || [])
           .map((id) => promptMap[id])
@@ -243,6 +247,8 @@
         const tagsHtml = (col.tags || [])
           .map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>")
           .join("");
+
+        const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("collection", col.id) : false;
 
         const wrap = document.createElement("div");
         wrap.className = "col-card";
@@ -258,7 +264,13 @@
                 '<span class="col-prompt-count">' + prompts.length + " prompts</span>" +
               "</div>" +
             "</div>" +
-            '<span class="col-toggle" aria-hidden="true">+</span>' +
+            '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">' +
+              '<button class="bookmark-btn col-bookmark' + (isSaved ? " saved" : "") + '" type="button" ' +
+                'aria-label="' + (isSaved ? "Remove bookmark" : "Bookmark") + '" aria-pressed="' + isSaved + '">' +
+                (isSaved ? BM_FILLED : BM_OUTLINE) +
+              '</button>' +
+              '<span class="col-toggle" aria-hidden="true">+</span>' +
+            '</div>' +
           "</div>" +
           '<div class="col-body">' +
             prompts.map((p, i) => buildPromptRow(p, i + 1)).join("") +
@@ -270,6 +282,20 @@
         head.addEventListener("click", () => {
           wrap.classList.toggle("open");
         });
+
+        // Bookmark button
+        const bmEl = wrap.querySelector(".col-bookmark");
+        if (bmEl) {
+          bmEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (!window.PL_BOOKMARKS) return;
+            const saved = window.PL_BOOKMARKS.toggle("collection", col.id);
+            bmEl.classList.toggle("saved", saved);
+            bmEl.setAttribute("aria-pressed", saved);
+            bmEl.setAttribute("aria-label", saved ? "Remove bookmark" : "Bookmark");
+            bmEl.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+          });
+        }
 
         // Wire copy buttons
         wrap.querySelectorAll(".col-copy-btn").forEach((btn) => {

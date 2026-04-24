@@ -497,8 +497,8 @@
         <button class="tab-btn" data-tab="articles">
           articles <span class="tab-count" id="tab-count-articles">0</span>
         </button>
-        <button class="tab-btn" data-tab="liked">
-          liked <span class="tab-count" id="tab-count-liked">&#x1F512;</span>
+        <button class="tab-btn" data-tab="bookmarks">
+          bookmarks <span class="tab-count" id="tab-count-bookmarks">&#x1F512;</span>
         </button>
         <button class="tab-btn" data-tab="tools">
           my tools <span class="tab-count" id="tab-count-tools">0</span>
@@ -526,8 +526,8 @@
         </div>
       </div>
 
-      <!-- Liked panel -->
-      <div class="tab-panel" id="panel-liked">
+      <!-- Bookmarks panel -->
+      <div class="tab-panel" id="panel-bookmarks">
         <div class="privacy-banner" id="privacy-banner">
           <div class="priv-left">
             <span class="priv-icon" id="priv-icon">&#x1F512;</span>
@@ -536,17 +536,29 @@
           <!-- Toggle only shown to the profile owner — hidden until auth wired up -->
           <button class="privacy-toggle hidden" id="privacy-toggle" type="button">make public</button>
         </div>
-        <div id="liked-content">
-          <div class="locked-overlay" id="liked-locked">
+        <div id="bookmarks-content">
+          <div class="locked-overlay" id="bookmarks-locked">
             <span class="lock-icon">&#x1F512;</span>
-            <strong>Liked prompts are private</strong>
-            Only this user can see what they've liked.
+            <strong>Bookmarks are private</strong>
+            Only this user can see what they've bookmarked.
           </div>
-          <div class="grid hidden" style="padding:0; margin:0;" id="liked-grid"></div>
-          <div class="panel-empty hidden" id="liked-empty">
-            <strong>No liked prompts</strong>
-            Nothing liked yet.
+          <div class="grid hidden" style="padding:0; margin:0;" id="bookmarks-grid"></div>
+          <div class="panel-empty hidden" id="bookmarks-empty">
+            <strong>No bookmarks yet</strong>
+            Nothing bookmarked yet.
           </div>
+        </div>
+
+        <!-- Saved docs — always visible, pulled from localStorage via PL_BOOKMARKS -->
+        <div style="margin-top:28px;">
+          <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-faint);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">saved docs</div>
+          <div id="saved-docs-grid" class="grid" style="padding:0;margin:0;"></div>
+          <div class="panel-empty hidden" id="saved-docs-empty">
+            <strong>No saved docs</strong>
+            Bookmark any template in the <a href="docs.html" style="color:var(--accent);">md repo</a> to see it here.
+          </div>
+        </div>
+        <div style="display:none">
         </div>
       </div>
 
@@ -677,6 +689,8 @@
 
   <script src="prompts.js"></script>
   <script src="articles.js"></script>
+  <script src="docs.js"></script>
+  <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script>
@@ -704,13 +718,13 @@
         }
       };
 
-      // Mock liked prompt IDs — replace with Supabase fetch when live
-      // TODO: sb.from('likes').select('prompt_id').eq('user_id', profile.id)
-      const MOCK_LIKED_IDS = new Set([1, 3, 7, 12]);
+      // Mock bookmarked prompt IDs — replace with Supabase fetch when live
+      // TODO: sb.from('bookmarks').select('prompt_id').eq('user_id', profile.id)
+      const MOCK_BOOKMARKED_IDS = new Set([1, 3, 7, 12]);
 
-      // Mock visibility state — replace with profile.likes_public field when live
-      // TODO: add likes_public boolean column to profiles table
-      let likesPublic = false;
+      // Mock visibility state — replace with profile.bookmarks_public field when live
+      // TODO: add bookmarks_public boolean column to profiles table
+      let bookmarksPublic = false;
 
       // ---------------------------------------------------------------
       // Load profile
@@ -732,7 +746,7 @@
       // ---------------------------------------------------------------
       const authoredPrompts  = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => (p.author || "") === profile.handle);
       const authoredArticles = (typeof ARTICLES !== "undefined" ? ARTICLES : []).filter((a) => (a.author || "") === profile.handle);
-      const likedPrompts     = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => MOCK_LIKED_IDS.has(p.id));
+      const bookmarkedPrompts = (typeof PROMPTS  !== "undefined" ? PROMPTS  : []).filter((p) => MOCK_BOOKMARKED_IDS.has(p.id));
 
       const totalContributions = authoredPrompts.length + authoredArticles.length;
 
@@ -769,7 +783,7 @@
       document.getElementById("profile-stats").innerHTML =
         statBlock(authoredPrompts.length,  "prompts") +
         statBlock(authoredArticles.length, "articles") +
-        statBlock(likedPrompts.length,     "liked") +
+        statBlock(bookmarkedPrompts.length, "bookmarks") +
         statBlock(totalContributions,      "total");
 
       const joined = profile.created_at
@@ -817,14 +831,50 @@
       }
 
       // ---------------------------------------------------------------
-      // Render liked grid (respects privacy)
+      // Render bookmarks grid (respects privacy)
       // ---------------------------------------------------------------
-      renderLiked();
+      renderBookmarks();
+      renderSavedDocs();
 
-      function renderLiked() {
-        const $locked = document.getElementById("liked-locked");
-        const $grid   = document.getElementById("liked-grid");
-        const $empty  = document.getElementById("liked-empty");
+      function renderSavedDocs() {
+        const $grid  = document.getElementById("saved-docs-grid");
+        const $empty = document.getElementById("saved-docs-empty");
+        if (!$grid || !$empty) return;
+
+        const savedIds = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.load().doc || [] : [];
+        const docMap   = {};
+        if (typeof DOCS !== "undefined") DOCS.forEach((d) => { docMap[d.id] = d; });
+
+        const saved = savedIds.map((id) => docMap[id]).filter(Boolean);
+
+        $empty.classList.toggle("hidden", saved.length > 0);
+        if (saved.length === 0) return;
+
+        const frag = document.createDocumentFragment();
+        saved.forEach((d) => {
+          const card = document.createElement("a");
+          card.className = "article-card";
+          card.href = "docs.html";
+          card.innerHTML =
+            '<div class="article-card-head">' +
+              '<span class="card-cat">' + escapeHtml(d.category || "doc") + '</span>' +
+              '<span class="badge md-file" style="font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid var(--accent);border-radius:2px;padding:1px 6px;">.md</span>' +
+            '</div>' +
+            '<h3>' + escapeHtml(d.title) + '</h3>' +
+            '<p>' + escapeHtml(d.description || "") + '</p>' +
+            '<div class="article-card-foot">' +
+              (d.tags || []).slice(0, 3).map((t) => '<span class="tag">#' + escapeHtml(t) + '</span>').join("") +
+              '<span class="read-cta" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--accent);">view &rarr;</span>' +
+            '</div>';
+          frag.appendChild(card);
+        });
+        $grid.appendChild(frag);
+      }
+
+      function renderBookmarks() {
+        const $locked = document.getElementById("bookmarks-locked");
+        const $grid   = document.getElementById("bookmarks-grid");
+        const $empty  = document.getElementById("bookmarks-empty");
         const $banner = document.getElementById("privacy-banner");
         const $icon   = document.getElementById("priv-icon");
         const $status = document.getElementById("priv-status");
@@ -835,7 +885,7 @@
         const isOwner = false; // stub — flip to true when auth is wired
         if (isOwner) $toggle.classList.remove("hidden");
 
-        if (likesPublic) {
+        if (bookmarksPublic) {
           $icon.textContent   = "\uD83D\uDD13";
           $status.textContent = "Public";
           $banner.querySelector(".priv-text").lastChild.textContent = " \u2014 visible to everyone";
@@ -843,13 +893,13 @@
           $toggle.classList.add("public");
           $locked.classList.add("hidden");
           $grid.innerHTML = "";
-          if (likedPrompts.length === 0) {
+          if (bookmarkedPrompts.length === 0) {
             $empty.classList.remove("hidden");
           } else {
             $empty.classList.add("hidden");
             $grid.classList.remove("hidden");
             const frag = document.createDocumentFragment();
-            likedPrompts.forEach((p) => frag.appendChild(buildPromptCard(p)));
+            bookmarkedPrompts.forEach((p) => frag.appendChild(buildPromptCard(p)));
             $grid.appendChild(frag);
           }
         } else {
@@ -865,9 +915,9 @@
       }
 
       document.getElementById("privacy-toggle").addEventListener("click", () => {
-        likesPublic = !likesPublic;
-        // TODO: persist via sb.from('profiles').update({ likes_public: likesPublic })
-        renderLiked();
+        bookmarksPublic = !bookmarksPublic;
+        // TODO: persist via sb.from('profiles').update({ bookmarks_public: bookmarksPublic })
+        renderBookmarks();
       });
 
       // ---------------------------------------------------------------

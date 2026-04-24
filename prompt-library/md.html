@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>md &middot; prompt-library</title>
+  <meta name="description" content="Markdown template detail — prompt-library md repo." />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+  <style>
+    .md-detail-wrap { max-width: 780px; margin: 0 auto 100px; padding: 0 18px; }
+
+    /* ---- action bar ---- */
+    .md-action-bar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px;
+    }
+    .md-action-bar .md-title-block { flex: 1; min-width: 0; }
+    .md-action-bar h1 {
+      font-family: var(--mono); font-size: 22px; font-weight: 700;
+      color: var(--text); margin: 0 0 4px; line-height: 1.2;
+    }
+    .md-action-bar .md-purpose-line {
+      font-size: 13px; color: var(--text-dim); line-height: 1.5;
+    }
+    .md-action-btns { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .md-action-copy, .md-action-dl {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 8px 14px; border-radius: var(--radius);
+      cursor: pointer; white-space: nowrap; transition: background 120ms, color 120ms, border-color 120ms;
+      text-decoration: none;
+    }
+    .md-action-copy {
+      color: var(--text-faint); background: var(--bg-1); border: 1px solid var(--border);
+    }
+    .md-action-copy svg, .md-action-dl svg { width: 12px; height: 12px; display: block; }
+    .md-action-copy:hover { color: var(--accent); border-color: var(--accent-edge); }
+    .md-action-copy.copied { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+    .md-action-dl {
+      color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-edge);
+    }
+    .md-action-dl:hover { background: var(--accent); color: var(--bg); }
+
+    /* ---- rendered markdown ---- */
+    .md-body {
+      font-size: 14px; line-height: 1.75; color: var(--text-dim);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 28px 32px; background: var(--bg-1);
+    }
+    @media (max-width: 600px) { .md-body { padding: 18px 16px; } }
+
+    .md-body h1, .md-body h2, .md-body h3, .md-body h4 {
+      color: var(--text); font-family: var(--sans); margin: 1.6em 0 0.5em;
+      line-height: 1.3;
+    }
+    .md-body h1 { font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 0; }
+    .md-body h2 { font-size: 16px; }
+    .md-body h3 { font-size: 14px; color: var(--text-dim); }
+    .md-body h4 { font-size: 13px; color: var(--text-faint); }
+
+    .md-body p { margin: 0 0 1em; }
+    .md-body blockquote {
+      border-left: 3px solid var(--accent-edge); margin: 1em 0;
+      padding: 8px 16px; background: var(--bg-2); border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--text-faint); font-style: italic;
+    }
+    .md-body blockquote p { margin: 0; }
+    .md-body hr { border: none; border-top: 1px dashed var(--border); margin: 1.8em 0; }
+
+    .md-body ul, .md-body ol { padding-left: 22px; margin: 0 0 1em; }
+    .md-body li { margin-bottom: 4px; }
+    .md-body li.task-item { list-style: none; margin-left: -18px; }
+    .md-body li.task-item input { margin-right: 6px; accent-color: var(--accent); }
+
+    .md-body code {
+      font-family: var(--mono); font-size: 12px;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 5px; color: var(--accent);
+    }
+    .md-body pre {
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; overflow-x: auto;
+      margin: 0 0 1em;
+    }
+    .md-body pre code {
+      background: none; border: none; padding: 0; color: var(--text-dim); font-size: 12px;
+    }
+
+    .md-body table { width: 100%; border-collapse: collapse; margin-bottom: 1em; font-size: 13px; }
+    .md-body th, .md-body td {
+      text-align: left; padding: 7px 12px; border: 1px solid var(--border);
+    }
+    .md-body th { background: var(--bg-2); color: var(--text); font-weight: 600; }
+    .md-body td { color: var(--text-dim); }
+
+    .md-body a { color: var(--accent); text-decoration: none; }
+    .md-body a:hover { text-decoration: underline; }
+    .md-body strong { color: var(--text); font-weight: 600; }
+
+    /* ---- tags row ---- */
+    .md-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+
+    /* ---- divider ---- */
+    .section-divider {
+      display: flex; align-items: center; gap: 12px; margin: 40px 0 24px;
+    }
+    .section-divider span {
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--text-faint); white-space: nowrap;
+    }
+    .section-divider hr { flex: 1; height: 1px; border: none; background: var(--border); margin: 0; }
+
+    /* ---- rating ---- */
+    .rating-widget { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .rating-stars { display: flex; gap: 4px; }
+    .rating-star {
+      font-size: 20px; line-height: 1; cursor: pointer;
+      color: var(--border); background: none; border: none; padding: 3px;
+      transition: color 80ms;
+    }
+    .rating-star.lit { color: var(--accent); }
+    .rating-count { font-family: var(--mono); font-size: 11px; color: var(--text-faint); }
+
+    /* ---- comments ---- */
+    .comments-section { display: flex; flex-direction: column; gap: 12px; }
+    .comment-list { display: flex; flex-direction: column; gap: 10px; }
+    .comment-item {
+      background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 14px;
+    }
+    .comment-meta { font-family: var(--mono); font-size: 9px; color: var(--text-faint); margin-bottom: 5px; }
+    .comment-body { font-size: 13px; color: var(--text-dim); line-height: 1.55; }
+    .comment-input-row { display: flex; gap: 8px; }
+    .comment-input {
+      flex: 1; background: var(--bg-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 9px 12px;
+      font-family: var(--sans); font-size: 13px; color: var(--text);
+      outline: none; transition: border-color 120ms;
+    }
+    .comment-input:focus { border-color: var(--text-faint); }
+    .comment-input::placeholder { color: var(--text-faint); }
+    .comment-submit {
+      font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-edge); border-radius: var(--radius);
+      padding: 9px 16px; cursor: pointer; white-space: nowrap;
+      transition: background 120ms, color 120ms;
+    }
+    .comment-submit:hover { background: var(--accent); color: var(--bg); }
+    .comments-empty {
+      font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+      padding: 16px 0; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="site-nav" data-active="docs" data-sub="md repo"></div>
+
+  <section class="hero" style="padding-bottom: 24px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="docs.html" style="color:var(--text-dim); text-decoration:none;">&larr; md repo</a>
+      <span class="sep" id="breadcrumb-title">/</span>
+    </div>
+  </section>
+
+  <div class="md-detail-wrap">
+
+    <!-- action bar: title + copy + download + bookmark -->
+    <div class="md-action-bar" id="action-bar">
+      <div class="md-title-block">
+        <h1 id="md-title">Loading…</h1>
+        <div class="md-purpose-line" id="md-purpose"></div>
+      </div>
+      <div class="md-action-btns">
+        <button class="md-action-copy" id="copy-btn" type="button">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>
+          <span>copy</span>
+        </button>
+        <a class="md-action-dl" id="dl-btn" href="#" download>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
+          <span>download</span>
+        </a>
+        <button class="bookmark-btn" id="bm-btn" type="button" aria-label="Save">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- tags -->
+    <div class="md-tags-row" id="md-tags"></div>
+
+    <!-- rendered markdown body -->
+    <div class="md-body" id="md-body"></div>
+
+    <!-- rating -->
+    <div class="section-divider"><span>rating</span><hr /></div>
+    <div class="rating-widget">
+      <div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this template"></div>
+      <span class="rating-count" id="rating-count">not yet rated</span>
+    </div>
+
+    <!-- comments -->
+    <div class="section-divider"><span>comments</span><hr /></div>
+    <div class="comments-section">
+      <div class="comment-list" id="comment-list">
+        <div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>
+      </div>
+      <div class="comment-input-row">
+        <input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />
+        <button class="comment-submit" id="comment-submit" type="button">post</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="site-footer"></div>
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="mds.js"></script>
+  <script src="bookmarks.js"></script>
+  <script>
+  (function () {
+    "use strict";
+
+    // ---- resolve the MD from the query string ----
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const m  = (typeof MDS !== "undefined") ? MDS.find((x) => x.id === id) : null;
+
+    if (!m) {
+      document.getElementById("md-title").textContent = "Template not found";
+      document.getElementById("md-body").textContent  = "No template with id "" + (id || "") + "" exists.";
+      return;
+    }
+
+    // ---- meta ----
+    document.title = m.title + " · prompt-library";
+
+    document.getElementById("md-title").textContent   = m.title;
+    document.getElementById("md-purpose").textContent = m.purpose;
+    document.getElementById("breadcrumb-title").textContent = "/ " + m.title;
+
+    const tagsEl = document.getElementById("md-tags");
+    (m.tags || []).forEach((t) => {
+      const s = document.createElement("span");
+      s.className = "tag"; s.textContent = "#" + t;
+      tagsEl.appendChild(s);
+    });
+
+    const dlBtn = document.getElementById("dl-btn");
+    dlBtn.href     = m.file;
+    dlBtn.download = m.file.split("/").pop();
+
+    // ---- render markdown ----
+    document.getElementById("md-body").innerHTML = renderMd(m.content);
+
+    // ---- copy ----
+    const copyBtn = document.getElementById("copy-btn");
+    copyBtn.addEventListener("click", async () => {
+      await copyText(m.content);
+      copyBtn.querySelector("span").textContent = "copied";
+      copyBtn.classList.add("copied");
+      showToast("Markdown copied");
+      setTimeout(() => { copyBtn.querySelector("span").textContent = "copy"; copyBtn.classList.remove("copied"); }, 1500);
+    });
+
+    // ---- bookmark ----
+    const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+    const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+    const bmBtn = document.getElementById("bm-btn");
+    if (window.PL_BOOKMARKS) {
+      const applyBm = (saved) => {
+        bmBtn.classList.toggle("saved", saved);
+        bmBtn.setAttribute("aria-label", saved ? "Remove from saved" : "Save");
+        bmBtn.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+      };
+      applyBm(window.PL_BOOKMARKS.isBookmarked("article", m.id));
+      bmBtn.addEventListener("click", () => {
+        applyBm(window.PL_BOOKMARKS.toggle("article", m.id));
+        showToast(bmBtn.classList.contains("saved") ? "Saved" : "Removed");
+      });
+    }
+
+    // ---- rating ----
+    (function () {
+      const starsEl = document.getElementById("rating-stars");
+      const countEl = document.getElementById("rating-count");
+      const key = "pl_rating_article_" + m.id;
+      let current = parseInt(localStorage.getItem(key) || "0", 10);
+      const LABELS = ["", "1 star", "2 stars", "3 stars", "4 stars", "5 stars"];
+
+      for (let i = 1; i <= 5; i++) {
+        (function (val) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "rating-star" + (val <= current ? " lit" : "");
+          btn.setAttribute("aria-label", val + " star");
+          btn.textContent = "★";
+          btn.addEventListener("mouseenter", () => highlight(val));
+          btn.addEventListener("mouseleave", () => highlight(current));
+          btn.addEventListener("click", () => {
+            current = val;
+            localStorage.setItem(key, String(val));
+            highlight(val);
+            countEl.textContent = LABELS[val];
+          });
+          starsEl.appendChild(btn);
+        })(i);
+      }
+
+      function highlight(val) {
+        starsEl.querySelectorAll(".rating-star").forEach((s, idx) => {
+          s.classList.toggle("lit", idx < val);
+        });
+      }
+      countEl.textContent = current ? LABELS[current] : "not yet rated";
+    })();
+
+    // ---- comments ----
+    (function () {
+      const listEl   = document.getElementById("comment-list");
+      const emptyEl  = document.getElementById("comments-empty");
+      const inputEl  = document.getElementById("comment-input");
+      const submitEl = document.getElementById("comment-submit");
+      const key = "pl_comments_article_" + m.id;
+      let comments = [];
+      try { comments = JSON.parse(localStorage.getItem(key) || "[]"); } catch (_) {}
+
+      function refresh() {
+        emptyEl.style.display = comments.length ? "none" : "block";
+      }
+
+      comments.forEach((c) => listEl.insertBefore(buildComment(c), emptyEl));
+      refresh();
+
+      function post() {
+        const text = inputEl.value.trim();
+        if (!text) return;
+        const c = { text, ts: Date.now() };
+        comments.push(c);
+        try { localStorage.setItem(key, JSON.stringify(comments)); } catch (_) {}
+        listEl.insertBefore(buildComment(c), emptyEl);
+        inputEl.value = "";
+        refresh();
+        listEl.lastElementChild.previousElementSibling?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      submitEl.addEventListener("click", post);
+      inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") post(); });
+    })();
+
+    // ---- markdown renderer ----
+    function renderMd(src) {
+      if (!src) return "";
+      const lines  = src.split("\n");
+      let html     = "";
+      let inCode   = false;
+      let codeLang = "";
+      let codeAccum = [];
+      let inUl = false, inOl = false;
+
+      function closeList() {
+        if (inUl) { html += "</ul>\n"; inUl = false; }
+        if (inOl) { html += "</ol>\n"; inOl = false; }
+      }
+
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      function inline(s) {
+        s = esc(s);
+        s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+        s = s.replace(/\*\*\*([^*]+)\*\*\*/g, "<strong><em>$1</em></strong>");
+        s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        s = s.replace(/\*([^*\n]+)\*/g,   "<em>$1</em>");
+        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        return s;
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        // fenced code block
+        if (/^```/.test(line)) {
+          if (!inCode) {
+            closeList();
+            inCode = true;
+            codeLang = line.slice(3).trim();
+            codeAccum = [];
+          } else {
+            inCode = false;
+            const body = codeAccum.map(esc).join("\n");
+            html += `<pre><code${codeLang ? ' class="lang-' + esc(codeLang) + '"' : ""}>${body}</code></pre>\n`;
+            codeAccum = [];
+            codeLang  = "";
+          }
+          continue;
+        }
+        if (inCode) { codeAccum.push(line); continue; }
+
+        // heading
+        const hm = line.match(/^(#{1,6})\s+(.*)/);
+        if (hm) { closeList(); html += `<h${hm[1].length}>${inline(hm[2])}</h${hm[1].length}>\n`; continue; }
+
+        // hr
+        if (/^(-{3,}|_{3,}|\*{3,})$/.test(line.trim())) { closeList(); html += "<hr/>\n"; continue; }
+
+        // blockquote
+        const bq = line.match(/^>\s?(.*)/);
+        if (bq) { closeList(); html += `<blockquote><p>${inline(bq[1])}</p></blockquote>\n`; continue; }
+
+        // table row
+        if (/^\|/.test(line)) {
+          if (/^[\|\-\s:]+$/.test(line)) continue; // separator row
+          closeList();
+          const cells = line.split("|").slice(1, -1).map((c) => c.trim());
+          const tag   = (i > 0 && /^\|/.test(lines[i - 1]) && !lines[i - 1].replace(/[\|\-\s:]/g, "")) ? "th" : "td";
+          html += "<tr>" + cells.map((c) => `<${tag}>${inline(c)}</${tag}>`).join("") + "</tr>\n";
+          continue;
+        }
+
+        // unordered list
+        const ul = line.match(/^(\s*)[-*]\s+(.*)/);
+        if (ul) {
+          if (inOl) { html += "</ol>\n"; inOl = false; }
+          if (!inUl) { html += "<ul>\n"; inUl = true; }
+          const cb = ul[2].match(/^\[( |x)\]\s+(.*)/i);
+          if (cb) {
+            html += `<li class="task-item"><input type="checkbox"${cb[1].toLowerCase() === "x" ? " checked" : ""} disabled> ${inline(cb[2])}</li>\n`;
+          } else {
+            html += `<li>${inline(ul[2])}</li>\n`;
+          }
+          continue;
+        }
+
+        // ordered list
+        const ol = line.match(/^\d+\.\s+(.*)/);
+        if (ol) {
+          if (inUl) { html += "</ul>\n"; inUl = false; }
+          if (!inOl) { html += "<ol>\n"; inOl = true; }
+          html += `<li>${inline(ol[1])}</li>\n`;
+          continue;
+        }
+
+        // blank line
+        if (!line.trim()) { closeList(); continue; }
+
+        // paragraph
+        closeList();
+        html += `<p>${inline(line)}</p>\n`;
+      }
+
+      closeList();
+
+      // wrap consecutive <tr> in <table>
+      html = html.replace(/(<tr>[\s\S]*?<\/tr>\n)+/g, (match) => `<table>${match}</table>\n`);
+
+      return html;
+    }
+
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); return; } catch (_) {}
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.cssText = "position:fixed;opacity:0;";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+
+    function buildComment(c) {
+      const el = document.createElement("div");
+      el.className = "comment-item";
+      const meta = document.createElement("div");
+      meta.className = "comment-meta";
+      meta.textContent = new Date(c.ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+      const body = document.createElement("div");
+      body.className = "comment-body";
+      body.textContent = c.text;
+      el.appendChild(meta); el.appendChild(body);
+      return el;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1400);
+    }
+  })();
+  </script>
+
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+</body>
+</html>

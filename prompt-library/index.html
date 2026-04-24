@@ -285,12 +285,11 @@
       wireDownloads();
       wireUseIn();
 
-      // ---- deep-link: ?id=42 auto-opens that prompt's modal ----
+      // ---- deep-link: ?id=42 — redirect to the dedicated prompt page ----
       (function () {
         const id = parseInt(new URLSearchParams(window.location.search).get("id"), 10);
         if (!id) return;
-        const p = PROMPTS.find((x) => x.id === id);
-        if (p) openModal(p);
+        window.location.replace("prompt.html?id=" + id);
       })();
 
       // ---- "Use in X" split button ----
@@ -415,7 +414,7 @@
             '<div style="font-size:12px; color:var(--text-dim); line-height:1.4;">' + escapeHtml(p.purpose) + '</div>';
           card.addEventListener("mouseenter", () => card.style.borderColor = "var(--accent-edge)");
           card.addEventListener("mouseleave", () => card.style.borderColor = "var(--border)");
-          card.addEventListener("click", () => openModal(p));
+          card.addEventListener("click", () => { window.location.href = "prompt.html?id=" + p.id; });
           $grid.appendChild(card);
         });
       }
@@ -486,6 +485,9 @@
         $grid.appendChild(frag);
       }
 
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
       function buildCard(p) {
         const card = document.createElement("div");
         card.className = "card";
@@ -505,6 +507,9 @@
             '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
           '</svg>';
 
+        const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("prompt", p.id) : false;
+        const bmSvg   = isSaved ? BM_FILLED : BM_OUTLINE;
+
         const idStr = String(p.id).padStart(3, "0");
         card.innerHTML =
           '<div class="card-head">' +
@@ -512,7 +517,13 @@
               '<span class="card-id">#' + escapeHtml(idStr) + "</span>" +
               '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
             "</div>" +
-            '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>" +
+            '<div style="display:flex;align-items:center;gap:6px;">' +
+              '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>" +
+              '<button class="bookmark-btn card-bookmark' + (isSaved ? " saved" : "") + '" type="button" ' +
+                'aria-label="' + (isSaved ? "Remove bookmark" : "Bookmark") + '" aria-pressed="' + isSaved + '">' +
+                bmSvg +
+              "</button>" +
+            "</div>" +
           "</div>" +
           "<h3>" + escapeHtml(p.title) + "</h3>" +
           '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
@@ -526,10 +537,10 @@
             "</button>" +
           "</div>";
 
-        // Card opens modal on click / Enter / Space.
+        // Card navigates to prompt detail page on click / Enter / Space.
         const openFromCard = (e) => {
-          if (e.target.closest(".card-copy")) return;
-          openModal(p);
+          if (e.target.closest(".card-copy") || e.target.closest(".card-share") || e.target.closest(".card-bookmark")) return;
+          window.location.href = "prompt.html?id=" + p.id;
         };
         card.addEventListener("click", openFromCard);
         card.addEventListener("keydown", (e) => {
@@ -554,6 +565,20 @@
             labelSpan.textContent = originalLabel;
           }, 1500);
         });
+
+        // Bookmark button
+        const bmEl = card.querySelector(".card-bookmark");
+        if (bmEl) {
+          bmEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (!window.PL_BOOKMARKS) return;
+            const saved = window.PL_BOOKMARKS.toggle("prompt", p.id);
+            bmEl.classList.toggle("saved", saved);
+            bmEl.setAttribute("aria-pressed", saved);
+            bmEl.setAttribute("aria-label", saved ? "Remove bookmark" : "Bookmark");
+            bmEl.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+          });
+        }
 
         return card;
       }
@@ -691,8 +716,7 @@
         }).join("");
         grid.querySelectorAll(".recent-card").forEach((btn) => {
           btn.addEventListener("click", () => {
-            const p = PROMPTS.find((x) => x.id === parseInt(btn.getAttribute("data-id"), 10));
-            if (p) openModal(p);
+            window.location.href = "prompt.html?id=" + btn.getAttribute("data-id");
           });
         });
       }

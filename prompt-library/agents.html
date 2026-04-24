@@ -46,6 +46,7 @@
       border-radius: var(--radius); padding: 20px;
       display: flex; flex-direction: column; gap: 12px;
       transition: border-color 120ms;
+      position: relative;
     }
     .pattern-card:hover { border-color: var(--text-faint); }
 
@@ -449,8 +450,43 @@
        ================================================================ -->
   <div id="site-footer"></div>
 
+  <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
+      document.querySelectorAll(".pattern-card").forEach(function (card) {
+        const titleEl = card.querySelector(".pattern-title");
+        if (!titleEl) return;
+        const agentId = titleEl.textContent.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
+        const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("agent", agentId) : false;
+        const btn = document.createElement("button");
+        btn.className = "bookmark-btn" + (isSaved ? " saved" : "");
+        btn.type = "button";
+        btn.setAttribute("aria-label", isSaved ? "Remove bookmark" : "Bookmark");
+        btn.setAttribute("aria-pressed", isSaved);
+        btn.innerHTML = isSaved ? BM_FILLED : BM_OUTLINE;
+
+        const head = card.querySelector(".pattern-head");
+        if (head) head.appendChild(btn);
+
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (!window.PL_BOOKMARKS) return;
+          const saved = window.PL_BOOKMARKS.toggle("agent", agentId);
+          btn.classList.toggle("saved", saved);
+          btn.setAttribute("aria-pressed", saved);
+          btn.setAttribute("aria-label", saved ? "Remove bookmark" : "Bookmark");
+          btn.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+        });
+      });
+    })();
+  </script>
   <script src="theme.js"></script>
   <script defer src="shortcuts.js"></script>
 

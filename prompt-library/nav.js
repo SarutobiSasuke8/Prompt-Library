@@ -26,7 +26,7 @@
         { key: "agents",      href: "agents.html",      label: "agents" },
         { key: "collections", href: "collections.html", label: "collections" },
         { key: "playground",  href: "playground.html",  label: "playground" },
-        { key: "methodology", href: "learn.html",        label: "methodology" }
+        { key: "methodology", href: "learn.html",        label: "articles" }
       ]
     },
     { key: "about", href: "about.html", label: "about" }

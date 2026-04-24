@@ -660,6 +660,24 @@ a:hover { text-decoration: underline; }
   background: var(--accent);
   border-color: var(--accent);
 }
+.bookmark-btn {
+  flex-shrink: 0;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  min-height: 28px;
+  line-height: 1;
+}
+.bookmark-btn svg { width: 13px; height: 13px; display: block; }
+.bookmark-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.bookmark-btn.saved { color: var(--accent); border-color: var(--accent); }
 .tag, .model-pill {
   font-family: var(--mono);
   font-size: 10.5px;

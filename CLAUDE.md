@@ -65,27 +65,27 @@ check `prompt-library/ROADMAP.md`.
 
 ## Session recording — standard practice
 
-Every working session on this repo MUST end with a session log written to
+Every working session on this repo MUST end with a comprehensive session report written to
 `sessions/` at the repo root. This is how future Claude sessions (and
 future-you) reconstruct what happened, why, and what's left.
 
 **Rules:**
 
-- One markdown file per session, named `YYYY-MM-DD-kebab-name.md`.
-- Use the template at the bottom of `sessions/README.md`.
-- YAML frontmatter MUST include `[[wikilink]]` values for `project`, `date`,
-  `llms_used`, `scope`, `related`, and `concepts` — these power the
-  [[Obsidian]] graph.
-- `llms_used` lists every model that contributed to the session (e.g.
-  `[[Claude Opus 4.7]]`, `[[Claude Sonnet 4.6]]`). If multiple threads
-  collaborated, list them all.
-- `commits` lists every short-SHA produced during the session.
-- Body sections: Context → Decisions → Changes → Follow-ups. Keep Follow-ups
-  actionable and prioritised; future sessions start from there.
+- One markdown file per session, named `YYYY-MM-DD-session-report-[project-slug].md`.
+- **Copy `sessions/Session Report Template.md`** and fill all sections completely.
+- YAML frontmatter MUST include comprehensive metadata:
+  - `[[project]]`, `[[branch]]`, `[[date]]` as wikilinks
+  - `llm:` (provider), `model:` (version), `agents_used:` (all agents that touched it)
+  - `agent_instruction_files:` (CLAUDE.md, AGENTS.md, CODEX.md, etc.)
+  - `status:` one of `active`, `shipped`, `parked`, `blocked`, `aborted`
+  - `confidence:` one of `low`, `medium`, `high`
+  - `commits:` list of short-SHAs
+  - `tags:`, `related_entities:`, `related_systems:`, `related_projects:` — all wikilinked
+- Body sections in order: Executive Summary → Context → Work Completed → Decisions → Git Log → Validation → Tasks → Blockers → Handoff
+- **Handoff section MUST include "Recommended startup sequence"** for the next agent to quickly resume work.
 - Update the Index table in `sessions/README.md` with a new row.
-- Do NOT write session logs anywhere else. An older alternate folder
-  (`logs/sessions/`) exists from a prior Sonnet session — it is deprecated.
-  Consolidate under `sessions/` only.
+- Use `[[wikilinks]]` extensively for entities, concepts, tools, dates, people.
+- Do NOT write session logs anywhere else. Deprecated `logs/sessions/` folder should be ignored.
 
 Sessions live at the repo root so the GitHub Pages deploy (which publishes
 only `prompt-library/`) does not expose internal working notes.

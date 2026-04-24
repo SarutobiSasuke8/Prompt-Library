@@ -10,32 +10,42 @@ tags: [sessions, index, log, moc]
 # Sessions — MOC
 
 > Map of content for every Claude Code working session on this repo.
-> Each session has its own note with YAML frontmatter and an Obsidian-style
+> Each session has its own comprehensive report with detailed YAML frontmatter and an Obsidian-style
 > wiki-linked write-up. Link freely with `[[ ]]`.
+> 
+> **Migration (2026-04-24):** System upgraded from lightweight format (Context/Decisions/Changes/Follow-ups) to comprehensive template. Legacy sessions below retained for context; new sessions use full template format.
 
 ## How this system works
 
-- One `.md` per session, named `YYYY-MM-DD-kebab-name.md`.
-- Every session file begins with [[YAML frontmatter]] that captures
-  machine-readable metadata (date, agent, branch, commits, files, status).
-- The body is a human-readable log with headings, decisions, and
-  `[[wikilinks]]` to [[concepts]], [[files]], [[branches]], and other
-  [[sessions]]. This makes the folder graph-ready in Obsidian.
-- This `README.md` is the root [[MOC]] (Map of Content). Update the
-  **Index** table below whenever a new session file lands.
-- These notes live at the **repo root** (`sessions/`), not inside
-  `prompt-library/`, so the [[GitHub Pages deploy]] does not publish them.
+- One `.md` per session, named `YYYY-MM-DD-session-report-[project-slug].md`.
+- Every session file begins with comprehensive [[YAML frontmatter]] capturing metadata (date, agent, llm, model, agents_used, commits, status, confidence, etc.).
+- Body structured in sections: Executive Summary → Context → Work Completed → Decisions → Git Log → Validation → Tasks → Blockers → Handoff.
+- Heavy use of `[[wikilinks]]` to [[concepts]], [[files]], [[branches]], [[entities]], and other [[sessions]]. Fully graph-ready for [[Obsidian]].
+- Dedicated **"Recommended startup sequence"** for the next coding agent to quickly resume work.
+- This `README.md` is the root [[MOC]] (Map of Content). Update the **Index** table below whenever a new session file lands.
+- These notes live at the **repo root** (`sessions/`), not inside `prompt-library/`, so the [[GitHub Pages deploy]] does not publish them.
 
 ## Conventions
 
-- Dates in frontmatter are ISO-8601 (`YYYY-MM-DD`).
-- `status:` is one of `active`, `shipped`, `parked`, `aborted`.
-- `tags:` are lowercase, kebab-case, plural where it makes sense.
-- Use `[[wikilinks]]` freely — they don't need to resolve in GitHub's
-  renderer. They're for [[Obsidian]] graph navigation and future-you.
+**Naming:**
+- Filename: `YYYY-MM-DD-session-report-[project-slug].md` (e.g. `2026-04-24-session-report-prompt-library.md`)
+- Use lowercase, hyphens, no spaces; stable project slugs (see `AGENTS.md`, `CLAUDE.md`, `CODEX.md`)
+
+**Metadata:**
+- Dates in frontmatter are ISO-8601 (`YYYY-MM-DD`)
+- `status:` is one of `active`, `shipped`, `parked`, `blocked`, `aborted`
+- `confidence:` is one of `low`, `medium`, `high`
+- `llm:` list LLM providers (e.g. `[[Claude]]`, `[[ChatGPT]]`, `[[Codex]]`)
+- `model:` list specific models (e.g. `[[Claude Opus 4.7]]`, `[[GPT-4o]]`)
+- `agents_used:` list agent names (e.g. `[[Claude Code]]`, `[[Codex]]`)
+- `tags:` lowercase, kebab-case, plural where it makes sense
+
+**Linking:**
+- Use `[[wikilinks]]` freely — they don't need to resolve in GitHub. They're for [[Obsidian]] graph navigation.
 - Prefer `[[double-brackets]]` over inline paths. Paths rot; concepts don't.
-- When referencing code locations, use `path:line` (e.g. `prompt-library/index.html:254`).
-- When referencing commits, short-SHA the commit (e.g. `6656f1e`).
+- When referencing code: `path:line` (e.g. `prompt-library/index.html:254`)
+- When referencing commits: short-SHA (e.g. `6656f1e`)
+- When referencing dates, entities, people: always use `[[wikilinks]]`
 
 ## Canonical concepts (link anchors)
 
@@ -92,35 +102,21 @@ on request.
 
 ## Template
 
-A new session file should start from this shape. Copy, rename, fill in.
+**See `Session Report Template.md` for the canonical template.** 
 
-```markdown
----
-id: YYYY-MM-DD-kebab-name
-date: YYYY-MM-DD
-project: [[prompt-library]]
-branch: claude/your-branch-name
-agent: Claude Code (Opus 4.7)
-status: active              # active | shipped | parked | aborted
-tags: [frontend, design, ...]
-touches:
-  - path/to/file.ext
-commits: []
-related:
-  - [[previous-session]]
----
-
-# YYYY-MM-DD — Session title
-
-## Context
-…why we're doing this, what triggered it…
-
-## Decisions
-…the calls made, the trade-offs taken…
-
-## Changes
-…what actually got written…
-
-## Follow-ups
-…what's left, what blocked us…
-```
+New sessions should:
+1. Copy `Session Report Template.md` and rename to `YYYY-MM-DD-session-report-[project-slug].md`
+2. Fill **all** YAML frontmatter fields (llm, model, agents_used, agent_instruction_files, etc.)
+3. Complete body sections in order:
+   - **Executive Summary** — 60-second mission overview
+   - **Context and Operating System** — what instruction files loaded, constraints, strategic frame
+   - **Work Completed** — outputs, files created/modified, systems used
+   - **Decisions and Reasoning** — key decisions + tradeoffs, strategic insights
+   - **Git and Delivery Log** — commits, branch/PR status, deployment status
+   - **Validation** — tests run, linting, manual QA, what remains unverified
+   - **Tasks** — completed, open, immediate next actions
+   - **Blockers and Risks** — current blockers, dependencies, risks to watch
+   - **Handoff for Future Agents** — startup sequence, files to read, traps, safe assumptions
+4. Use `[[wikilinks]]` extensively for entities, concepts, files, dates, people, tools
+5. Include `## Linked Entities and Notes` section
+6. Update the **Index** table below with new session entry

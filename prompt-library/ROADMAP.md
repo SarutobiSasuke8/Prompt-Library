@@ -48,6 +48,23 @@ Do **not** start on these until v1 has users asking for them.
 - Share a folder via URL
 - Import a folder into your own collection
 
+### Profile organisation & export
+Builds on auth + folders. The profile page becomes the user's workspace
+across every content type the site carries.
+
+- Profile surfaces four content buckets: **prompts**, **markdown notes**,
+  **tools**, **articles**
+- Users can create multiple named folders inside each bucket (e.g. a
+  "research" folder of prompts separate from a "shipping" folder)
+- **Per-folder export as `.md`** — one file bundling every item in that
+  folder, suitable for dropping into another vault or sharing
+- **Full-profile export as Obsidian-formatted `.md`** — a single archive of
+  every folder across every bucket, using Obsidian conventions
+  (`[[wikilinks]]`, YAML frontmatter, folder-as-directory) so the export
+  drops straight into an Obsidian vault with a working graph
+- Exact MD / Obsidian formatting spec **TBD — user will supply**. Do not
+  invent a schema; wait for the spec before implementing.
+
 ### Ratings / reviews
 - 1–5 star ratings with optional short review
 - Aggregate score on the card

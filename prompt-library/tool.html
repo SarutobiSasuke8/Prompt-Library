@@ -298,26 +298,26 @@
     var actionsDiv = document.createElement('div');
     actionsDiv.className = 'td-actions';
 
-    function actionBtn(href, label, primary) {
+    function actionBtn(href, iconSvg, label, primary) {
       if (!href) return null;
       var a = document.createElement('a');
       a.href = href;
       a.target = '_blank';
       a.rel = 'noopener';
       a.className = 'td-btn' + (primary ? ' primary' : '');
-      a.innerHTML = label + ' ' + EXTERNAL_ICON;
+      a.innerHTML = iconSvg + label + (primary ? ' ' + EXTERNAL_ICON : '');
       return a;
     }
 
-    var visitBtn = actionBtn(tool.url, 'Visit website', true);
+    var visitBtn = actionBtn(tool.url, '', 'Visit website', true);
     if (visitBtn) actionsDiv.appendChild(visitBtn);
 
     if (tool.github) {
-      var ghBtn = actionBtn(tool.github, 'GitHub', false);
+      var ghBtn = actionBtn(tool.github, GITHUB_ICON, 'GitHub', false);
       if (ghBtn) actionsDiv.appendChild(ghBtn);
     }
     if (tool.x) {
-      var xBtn = actionBtn(tool.x, 'Follow on X', false);
+      var xBtn = actionBtn(tool.x, X_ICON, 'Follow on X', false);
       if (xBtn) actionsDiv.appendChild(xBtn);
     }
 

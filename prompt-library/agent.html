@@ -188,14 +188,26 @@
     // ---- Logo ----
     var logoDiv = document.createElement('div');
     logoDiv.className = 'ad-logo';
-    if (agent.icon) {
+    if (agent.logoUrl) {
+      var urlImg = document.createElement('img');
+      urlImg.className = 'cb-logo';
+      urlImg.alt = ''; urlImg.src = agent.logoUrl;
+      urlImg.onerror = function () {
+        urlImg.remove();
+        if (agent.icon) trySimpleIcons(); else tryClearbit();
+      };
+      logoDiv.appendChild(urlImg);
+    } else if (agent.icon) {
+      trySimpleIcons();
+    } else {
+      tryClearbit();
+    }
+    function trySimpleIcons() {
       var siImg = document.createElement('img');
       siImg.className = 'si-logo';
       siImg.alt = ''; siImg.src = siUrl(agent.icon);
       siImg.onerror = function () { siImg.remove(); tryClearbit(); };
       logoDiv.appendChild(siImg);
-    } else {
-      tryClearbit();
     }
     function tryClearbit() {
       if (!domain) { showMonogram(); return; }
@@ -325,9 +337,9 @@
         card.className = 'ad-rel-card';
         var markDiv = document.createElement('div');
         markDiv.className = 'ad-rel-mark';
-        if (rt.icon) {
+        if (rt.logoUrl || rt.icon) {
           var img = document.createElement('img');
-          img.alt = ''; img.src = siUrl(rt.icon);
+          img.alt = ''; img.src = rt.logoUrl || siUrl(rt.icon);
           img.onerror = function () {
             img.remove();
             var mono = document.createElement('span');

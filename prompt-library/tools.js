@@ -82,6 +82,13 @@ var TOOLS = [
     purpose: 'Enterprise-focused chat with strong retrieval augmentation. Good for grounding answers in large document sets.',
     description: "Cohere's enterprise chat product, built on their Command R+ model and optimised for retrieval-augmented generation. The standout feature is document grounding: connect Coral to a search index, file store, or SharePoint, and every answer cites the source document. Designed for B2B deployments where hallucination is costly, accuracy is auditable, and traceability to source matters. Pricing targets enterprise contracts rather than individual users. Weak point: it's not a general-purpose tool — personal productivity, creative writing, and coding are secondary use cases at best."
   },
+  {
+    id: 'venice', group: 'chat', mark: 'VC', icon: '', name: 'Venice', sub: 'privacy-first AI',
+    pricing: 'freemium', url: 'https://venice.ai/', x: 'https://x.com/tryvenice', github: '',
+    deepLink: 'none',
+    purpose: 'Privacy-focused AI chat running open-source models. No conversation logging, no training on your data.',
+    description: "Venice runs open-source models (Llama, Mistral, and others) on its own infrastructure with a hard no-logging guarantee — conversations are not stored, not used for training, and not accessible to Venice staff. This makes it a practical alternative to mainstream chat UIs for sensitive work: legal drafting, financial analysis, personal notes, or any context where the prompt itself is confidential. The image generation feature uses Flux and Stable Diffusion variants with the same privacy-first policy. A Pro plan removes rate limits and adds access to larger models. Weak point: model selection is narrower than the major lab products and there is no tool-use or web-browsing capability yet."
+  },
 
   // ---- Creative AI ----
   {

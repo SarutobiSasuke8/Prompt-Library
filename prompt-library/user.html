@@ -502,6 +502,7 @@
       <!-- shown only to profile owner — toggled by JS when auth is wired -->
       <button class="edit-profile-btn hidden" id="edit-profile-btn" type="button">edit profile</button>
       <button class="edit-profile-btn" id="export-profile-btn" type="button" title="Download your profile as an Obsidian-compatible markdown file">export profile (.md)</button>
+      <button class="edit-profile-btn hidden" id="signout-btn" type="button" style="color:var(--text-faint);border-color:var(--border);">sign out</button>
     </aside>
 
     <!-- Main content -->
@@ -733,47 +734,147 @@
   <script src="bookmarks.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
-  <script>
-    (function () {
+  <script type="module">
+    import { sb, onAuth, signInWithGitHub, signInWithEmail, signOut,
+             updateProfile, setHandle, validateHandleShape, isHandleAvailable } from './supabase.js';
+
+    (async function () {
       "use strict";
+
+      // ---------------------------------------------------------------
+      // Helpers (defined early — used in error panels below)
+      // ---------------------------------------------------------------
+      function escHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      }
 
       // ---------------------------------------------------------------
       // URL param
       // ---------------------------------------------------------------
-      const params = new URLSearchParams(window.location.search);
-      const handle = params.get("handle") || "";
-
-      // ---------------------------------------------------------------
-      // Mock profile data — replace with Supabase fetch when live
-      // TODO: sb.from('profiles').select('*').eq('handle', handle).single()
-      // ---------------------------------------------------------------
-      const MOCK_PROFILES = {
-        "SarutobiSasuke": {
-          handle:        "SarutobiSasuke",
-          bio:           "Building with AI. Prompt engineer and crypto researcher. Curating production-ready prompts for builders.",
-          x_handle:      "Sarut0biSasuke",
-          github_handle: "SarutobiSasuke8",
-          avatar_url:    null,
-          created_at:    "2026-04-01T00:00:00Z"
-        }
-      };
-
-      // TODO: replace with Supabase fetch when auth is live:
-      // sb.from('bookmarks').select('prompt_id').eq('user_id', profile.id)
-      // v1 is a single-browser app — bookmarks are always visible to the
-      // local user. The privacy toggle becomes meaningful once auth lands.
+      const params     = new URLSearchParams(window.location.search);
+      const handleParam = params.get("handle") || "";
       let bookmarksPublic = true;
 
+      // Show loading while auth resolves
+      document.getElementById("profile-wrap").innerHTML =
+        '<div style="grid-column:1/-1;padding:60px 0;text-align:center;' +
+        'color:var(--text-faint);font-family:var(--mono);font-size:13px;">loading…</div>';
+
       // ---------------------------------------------------------------
-      // Load profile
+      // Wait for Supabase auth (fires once; unsubscribes immediately)
       // ---------------------------------------------------------------
-      const profile = handle ? (MOCK_PROFILES[handle] || null) : null;
+      const { user, profile: ownProfile } = await new Promise(resolve => {
+        const unsub = onAuth(state => { unsub(); resolve(state); });
+      });
+
+      // ---------------------------------------------------------------
+      // Determine which profile to display
+      // ---------------------------------------------------------------
+      let profile  = null;
+      let isOwner  = false;
+      let currentUser = user;
+
+      if (handleParam) {
+        const { data } = await sb
+          .from("profiles").select("*")
+          .eq("handle", handleParam.toLowerCase()).maybeSingle();
+        profile = data;
+        isOwner = !!(user && data && user.id === data.id);
+      } else if (user && ownProfile && ownProfile.handle) {
+        profile = ownProfile;
+        isOwner = true;
+        history.replaceState(null, "", "?handle=" + encodeURIComponent(ownProfile.handle));
+      } else if (!user) {
+        renderSignIn();
+        return;
+      } else {
+        renderSetupHandle();
+        return;
+      }
 
       if (!profile) {
         document.getElementById("profile-wrap").innerHTML =
           '<div class="panel-empty" style="grid-column:1/-1;margin-top:40px;">' +
-          '<strong>User not found</strong>No profile exists for this handle.</div>';
+          "<strong>User not found</strong>No profile for " +
+          (handleParam ? "@" + escHtml(handleParam) : "this handle") + ".</div>";
         return;
+      }
+
+      // ---------------------------------------------------------------
+      // Sign-in panel
+      // ---------------------------------------------------------------
+      function renderSignIn() {
+        document.getElementById("profile-wrap").innerHTML =
+          '<div style="grid-column:1/-1;padding:60px 20px;text-align:center;">' +
+          '<div style="max-width:380px;margin:0 auto;">' +
+          '<h2 style="font-size:20px;margin:0 0 8px;color:var(--text);">Your library profile</h2>' +
+          '<p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin:0 0 28px;">' +
+          'Sign in to bookmark prompts, save tools, and track your contributions.</p>' +
+          '<div style="display:flex;flex-direction:column;gap:10px;">' +
+          '<button id="signin-gh" class="btn-save" style="justify-content:center;display:flex;align-items:center;gap:8px;width:100%;">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>' +
+          'Continue with GitHub</button>' +
+          '<div style="display:flex;align-items:center;gap:10px;color:var(--text-faint);font-size:12px;">' +
+          '<div style="flex:1;height:1px;background:var(--border);"></div>or email<div style="flex:1;height:1px;background:var(--border);"></div></div>' +
+          '<div style="display:flex;gap:8px;">' +
+          '<input type="email" id="signin-email" placeholder="your@email.com" style="flex:1;padding:9px 12px;background:var(--bg-1);border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:13px;font-family:var(--mono);outline:none;" />' +
+          '<button id="signin-magic" class="btn-save" style="flex-shrink:0;">send link</button>' +
+          '</div>' +
+          '<div id="signin-msg" style="font-size:12px;color:var(--text-dim);font-family:var(--mono);min-height:18px;text-align:left;"></div>' +
+          '</div></div></div>';
+
+        document.getElementById("signin-gh").addEventListener("click", () => signInWithGitHub());
+        document.getElementById("signin-magic").addEventListener("click", async () => {
+          const email = document.getElementById("signin-email").value.trim();
+          if (!email) return;
+          const btn = document.getElementById("signin-magic");
+          const msg = document.getElementById("signin-msg");
+          btn.textContent = "sending…"; btn.disabled = true;
+          const { error } = await signInWithEmail(email);
+          btn.textContent = "send link"; btn.disabled = false;
+          msg.textContent = error ? "Error: " + error.message : "Check your email for the magic link.";
+        });
+      }
+
+      // ---------------------------------------------------------------
+      // Handle setup panel (logged in but no handle yet)
+      // ---------------------------------------------------------------
+      function renderSetupHandle() {
+        document.getElementById("profile-wrap").innerHTML =
+          '<div style="grid-column:1/-1;padding:60px 20px;text-align:center;">' +
+          '<div style="max-width:380px;margin:0 auto;">' +
+          '<h2 style="font-size:20px;margin:0 0 8px;color:var(--text);">Choose a handle</h2>' +
+          '<p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin:0 0 24px;">Pick a public handle to complete your profile.</p>' +
+          '<div style="display:flex;gap:8px;">' +
+          '<div style="display:flex;align-items:center;background:var(--bg-1);border:1px solid var(--border);border-radius:2px;flex:1;">' +
+          '<span style="padding:0 6px 0 12px;color:var(--text-faint);font-family:var(--mono);font-size:13px;">@</span>' +
+          '<input type="text" id="handle-inp" placeholder="yourhandle" maxlength="24" autocomplete="off" style="flex:1;border:none;background:none;color:var(--text);font-size:13px;font-family:var(--mono);padding:9px 12px 9px 0;outline:none;" />' +
+          '</div>' +
+          '<button id="handle-save" class="btn-save" style="flex-shrink:0;">save</button>' +
+          '</div>' +
+          '<div id="handle-msg" style="font-size:12px;color:var(--text-dim);font-family:var(--mono);min-height:18px;margin-top:8px;text-align:left;"></div>' +
+          '<button id="handle-signout" class="btn-cancel" style="margin-top:20px;font-size:12px;">sign out</button>' +
+          '</div></div>';
+
+        document.getElementById("handle-save").addEventListener("click", async () => {
+          const h   = (document.getElementById("handle-inp").value || "").trim();
+          const msg = document.getElementById("handle-msg");
+          const btn = document.getElementById("handle-save");
+          const shapeErr = validateHandleShape(h);
+          if (shapeErr) { msg.textContent = shapeErr; return; }
+          btn.textContent = "checking…"; btn.disabled = true;
+          const availErr = await isHandleAvailable(h);
+          if (availErr) { msg.textContent = availErr; btn.textContent = "save"; btn.disabled = false; return; }
+          try {
+            await setHandle(h);
+            window.location.reload();
+          } catch (e) {
+            msg.textContent = e.message; btn.textContent = "save"; btn.disabled = false;
+          }
+        });
+        document.getElementById("handle-signout").addEventListener("click", () => signOut().then(() => window.location.reload()));
       }
 
       document.title = "prompt-library \u00b7 @" + profile.handle;
@@ -990,8 +1091,6 @@
         : "";
       document.getElementById("profile-joined").textContent = joined;
 
-      // TODO: replace with auth check — const isOwner = currentUser?.id === profile.id;
-      const isOwner = true; // stub — always show edit button for now
       if (isOwner) document.getElementById("edit-profile-btn").classList.remove("hidden");
 
       document.getElementById("header-count").textContent = totalContributions;
@@ -1180,7 +1279,7 @@
 
       document.getElementById("privacy-toggle").addEventListener("click", () => {
         bookmarksPublic = !bookmarksPublic;
-        // TODO: persist via sb.from('profiles').update({ bookmarks_public: bookmarksPublic })
+        if (isOwner) updateProfile({ bookmarks_public: bookmarksPublic }).catch(() => {});
         renderBookmarks();
       });
 
@@ -1519,6 +1618,11 @@
       const $avatarFile   = document.getElementById("avatar-file-input");
 
       document.getElementById("edit-profile-btn").addEventListener("click", openEditModal);
+      if (isOwner) {
+        const $so = document.getElementById("signout-btn");
+        $so.classList.remove("hidden");
+        $so.addEventListener("click", () => signOut().then(() => { window.location.href = "user.html"; }));
+      }
       document.getElementById("export-profile-btn").addEventListener("click", () => {
         try { exportProfileObsidian(); showToast("Profile exported"); }
         catch (err) { console.error(err); showToast("Export failed"); }
@@ -1543,19 +1647,28 @@
         $editSave.textContent = "saving…";
         $editSave.classList.add("saving");
 
-        // TODO: wire to Supabase when auth is live
-        // await PL.updateProfile({
-        //   bio:           $editBio.value.trim(),
-        //   x_handle:      $editX.value.trim(),
-        //   avatar_url:    uploadedAvatarUrl   // from Supabase Storage upload
-        // });
-        // if handle changed: await PL.setHandle($editHandle.value.trim());
-
-        // Optimistic local update for demo
-        profile.handle        = $editHandle.value.trim() || profile.handle;
-        profile.bio           = $editBio.value.trim();
-        profile.x_handle      = $editX.value.trim();
-        profile.github_handle = $editGH.value.trim();
+        try {
+          const newHandle = $editHandle.value.trim();
+          if (newHandle && newHandle.toLowerCase() !== (profile.handle || "").toLowerCase()) {
+            const shapeErr = validateHandleShape(newHandle);
+            if (shapeErr) { showToast(shapeErr); $editSave.textContent = "save changes"; $editSave.classList.remove("saving"); return; }
+            const availErr = await isHandleAvailable(newHandle);
+            if (availErr) { showToast(availErr); $editSave.textContent = "save changes"; $editSave.classList.remove("saving"); return; }
+            await setHandle(newHandle);
+            profile.handle = newHandle;
+          }
+          await updateProfile({
+            bio:      $editBio.value.trim(),
+            x_handle: $editX.value.trim()
+          });
+          profile.bio           = $editBio.value.trim();
+          profile.x_handle      = $editX.value.trim();
+          profile.github_handle = $editGH.value.trim();
+        } catch (err) {
+          showToast("Save failed: " + err.message);
+          $editSave.textContent = "save changes"; $editSave.classList.remove("saving");
+          return;
+        }
 
         document.getElementById("profile-handle-text").textContent = profile.handle;
         document.getElementById("nav-sub").textContent = "@" + profile.handle;
@@ -1628,6 +1741,7 @@
       function escapeAttr(s) { return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, ""); }
     })();
   </script>
+  <script type="module" src="auth-nav.js"></script>
   <script src="theme.js"></script>
   <script defer src="shortcuts.js"></script>
 

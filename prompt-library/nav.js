@@ -76,9 +76,9 @@
         '</nav>' +
         (slot ? slot : "") +
         '<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">&#9728;</button>' +
-        '<a href="user.html?handle=SarutobiSasuke" class="avatar-chip" aria-label="Your profile">' +
-          '<span class="av-circle">S</span>' +
-          '<span class="av-handle">SarutobiSasuke</span>' +
+        '<a href="user.html" class="avatar-chip" id="av-chip" aria-label="Sign in">' +
+          '<span class="av-circle" id="av-circle">?</span>' +
+          '<span class="av-handle" id="av-handle-text">sign in</span>' +
         '</a>' +
         '<button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false">' +
           '<span></span><span></span><span></span>' +

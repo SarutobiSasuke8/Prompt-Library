@@ -883,7 +883,7 @@
 
         const savedIds = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.load().doc || [] : [];
         const docMap   = {};
-        if (typeof DOCS !== "undefined") DOCS.forEach((d) => { docMap[d.id] = d; });
+        if (typeof MDS !== "undefined") MDS.forEach((d) => { docMap[d.id] = d; });
 
         const saved = savedIds.map((id) => docMap[id]).filter(Boolean);
 
@@ -894,14 +894,14 @@
         saved.forEach((d) => {
           const card = document.createElement("a");
           card.className = "article-card";
-          card.href = "mdrepo.html";
+          card.href = "md.html?id=" + encodeURIComponent(d.id);
           card.innerHTML =
             '<div class="article-card-head">' +
-              '<span class="card-cat">' + escapeHtml(d.category || "doc") + '</span>' +
+              '<span class="card-cat">md doc</span>' +
               '<span class="badge md-file" style="font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid var(--accent);border-radius:2px;padding:1px 6px;">.md</span>' +
             '</div>' +
             '<h3>' + escapeHtml(d.title) + '</h3>' +
-            '<p>' + escapeHtml(d.description || "") + '</p>' +
+            '<p>' + escapeHtml(d.purpose || "") + '</p>' +
             '<div class="article-card-foot">' +
               (d.tags || []).slice(0, 3).map((t) => '<span class="tag">#' + escapeHtml(t) + '</span>').join("") +
               '<span class="read-cta" style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--accent);">view &rarr;</span>' +

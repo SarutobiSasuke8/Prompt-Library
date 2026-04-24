@@ -282,9 +282,9 @@
         bmBtn.setAttribute("aria-label", saved ? "Remove from saved" : "Save");
         bmBtn.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
       };
-      applyBm(window.PL_BOOKMARKS.isBookmarked("article", m.id));
+      applyBm(window.PL_BOOKMARKS.isBookmarked("doc", m.id));
       bmBtn.addEventListener("click", () => {
-        applyBm(window.PL_BOOKMARKS.toggle("article", m.id));
+        applyBm(window.PL_BOOKMARKS.toggle("doc", m.id));
         showToast(bmBtn.classList.contains("saved") ? "Saved" : "Removed");
       });
     }

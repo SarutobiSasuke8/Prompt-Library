@@ -172,10 +172,10 @@ Defined in `CATEGORIES` at the top of `prompts.js`:
 
 ### Current state
 
-- **7 prompts** — all in `web3`.
-- **33+ remaining** to hit the "40+ across 9 categories" launch target.
-- Categories `agents`, `vibe-coding`, `business`, `marketing`, `pkm`,
-  `strategy`, `gaming`, `evaluation` are **empty** and need content.
+- **54 prompts** across all 9 categories (5–7 each). Launch content
+  target met.
+- For the live distribution, run:
+  `grep -oE 'category:\s*"[^"]+"' prompts.js | sort | uniq -c`
 
 ### Tone bar for prompt content
 
@@ -483,9 +483,9 @@ Run these locally (open `index.html` in a browser) before any PR:
 ## Session history (what Claude has built so far)
 
 1. **Phase 1** — scaffolding: folder + 7 empty files committed
-2. **Phase 2 (partial)** — 7 web3 prompts in `prompts.js` (token research,
-   whitepaper summarizer, tokenomics, airdrop farmer detector, sentiment,
-   ecosystem health, wallet scorer). Categories 2–9 still empty.
+2. **Phase 2** — library content filled to 54 prompts spanning all 9
+   categories. Launch target met. Per-category distribution lives in the
+   data; don't restate numbers here (they go stale fast).
 3. **Phase 3 + 4** — `index.html` + `style.css` + `add-prompt.html` built,
    data-driven category chips, keyboard shortcuts, modal, clipboard.
 4. **Phase 5** — deploy workflow, CONTRIBUTING, README, ROADMAP. In-card

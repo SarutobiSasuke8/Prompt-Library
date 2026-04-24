@@ -50,12 +50,15 @@ merged before the site goes live.
 
 ## Current state at a glance
 
-- 4 commits on the working branch (scaffold → framework → docs+deploy → CLAUDE+README)
-- 7 web3 prompts seeded; categories 2–9 empty; 33+ prompts still needed
-- UI + capture utility + deploy workflow + docs all done
-- Waiting on: (a) merge to `main`, (b) one-time GitHub Pages UI toggle,
-  (c) fill remaining 8 categories, (d) drop a real screenshot at
-  `prompt-library/screenshot.png`
+- Shipping on `main` via GitHub Pages.
+- 54 prompts across all 9 categories. Launch content target met.
+- Full v1 surface: prompts / articles / tools / agents / md repo / user
+  profile, with standardised bookmarks and localStorage-backed ratings
+  + comments on every detail page. Backend wire-up is parked in
+  `prompt-library/ROADMAP.md`.
+- Don't restate prompt counts or per-category distribution here — they
+  go stale. Run the grep in `prompt-library/CLAUDE.md` when you need
+  the live number.
 
 When in doubt, ask the user — and before adding a library/framework/backend,
 check `prompt-library/ROADMAP.md`.

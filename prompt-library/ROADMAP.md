@@ -79,6 +79,46 @@ Do **not** start on these until v1 has users asking for them.
 - Share a folder via URL
 - Import a folder into your own collection
 
+### Profile organisation & export
+Builds on auth + folders. The profile page becomes the user's workspace
+across every content type the site carries.
+
+- Profile surfaces four content buckets: **prompts**, **markdown notes**,
+  **tools**, **articles**
+- Users can create multiple named folders inside each bucket (e.g. a
+  "research" folder of prompts separate from a "shipping" folder)
+- **Per-folder export as `.md`** — one file bundling every item in that
+  folder, suitable for dropping into another vault or sharing
+- **Full-profile export as Obsidian-formatted `.md`** — a single archive of
+  every folder across every bucket, using Obsidian conventions
+  (`[[wikilinks]]`, YAML frontmatter, folder-as-directory) so the export
+  drops straight into an Obsidian vault with a working graph
+
+#### Status
+- [x] **Export tool shipped (provisional formatting).** `user.html` now has:
+  - `export .md` button on every collection (prompt folder) → downloads
+    a single markdown file with YAML frontmatter + per-prompt sections.
+  - `export profile (.md)` button in the sidebar → downloads a single
+    Obsidian-style markdown file bundling authored prompts, authored
+    articles, liked prompts, collections, and starred tools, with a
+    "prompt bodies" appendix. Cross-references use `[[wikilinks]]`.
+  - See `exportCollection` / `exportProfileObsidian` helpers inside the
+    `user.html` IIFE. Format is intentionally provisional.
+- [ ] **Finalise formatting spec.** User will supply the canonical Markdown
+  / Obsidian schema (frontmatter keys, wikilink targets, folder-as-directory
+  layout, filename conventions). Current output is a working placeholder
+  and should be replaced once that spec lands. Do not invent additional
+  schema in the meantime.
+- [ ] **Folder-per-bucket data model.** Today only the prompts bucket has
+  user-defined folders (localStorage `promptLibrary.collections`). Articles,
+  tools, and markdown notes are flat. Adding folders to the other buckets
+  needs a schema (likely a single `folders` table keyed by `owner_id`,
+  `bucket`, `name`) + per-bucket tables for the tools/notes content the
+  user wants to save beyond starring.
+- [ ] **Markdown notes bucket.** Not yet built. Requires a `notes` table
+  (user-owned, folder-scoped) and a UI for creating/editing. Park until the
+  above spec lands.
+
 ### Ratings / reviews
 - 1–5 star ratings with optional short review
 - Aggregate score on the card

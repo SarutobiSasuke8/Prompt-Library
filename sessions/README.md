@@ -81,6 +81,7 @@ deserves its own note.
 | 2026-04-23 | [[2026-04-23-nav-agents-markdown-library\|Nav dropdown, agents page, md repo]]     | `main`                                     | shipped |
 | 2026-04-24 | [[2026-04-24-session-report-prompt-library\|Karpathy bundle, creative tools, MD rendering fix, README rewrite]] | `main` | shipped |
 | 2026-05-03 | [[2026-05-03-session-report-prompt-library-product-prompt\|Head of Product prompt and MD entry]] | `main` | shipped |
+| 2026-05-05 | [[2026-05-05-session-report-prompt-library-persona-suite\|Vibe Coding persona suite — 10 MD entries + collections repo card]] | `main` | shipped |
 
 ## Past work — reconstructed from git log
 

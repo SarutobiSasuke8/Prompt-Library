@@ -171,6 +171,36 @@
       text-decoration: none;
     }
     .col-curator a:hover { text-decoration: underline; }
+
+    /* ---- repo-type collection ---- */
+    .col-file-row {
+      font-size: 13px;
+      color: var(--text-dim);
+      padding: 8px 14px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      line-height: 1.4;
+    }
+    .col-repo-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-edge);
+      border-radius: var(--radius);
+      padding: 7px 16px;
+      text-decoration: none;
+      transition: background 0.12s, color 0.12s;
+      margin-top: 4px;
+      align-self: flex-start;
+    }
+    .col-repo-link:hover { background: var(--accent); color: var(--bg); text-decoration: none; }
   </style>
 </head>
 <body>
@@ -249,10 +279,21 @@
           .join("");
 
         const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("collection", col.id) : false;
+        const isRepo = !!col.repoUrl;
+        const countLabel = isRepo
+          ? (col.files || []).length + " personas"
+          : prompts.length + " prompts";
 
         const wrap = document.createElement("div");
         wrap.className = "col-card";
         wrap.id = "col-" + col.id;
+
+        const bodyContent = isRepo
+          ? (col.files || []).map((f) => '<div class="col-file-row">' + escapeHtml(f) + "</div>").join("") +
+            '<a class="col-repo-link" href="' + escapeHtml(col.repoUrl) + '" target="_blank" rel="noopener">View on GitHub &rarr;</a>' +
+            '<div class="col-curator">maintained by <a href="user.html?handle=' + encodeURIComponent(col.curator || "") + '">' + escapeHtml(col.curator || "—") + "</a></div>"
+          : prompts.map((p, i) => buildPromptRow(p, i + 1)).join("") +
+            '<div class="col-curator">curated by <a href="user.html?handle=' + encodeURIComponent(col.curator || "") + '">' + escapeHtml(col.curator || "—") + "</a></div>";
 
         wrap.innerHTML =
           '<div class="col-card-head">' +
@@ -261,7 +302,7 @@
               "<p>" + escapeHtml(col.description) + "</p>" +
               '<div class="col-meta">' +
                 tagsHtml +
-                '<span class="col-prompt-count">' + prompts.length + " prompts</span>" +
+                '<span class="col-prompt-count">' + countLabel + "</span>" +
               "</div>" +
             "</div>" +
             '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">' +
@@ -272,10 +313,7 @@
               '<span class="col-toggle" aria-hidden="true">+</span>' +
             '</div>' +
           "</div>" +
-          '<div class="col-body">' +
-            prompts.map((p, i) => buildPromptRow(p, i + 1)).join("") +
-            '<div class="col-curator">curated by <a href="user.html?handle=' + encodeURIComponent(col.curator || "") + '">' + escapeHtml(col.curator || "—") + "</a></div>" +
-          "</div>";
+          '<div class="col-body">' + bodyContent + "</div>";
 
         // Toggle open/close on head click
         const head = wrap.querySelector(".col-card-head");

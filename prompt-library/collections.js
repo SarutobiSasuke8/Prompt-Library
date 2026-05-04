@@ -62,6 +62,30 @@ const COLLECTIONS = [
     tags: ["evaluation", "testing", "quality"],
     promptIds: [50, 51, 49, 52, 53, 54],
     curator: "SarutobiSasuke"
+  },
+
+  {
+    id: 7,
+    slug: "vibe-coding-generalist-template",
+    title: "Vibe Coding Generalist Template",
+    description: "11 production-ready agentic personas for vibe-coded software projects. Use one for a focused pass, or run the Agent Council Protocol to orchestrate the full team — from product and design through security, ops, analytics, and launch.",
+    tags: ["vibe-coding", "agents", "personas"],
+    repoUrl: "https://github.com/SarutobiSasuke8/vibe-coding-generalist-template",
+    files: [
+      "Agent Council Protocol — orchestration layer for multi-persona work",
+      "Head of Product — product strategy, vibe protection, scope discipline",
+      "Design Director / UX Lead — experience clarity, visual coherence, accessibility",
+      "CTO — architecture, implementation, speed-to-quality",
+      "Code Reviewer / Maintainability Critic — correctness, coupling, regression risk",
+      "QA / Acceptance Tester — real workflows, state coverage, ship readiness",
+      "AEGIS – Defensive Security Lead — zero-trust local security, prompt-injection defense",
+      "Ops / Deployment Engineer — reliable releases, environment hygiene, rollback",
+      "Delivery Lead / Technical Producer — milestones, slices, next actions",
+      "Research Scout — evidence-aware decision support, source quality",
+      "Data / Analytics Lead — privacy-conscious metrics, event design, learning loops",
+      "Growth / Launch Strategist — positioning clarity, credible proof, feedback loops"
+    ],
+    curator: "SarutobiSasuke"
   }
 
 ];

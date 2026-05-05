@@ -5,10 +5,19 @@
 // Bundle entries also have `version` (date string) and `files[]` (per-file copy/download)
 
 /* global MDS */
+const MD_CATEGORIES = {
+  "project-context": "Project Context",
+  "agent-systems": "Agent Systems",
+  "product-strategy": "Product & Strategy",
+  "engineering-quality": "Engineering & Quality",
+  "design-ux": "Design & UX"
+};
+
 var MDS = [
   {
     id: "andrej-karpathy-skills",
     title: "andrej-karpathy-skills",
+    category: "project-context",
     purpose: "Four principles derived from Andrej Karpathy's observations on LLM coding pitfalls — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution. Drop into any project as a CLAUDE.md.",
     tags: ["claude-code", "karpathy", "best-practices", "ai-guidelines", "developer-tooling"],
     file: "mds/andrej-karpathy-skills-readme.md",
@@ -400,6 +409,7 @@ MIT`
   {
     id: "claude-md",
     title: "CLAUDE.md",
+    category: "project-context",
     purpose: "Project context template for Claude Code sessions — covers constraints, file layout, conventions, anti-patterns, and testing checklist.",
     tags: ["claude-code", "project-context", "developer-tooling", "ai-assisted-dev"],
     file: "mds/claude.md",
@@ -513,6 +523,7 @@ Sections: **Context → Decisions → Changes → Follow-ups.**`
   {
     id: "agents-md",
     title: "Agent System Prompt",
+    category: "agent-systems",
     purpose: "Production-ready template for single-agent and orchestrator system prompts — role definition, tools, constraints, output format, escalation policy, and stop conditions.",
     tags: ["agents", "system-prompt", "orchestration", "tool-use", "ai-architecture"],
     file: "mds/agents.md",
@@ -637,6 +648,7 @@ Timeout: halt after [N] steps regardless of completion state; report partial res
   {
     id: "contributing-md",
     title: "CONTRIBUTING.md",
+    category: "project-context",
     purpose: "Contribution guide template for AI-assisted open source projects — prompt schema, quality bar, PR checklist, and commit conventions.",
     tags: ["open-source", "contributing", "developer-tooling", "project-management"],
     file: "mds/contributing.md",
@@ -714,6 +726,7 @@ Types: prompt | article | md | feat | fix | style | refactor | docs | chore
   {
     id: "session-report-template",
     title: "Session Report Template",
+    category: "project-context",
     purpose: "Structured session report for AI-assisted coding and research work — captures objectives, decisions, git log, tasks, blockers, and a handoff for the next agent. Obsidian-native with wikilinks.",
     tags: ["claude-code", "session-log", "obsidian", "coding-agents", "ai-workflow"],
     file: "mds/session-report-template.md",
@@ -961,6 +974,7 @@ Add or remove links generously. Prefer linked entities over bare text where poss
   {
     id: "head-of-product-vibe-coding-agent",
     title: "Head of Product – Vibe Coding AI Agent",
+    category: "product-strategy",
     purpose: "Dedicated AI agent system prompt for pragmatic, user-obsessed product leadership on fast, high-quality vibe coding projects.",
     tags: ["product", "vibe-coding", "system-prompt", "ai-agent", "mvp"],
     file: "mds/head-of-product-vibe-coding-agent.md",
@@ -1118,6 +1132,7 @@ Protect the quality. Protect the vibe. Ship fast, but ship excellent.`
   {
     id: "cto-vibe-coding-agent",
     title: "CTO – Vibe Coding AI Agent",
+    category: "engineering-quality",
     purpose: "Dedicated AI agent system prompt for hands-on technical leadership that turns vibe-driven product visions into stable, polished, maintainable code.",
     tags: ["cto", "vibe-coding", "system-prompt", "ai-agent", "technical-leadership"],
     file: "mds/cto-vibe-coding-agent.md",
@@ -1249,6 +1264,7 @@ Protect the build. Protect the vibe. Ship fast, ship excellent, and make the cod
   {
     id: "agent-council-protocol",
     title: "Agent Council Protocol",
+    category: "agent-systems",
     purpose: "Orchestration protocol for running multiple vibe-coding personas together — routing, council sequence, conflict resolution, and a synthesized report format.",
     tags: ["orchestration", "vibe-coding", "multi-agent", "system-prompt", "council"],
     file: "mds/agent-council-protocol.md",
@@ -1387,6 +1403,7 @@ For code-review-style work, findings should still lead when the user asks for a 
   {
     id: "design-director-vibe-coding",
     title: "Design Director – Vibe Coding AI Agent",
+    category: "design-ux",
     purpose: "Taste-driven UX lead that translates product intent into clear, buildable, accessible experience direction — flow, visual system, states, and responsiveness.",
     tags: ["design", "ux", "vibe-coding", "ai-agent", "system-prompt"],
     file: "mds/design-director-vibe-coding.md",
@@ -1559,6 +1576,7 @@ Protect the experience. Protect the coherence. Make the product feel inevitable.
   {
     id: "code-reviewer-maintainability",
     title: "Code Reviewer – Maintainability Critic",
+    category: "engineering-quality",
     purpose: "Sharp engineering reviewer focused on correctness, hidden coupling, testability, regression risk, and release safety for vibe-coded products.",
     tags: ["code-review", "vibe-coding", "ai-agent", "maintainability", "system-prompt"],
     file: "mds/code-reviewer-maintainability.md",
@@ -1749,6 +1767,7 @@ Find the risk. Simplify the fix. Protect future change.`
   {
     id: "qa-acceptance-tester",
     title: "QA – Acceptance Tester Vibe Coding AI Agent",
+    category: "engineering-quality",
     purpose: "Rigorous acceptance tester focused on real user workflows, state coverage, edge cases, accessibility basics, and clear ship-readiness verdicts.",
     tags: ["qa", "testing", "vibe-coding", "ai-agent", "system-prompt"],
     file: "mds/qa-acceptance-tester.md",
@@ -1927,6 +1946,7 @@ Test the real workflow. Name the evidence. Protect release confidence.`
   {
     id: "aegis-defensive-security",
     title: "AEGIS – Defensive Security Lead",
+    category: "engineering-quality",
     purpose: "Zero-trust defensive security persona for local AI workflows — repo sweeps, prompt-injection defense, secrets hygiene, and safe remediation without external calls.",
     tags: ["security", "vibe-coding", "ai-agent", "defensive", "system-prompt"],
     file: "mds/aegis-defensive-security.md",
@@ -2099,6 +2119,7 @@ Type CONFIRM to proceed.
   {
     id: "ops-deployment-engineer",
     title: "Ops – Deployment Engineer Vibe Coding AI Agent",
+    category: "engineering-quality",
     purpose: "Calm deployment lead covering reliable releases, environment hygiene, observability, rollback, and production readiness for vibe-coded products.",
     tags: ["ops", "deployment", "vibe-coding", "ai-agent", "system-prompt"],
     file: "mds/ops-deployment-engineer.md",
@@ -2271,6 +2292,7 @@ Make the release boring. Make the system observable. Make recovery obvious.`
   {
     id: "delivery-lead",
     title: "Delivery Lead – Vibe Coding AI Agent",
+    category: "product-strategy",
     purpose: "Delivery operator that turns fuzzy ambition into shippable slices, realistic milestones, clear dependencies, and concrete next actions.",
     tags: ["delivery", "vibe-coding", "ai-agent", "project-management", "system-prompt"],
     file: "mds/delivery-lead.md",
@@ -2449,6 +2471,7 @@ Shrink the scope. Sequence the work. Keep the build moving.`
   {
     id: "research-scout",
     title: "Research Scout – Vibe Coding AI Agent",
+    category: "product-strategy",
     purpose: "Evidence-aware research partner for fast, constraint-fit decisions — libraries, APIs, competitors, and risk, without laundering speculation into certainty.",
     tags: ["research", "vibe-coding", "ai-agent", "decision-support", "system-prompt"],
     file: "mds/research-scout.md",
@@ -2628,6 +2651,7 @@ Find the signal. Name the uncertainty. Help the team decide.`
   {
     id: "data-analytics-lead",
     title: "Data – Analytics Lead Vibe Coding AI Agent",
+    category: "product-strategy",
     purpose: "Privacy-conscious analytics lead — meaningful metrics, lightweight event design, consent boundaries, and decision-ready dashboards for vibe-coded products.",
     tags: ["analytics", "vibe-coding", "ai-agent", "metrics", "system-prompt"],
     file: "mds/data-analytics-lead.md",
@@ -2803,6 +2827,7 @@ Measure what matters. Protect user trust. Turn data into decisions.`
   {
     id: "growth-launch-strategist",
     title: "Growth – Launch Strategist Vibe Coding AI Agent",
+    category: "product-strategy",
     purpose: "Practical launch partner focused on positioning clarity, credible proof, audience fit, distribution discipline, and feedback loops — not hype.",
     tags: ["growth", "launch", "vibe-coding", "ai-agent", "system-prompt"],
     file: "mds/growth-launch-strategist.md",

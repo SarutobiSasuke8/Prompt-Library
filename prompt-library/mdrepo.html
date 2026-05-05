@@ -59,6 +59,10 @@
       border-radius: var(--radius); padding: 2px 7px; background: rgba(255,176,32,0.08);
       white-space: nowrap;
     }
+    .badge.md-category {
+      color: var(--text-dim); border: 1px solid var(--border);
+      background: var(--bg-2); font-size: 10px;
+    }
 
     /* ---- expand chevron ---- */
     .md-chevron {
@@ -174,8 +178,8 @@
       />
     </div>
 
-    <div class="filter-row" id="tag-row" role="group" aria-label="Filter by tag">
-      <span class="label">tag</span>
+    <div class="filter-row" id="category-row" role="group" aria-label="Filter by category">
+      <span class="label">category</span>
     </div>
 
     <div class="filter-row" id="type-row" role="group" aria-label="Filter by template type">
@@ -210,12 +214,12 @@
       const $grid  = document.getElementById("grid");
       const $empty = document.getElementById("empty");
       const $search = document.getElementById("search");
-      const $tagRow = document.getElementById("tag-row");
+      const $categoryRow = document.getElementById("category-row");
       const $typeRow = document.getElementById("type-row");
       const $count = document.getElementById("count-num");
       const $countLabel = document.getElementById("count-label");
       const $toast = document.getElementById("toast");
-      const state = { query: "", tag: "all", type: "all" };
+      const state = { query: "", category: "all", type: "all" };
 
       if (typeof MDS === "undefined" || MDS.length === 0) {
         $empty.classList.remove("hidden");
@@ -228,24 +232,24 @@
       const COPY_SVG   = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>';
       const CHEVRON    = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg>';
 
-      renderTagChips();
+      renderCategoryChips();
       renderTypeCounts();
       render();
       wireEvents();
 
-      function renderTagChips() {
-        const counts = countByTag();
+      function renderCategoryChips() {
+        const counts = countByCategory();
         const frag = document.createDocumentFragment();
-        frag.appendChild(buildChip("all", "all", MDS.length, "data-tag"));
-        Object.keys(counts).sort().forEach(function (tag) {
-          frag.appendChild(buildChip(tag, tag, counts[tag], "data-tag"));
+        frag.appendChild(buildChip("all", "all", MDS.length, "data-category"));
+        Object.keys(MD_CATEGORIES || {}).forEach(function (key) {
+          frag.appendChild(buildChip(key, MD_CATEGORIES[key], counts[key] || 0, "data-category"));
         });
 
-        const label = $tagRow.querySelector(".label");
-        $tagRow.innerHTML = "";
-        $tagRow.appendChild(label);
-        $tagRow.appendChild(frag);
-        const first = $tagRow.querySelector(".chip");
+        const label = $categoryRow.querySelector(".label");
+        $categoryRow.innerHTML = "";
+        $categoryRow.appendChild(label);
+        $categoryRow.appendChild(frag);
+        const first = $categoryRow.querySelector(".chip");
         if (first) first.classList.add("active");
       }
 
@@ -258,7 +262,7 @@
 
       function render() {
         const filtered = applyFilters(MDS);
-        const isFiltered = state.query || state.tag !== "all" || state.type !== "all";
+        const isFiltered = state.query || state.category !== "all" || state.type !== "all";
         $count.textContent = filtered.length;
         $countLabel.textContent = isFiltered ? "of " + MDS.length + " templates" : "templates";
 
@@ -283,12 +287,11 @@
         return btn;
       }
 
-      function countByTag() {
+      function countByCategory() {
         const counts = {};
         MDS.forEach(function (m) {
-          (m.tags || []).forEach(function (tag) {
-            counts[tag] = (counts[tag] || 0) + 1;
-          });
+          const category = m.category || "uncategorized";
+          counts[category] = (counts[category] || 0) + 1;
         });
         return counts;
       }
@@ -296,7 +299,7 @@
       function applyFilters(list) {
         const q = state.query.trim().toLowerCase();
         return list.filter(function (m) {
-          if (state.tag !== "all" && (m.tags || []).indexOf(state.tag) === -1) return false;
+          if (state.category !== "all" && m.category !== state.category) return false;
           if (state.type === "single" && isBundle(m)) return false;
           if (state.type === "bundle" && !isBundle(m)) return false;
           if (!q) return true;
@@ -304,6 +307,7 @@
           const hay = [
             m.title,
             m.purpose,
+            MD_CATEGORIES[m.category] || m.category || "",
             (m.tags || []).join(" ")
           ].join(" ").toLowerCase();
           return hay.indexOf(q) !== -1;
@@ -320,12 +324,12 @@
           render();
         });
 
-        $tagRow.addEventListener("click", function (e) {
+        $categoryRow.addEventListener("click", function (e) {
           const chip = e.target.closest(".chip");
           if (!chip) return;
-          $tagRow.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+          $categoryRow.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
           chip.classList.add("active");
-          state.tag = chip.getAttribute("data-tag");
+          state.category = chip.getAttribute("data-category");
           render();
         });
 
@@ -353,6 +357,7 @@
         const headLeft = document.createElement("div");
         headLeft.className = "md-card-head-left";
         headLeft.innerHTML = '<span class="badge md-file">.md</span>';
+        headLeft.innerHTML += '<span class="badge md-category">' + escapeHtml(MD_CATEGORIES[m.category] || m.category || "Uncategorized") + '</span>';
         if (m.files && m.files.length) {
           headLeft.innerHTML += '<span class="badge md-bundle">bundle &middot; ' + m.files.length + ' files</span>';
         }

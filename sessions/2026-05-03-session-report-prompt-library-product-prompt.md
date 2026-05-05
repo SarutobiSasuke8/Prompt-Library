@@ -14,7 +14,7 @@ branch: "[[main]]"
 workspace: "C:/Users/sarut/Documents/Public GitHub Projects/prompt-library"
 session_kind: build
 session_scope: prompt-and-md-content-addition
-objective: "Add Head of Product and CTO Vibe Coding content to the prompt library and improve MD repo discovery."
+objective: "Add Head of Product and CTO Vibe Coding content to the prompt library and improve MD repo discovery with logical categories."
 operator: "[[SarutobiSasuke]]"
 llm:
   - "[[ChatGPT]]"
@@ -45,7 +45,7 @@ tags:
   - product
 commit_count: 0
 files_changed: 7
-tasks_completed: 8
+tasks_completed: 9
 tasks_remaining: 0
 confidence: high
 ---
@@ -54,7 +54,7 @@ confidence: high
 
 ## Executive Summary
 
-Added a new [[vibe-coding]] prompt, "Head of Product - Vibe Coding", to `prompt-library/prompts.js` with id `56`. Also added dedicated [[MD repo]] entries for "Head of Product – Vibe Coding AI Agent" and "CTO – Vibe Coding AI Agent", backed by markdown files under `prompt-library/mds/` and surfaced through `prompt-library/mds.js`. Later updated the MD repo page to use library-style search and filtering controls.
+Added a new [[vibe-coding]] prompt, "Head of Product - Vibe Coding", to `prompt-library/prompts.js` with id `56`. Also added dedicated [[MD repo]] entries for "Head of Product – Vibe Coding AI Agent" and "CTO – Vibe Coding AI Agent", backed by markdown files under `prompt-library/mds/` and surfaced through `prompt-library/mds.js`. Later updated the MD repo page to use library-style search and filtering controls, then replaced overly granular tag filtering with a logical category system.
 
 Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `node --check`. The existing uncommitted `prompt-library/README.md` changes were already present before this session and were not touched.
 
@@ -83,7 +83,8 @@ Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `
 - Added the canonical markdown file at `prompt-library/mds/head-of-product-vibe-coding-agent.md`.
 - Added `cto-vibe-coding-agent` to `mds.js`.
 - Added the canonical markdown file at `prompt-library/mds/cto-vibe-coding-agent.md`.
-- Added search, tag filters, type filters, filtered count updates, and empty-state messaging to `prompt-library/mdrepo.html`.
+- Added search, category filters, type filters, filtered count updates, and empty-state messaging to `prompt-library/mdrepo.html`.
+- Added `MD_CATEGORIES` and first-class `category` fields to every MD entry in `prompt-library/mds.js`.
 - Preserved the static-site architecture: no UI, dependency, or build changes were needed.
 
 ### Files created
@@ -127,6 +128,10 @@ Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `
   Why it was chosen: MD entries do not have category or complexity fields; tags and single/bundle type are the closest useful equivalents.
   Tradeoff accepted: MD filtering is analogous to the library page, not a one-to-one clone of its taxonomy.
 
+- Decision: Replace tag chips with five broad MD categories: Project Context, Agent Systems, Product & Strategy, Engineering & Quality, and Design & UX.
+  Why it was chosen: tag-level filtering was too granular and made discovery feel noisy; broad categories mirror the main library page better.
+  Tradeoff accepted: tags remain searchable and visible, but not used as primary filter chips.
+
 - Decision: Use id `56`.
   Why it was chosen: id `55` already existed on "Strategic Advisor"; `56` was the next globally unused id.
   Tradeoff accepted: the new id is non-contiguous within the category but remains globally unique, which matches the schema requirement.
@@ -140,7 +145,7 @@ Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `
 - This prompt strengthens the vibe-coding category by adding a product-quality role, not another engineering-only role.
 - The MD entry gives the longer dedicated-agent version a better home than the prompt card.
 - The CTO entry complements the Head of Product entry by covering technical execution and implementation quality.
-- Search now matches library behavior by scanning title, purpose, and tags rather than full document content, which was too noisy for short terms.
+- Search now matches library behavior by scanning title, purpose, category, and tags rather than full document content, which was too noisy for short terms.
 - No category changes were needed because the existing `vibe-coding` taxonomy already fits.
 - The prompt is intentionally strict so it protects shipping quality rather than becoming a generic cheerleader.
 
@@ -159,7 +164,7 @@ Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `
 
 ## Validation
 
-- Tests run: `node --check prompts.js`; `node --check mds.js`; Node data checks for duplicate prompt IDs, duplicate MD IDs, MD file/content consistency, and MD filter behavior
+- Tests run: `node --check prompts.js`; `node --check mds.js`; Node data checks for duplicate prompt IDs, duplicate MD IDs, MD file/content consistency, MD categories, and MD filter behavior
 - Lint / typecheck / build status: no build system exists
 - Manual QA performed: confirmed new prompt appears in `prompts.js` at id `56`; confirmed both new MD entries resolve from `MDS` and point to existing files; confirmed the `mdrepo.html` inline script parses
 - What remains unverified: browser rendering, visual layout, and copy flow were not manually tested because Python and Playwright were unavailable in this workspace
@@ -175,6 +180,7 @@ Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `
 - [x] Add "CTO – Vibe Coding AI Agent" to the MD repo #task
 - [x] Add backing markdown file for the CTO MD repo entry #task
 - [x] Add library-style search and filters to the MD repo page #task
+- [x] Replace granular tag chips with logical MD categories #task
 - [x] Validate prompt data syntax #task
 
 ### Open / remaining
@@ -196,7 +202,7 @@ Validation confirmed `prompts.js` and `mds.js` remain syntactically valid with `
 
 ### What the next coding agent should know
 
-- Current repo state: new prompt added to `prompt-library/prompts.js`; new MD repo entries added to `prompt-library/mds.js`, `prompt-library/mds/head-of-product-vibe-coding-agent.md`, and `prompt-library/mds/cto-vibe-coding-agent.md`; `prompt-library/mdrepo.html` now has search/filter controls; unrelated `prompt-library/README.md` was already dirty before this session.
+- Current repo state: new prompt added to `prompt-library/prompts.js`; new MD repo entries added to `prompt-library/mds.js`, `prompt-library/mds/head-of-product-vibe-coding-agent.md`, and `prompt-library/mds/cto-vibe-coding-agent.md`; `prompt-library/mdrepo.html` now has search, category, and type filter controls.
 - Highest-value next step: browser-check the library page and MD repo page if visual confirmation is needed.
 - Files to read first: root `AGENTS.md`, `prompt-library/CLAUDE.md`, `prompt-library/prompts.js`, `prompt-library/mds.js`.
 - Known traps or anti-patterns: do not add frameworks or build tooling for content additions; do not reformat `prompts.js`.

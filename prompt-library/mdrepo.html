@@ -21,20 +21,22 @@
       display: flex; flex-direction: column;
       background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius);
       padding: 18px 18px 16px; gap: 10px;
-      cursor: pointer; text-decoration: none; color: inherit;
+      cursor: pointer; color: inherit;
       transition: border-color 0.15s, transform 0.15s, background 0.15s;
       position: relative;
     }
-    .md-card:hover { border-color: var(--accent-edge); background: var(--bg-2); transform: translateY(-1px); text-decoration: none; }
+    .md-card:hover { border-color: var(--accent-edge); background: var(--bg-2); transform: translateY(-1px); }
     .md-card:hover h3 { color: var(--accent); }
+    .md-card.expanded { border-color: var(--accent-edge); transform: none; }
     .md-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .md-card-head-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
     .md-card h3 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--text); transition: color 0.15s; }
     .md-card p { margin: 0; color: var(--text-dim); font-size: 13.5px; line-height: 1.55; flex: 1; }
     .md-card .md-foot {
       display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px;
       border-top: 1px dashed var(--border); margin-top: auto; align-items: center;
     }
-    .md-card .md-actions { margin-left: auto; display: flex; gap: 6px; }
+    .md-card .md-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
     .md-card .md-dl {
       font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
       color: var(--accent); background: var(--accent-soft);
@@ -57,6 +59,87 @@
       border-radius: var(--radius); padding: 2px 7px; background: rgba(255,176,32,0.08);
       white-space: nowrap;
     }
+
+    /* ---- expand chevron ---- */
+    .md-chevron {
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--text-faint);
+      transition: transform 0.18s, color 0.15s;
+      pointer-events: none;
+    }
+    .md-chevron svg { width: 14px; height: 14px; display: block; }
+    .md-card.expanded .md-chevron { transform: rotate(90deg); color: var(--accent); }
+
+    /* ---- expanded body ---- */
+    .md-expand-body { display: none; }
+    .md-card.expanded .md-expand-body {
+      display: block;
+      border-top: 1px solid var(--border);
+      margin-top: 6px; padding-top: 14px;
+    }
+
+    .md-expand-toolbar {
+      display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 6px;
+    }
+    .md-expand-copy {
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text-faint);
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 5px 10px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+    }
+    .md-expand-copy svg { width: 11px; height: 11px; display: block; }
+    .md-expand-copy:hover { color: var(--accent); border-color: var(--accent-edge); }
+    .md-expand-copy.copied { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+    /* ---- rendered markdown inside card ---- */
+    .md-expand-content {
+      font-size: 13px; line-height: 1.72; color: var(--text-dim);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 24px; background: var(--bg-0, var(--bg));
+      max-height: 520px; overflow-y: auto;
+    }
+    @media (max-width: 600px) { .md-expand-content { padding: 14px 14px; } }
+
+    .md-expand-content h1, .md-expand-content h2,
+    .md-expand-content h3, .md-expand-content h4 {
+      color: var(--text); font-family: var(--sans); margin: 1.4em 0 0.4em; line-height: 1.3;
+    }
+    .md-expand-content h1 { font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 0; }
+    .md-expand-content h2 { font-size: 14px; }
+    .md-expand-content h3 { font-size: 13px; color: var(--text-dim); }
+    .md-expand-content h4 { font-size: 12px; color: var(--text-faint); }
+
+    .md-expand-content p { margin: 0 0 0.85em; }
+    .md-expand-content blockquote {
+      border-left: 3px solid var(--accent-edge); margin: 0.8em 0;
+      padding: 6px 14px; background: var(--bg-2); border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--text-faint); font-style: italic;
+    }
+    .md-expand-content blockquote p { margin: 0; }
+    .md-expand-content hr { border: none; border-top: 1px dashed var(--border); margin: 1.4em 0; }
+    .md-expand-content ul, .md-expand-content ol { padding-left: 20px; margin: 0 0 0.85em; }
+    .md-expand-content li { margin-bottom: 3px; }
+    .md-expand-content li.task-item { list-style: none; margin-left: -16px; }
+    .md-expand-content li.task-item input { margin-right: 5px; accent-color: var(--accent); }
+    .md-expand-content code {
+      font-family: var(--mono); font-size: 11px;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 4px; color: var(--accent);
+    }
+    .md-expand-content pre {
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 14px; overflow-x: auto; margin: 0 0 0.85em;
+    }
+    .md-expand-content pre code { background: none; border: none; padding: 0; color: var(--text-dim); font-size: 11px; }
+    .md-expand-content table { width: 100%; border-collapse: collapse; margin-bottom: 0.85em; font-size: 12px; }
+    .md-expand-content th, .md-expand-content td { text-align: left; padding: 6px 10px; border: 1px solid var(--border); }
+    .md-expand-content th { background: var(--bg-2); color: var(--text); font-weight: 600; }
+    .md-expand-content td { color: var(--text-dim); }
+    .md-expand-content a { color: var(--accent); text-decoration: none; }
+    .md-expand-content a:hover { text-decoration: underline; }
+    .md-expand-content strong { color: var(--text); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -64,7 +147,7 @@
   <div id="site-nav" data-active="docs" data-sub="md repo">
     <div class="count-pill">
       <span class="num" id="count-num">0</span>
-      <span class="label">templates</span>
+      <span class="label" id="count-label">templates</span>
     </div>
   </div>
 
@@ -79,12 +162,36 @@
     <p class="lede">Idealised templates for AI-assisted development — drop-in starting points for CLAUDE.md, AGENTS.md, and other context files that make agents work better.</p>
   </section>
 
+  <section class="controls" aria-label="Search and filter markdown templates">
+    <div class="search-wrap">
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="search title, purpose, tags…"
+        aria-label="Search markdown templates"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="filter-row" id="tag-row" role="group" aria-label="Filter by tag">
+      <span class="label">tag</span>
+    </div>
+
+    <div class="filter-row" id="type-row" role="group" aria-label="Filter by template type">
+      <span class="label">type</span>
+      <button class="chip active" data-type="all">all<span class="count" id="type-count-all">0</span></button>
+      <button class="chip" data-type="single">single<span class="count" id="type-count-single">0</span></button>
+      <button class="chip" data-type="bundle">bundle<span class="count" id="type-count-bundle">0</span></button>
+    </div>
+  </section>
+
   <main>
     <div class="mdrepo-wrap">
       <div class="mdrepo-grid" id="grid" aria-live="polite"></div>
       <div class="empty hidden" id="empty">
-        <strong>No templates yet</strong>
-        Check back soon.
+        <strong>No templates match</strong>
+        Try clearing a filter or searching something shorter.
       </div>
     </div>
   </main>
@@ -102,48 +209,178 @@
 
       const $grid  = document.getElementById("grid");
       const $empty = document.getElementById("empty");
+      const $search = document.getElementById("search");
+      const $tagRow = document.getElementById("tag-row");
+      const $typeRow = document.getElementById("type-row");
       const $count = document.getElementById("count-num");
+      const $countLabel = document.getElementById("count-label");
       const $toast = document.getElementById("toast");
+      const state = { query: "", tag: "all", type: "all" };
 
       if (typeof MDS === "undefined" || MDS.length === 0) {
         $empty.classList.remove("hidden");
         return;
       }
 
-      $count.textContent = MDS.length;
-
       const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
       const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
       const DL_SVG     = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>';
+      const COPY_SVG   = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>';
+      const CHEVRON    = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg>';
 
-      const frag = document.createDocumentFragment();
-      MDS.forEach((m) => frag.appendChild(buildCard(m)));
-      $grid.appendChild(frag);
+      renderTagChips();
+      renderTypeCounts();
+      render();
+      wireEvents();
+
+      function renderTagChips() {
+        const counts = countByTag();
+        const frag = document.createDocumentFragment();
+        frag.appendChild(buildChip("all", "all", MDS.length, "data-tag"));
+        Object.keys(counts).sort().forEach(function (tag) {
+          frag.appendChild(buildChip(tag, tag, counts[tag], "data-tag"));
+        });
+
+        const label = $tagRow.querySelector(".label");
+        $tagRow.innerHTML = "";
+        $tagRow.appendChild(label);
+        $tagRow.appendChild(frag);
+        const first = $tagRow.querySelector(".chip");
+        if (first) first.classList.add("active");
+      }
+
+      function renderTypeCounts() {
+        const bundle = MDS.filter(isBundle).length;
+        document.getElementById("type-count-all").textContent = MDS.length;
+        document.getElementById("type-count-single").textContent = MDS.length - bundle;
+        document.getElementById("type-count-bundle").textContent = bundle;
+      }
+
+      function render() {
+        const filtered = applyFilters(MDS);
+        const isFiltered = state.query || state.tag !== "all" || state.type !== "all";
+        $count.textContent = filtered.length;
+        $countLabel.textContent = isFiltered ? "of " + MDS.length + " templates" : "templates";
+
+        if (filtered.length === 0) {
+          $grid.innerHTML = "";
+          $empty.classList.remove("hidden");
+          return;
+        }
+
+        $empty.classList.add("hidden");
+        const frag = document.createDocumentFragment();
+        filtered.forEach((m) => frag.appendChild(buildCard(m)));
+        $grid.innerHTML = "";
+        $grid.appendChild(frag);
+      }
+
+      function buildChip(value, labelText, count, attrName) {
+        const btn = document.createElement("button");
+        btn.className = "chip";
+        btn.setAttribute(attrName, value);
+        btn.innerHTML = escapeHtml(labelText) + '<span class="count">' + count + "</span>";
+        return btn;
+      }
+
+      function countByTag() {
+        const counts = {};
+        MDS.forEach(function (m) {
+          (m.tags || []).forEach(function (tag) {
+            counts[tag] = (counts[tag] || 0) + 1;
+          });
+        });
+        return counts;
+      }
+
+      function applyFilters(list) {
+        const q = state.query.trim().toLowerCase();
+        return list.filter(function (m) {
+          if (state.tag !== "all" && (m.tags || []).indexOf(state.tag) === -1) return false;
+          if (state.type === "single" && isBundle(m)) return false;
+          if (state.type === "bundle" && !isBundle(m)) return false;
+          if (!q) return true;
+
+          const hay = [
+            m.title,
+            m.purpose,
+            (m.tags || []).join(" ")
+          ].join(" ").toLowerCase();
+          return hay.indexOf(q) !== -1;
+        });
+      }
+
+      function isBundle(m) {
+        return !!(m.files && m.files.length);
+      }
+
+      function wireEvents() {
+        $search.addEventListener("input", function (e) {
+          state.query = e.target.value;
+          render();
+        });
+
+        $tagRow.addEventListener("click", function (e) {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $tagRow.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+          chip.classList.add("active");
+          state.tag = chip.getAttribute("data-tag");
+          render();
+        });
+
+        $typeRow.addEventListener("click", function (e) {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $typeRow.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+          chip.classList.add("active");
+          state.type = chip.getAttribute("data-type");
+          render();
+        });
+      }
 
       function buildCard(m) {
-        const card = document.createElement("a");
+        const card = document.createElement("div");
         card.className = "md-card";
-        card.href = "md.html#" + encodeURIComponent(m.id);
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-expanded", "false");
 
+        // ---- head ----
         const head = document.createElement("div");
         head.className = "md-card-head";
-        var headBadges = '<span class="badge md-file">.md</span>';
+
+        const headLeft = document.createElement("div");
+        headLeft.className = "md-card-head-left";
+        headLeft.innerHTML = '<span class="badge md-file">.md</span>';
         if (m.files && m.files.length) {
-          headBadges += '<span class="badge md-bundle">bundle &middot; ' + m.files.length + ' files</span>';
+          headLeft.innerHTML += '<span class="badge md-bundle">bundle &middot; ' + m.files.length + ' files</span>';
         }
         if (m.version) {
-          headBadges += '<span class="badge md-version">v ' + escapeHtml(m.version) + '</span>';
+          headLeft.innerHTML += '<span class="badge md-version">v ' + escapeHtml(m.version) + '</span>';
         }
-        head.innerHTML =
-          headBadges +
-          '<button type="button" class="bookmark-btn doc-bm" aria-label="Save ' + escapeHtml(m.title) + '"></button>';
 
+        const chevron = document.createElement("span");
+        chevron.className = "md-chevron";
+        chevron.innerHTML = CHEVRON;
+
+        const bm = document.createElement("button");
+        bm.type = "button";
+        bm.className = "bookmark-btn doc-bm";
+        bm.setAttribute("aria-label", "Save " + escapeHtml(m.title));
+
+        head.appendChild(headLeft);
+        head.appendChild(chevron);
+        head.appendChild(bm);
+
+        // ---- title + purpose ----
         const h3 = document.createElement("h3");
         h3.textContent = m.title;
 
         const p = document.createElement("p");
         p.textContent = m.purpose;
 
+        // ---- foot ----
         const foot = document.createElement("div");
         foot.className = "md-foot";
         (m.tags || []).slice(0, 3).forEach((t) => {
@@ -154,22 +391,56 @@
 
         const actions = document.createElement("div");
         actions.className = "md-actions";
+
         const dl = document.createElement("a");
         dl.className = "md-dl";
         dl.href = m.file;
         dl.download = m.file.split("/").pop();
         dl.innerHTML = DL_SVG + "<span>download</span>";
         dl.addEventListener("click", (e) => { e.stopPropagation(); });
+
         actions.appendChild(dl);
         foot.appendChild(actions);
 
+        // ---- expand body (lazy-rendered) ----
+        const expandBody = document.createElement("div");
+        expandBody.className = "md-expand-body";
+
+        const toolbar = document.createElement("div");
+        toolbar.className = "md-expand-toolbar";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "md-expand-copy";
+        copyBtn.innerHTML = COPY_SVG + "<span>copy</span>";
+        copyBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          copyText(m.content).then(function () {
+            copyBtn.querySelector("span").textContent = "copied";
+            copyBtn.classList.add("copied");
+            showToast("Markdown copied");
+            setTimeout(function () {
+              copyBtn.querySelector("span").textContent = "copy";
+              copyBtn.classList.remove("copied");
+            }, 1500);
+          });
+        });
+        toolbar.appendChild(copyBtn);
+
+        const contentEl = document.createElement("div");
+        contentEl.className = "md-expand-content";
+
+        expandBody.appendChild(toolbar);
+        expandBody.appendChild(contentEl);
+
+        // ---- assemble ----
         card.appendChild(head);
         card.appendChild(h3);
         card.appendChild(p);
         card.appendChild(foot);
+        card.appendChild(expandBody);
 
-        // Bookmark
-        const bm = head.querySelector(".bookmark-btn");
+        // ---- bookmark ----
         const syncBm = (saved) => {
           bm.classList.toggle("saved", saved);
           bm.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
@@ -178,14 +449,138 @@
         if (window.PL_BOOKMARKS) {
           syncBm(window.PL_BOOKMARKS.isBookmarked("doc", m.id));
           bm.addEventListener("click", (e) => {
-            e.preventDefault();
             e.stopPropagation();
             syncBm(window.PL_BOOKMARKS.toggle("doc", m.id));
             showToast(bm.classList.contains("saved") ? "Saved" : "Removed");
           });
+        } else {
+          syncBm(false);
         }
 
+        // ---- expand / collapse ----
+        function toggle() {
+          const expanded = card.classList.toggle("expanded");
+          card.setAttribute("aria-expanded", expanded ? "true" : "false");
+          if (expanded && !contentEl.dataset.rendered) {
+            contentEl.innerHTML = renderMd(m.content || "");
+            contentEl.dataset.rendered = "1";
+          }
+        }
+
+        card.addEventListener("click", function (e) {
+          if (e.target.closest("button, a")) return;
+          toggle();
+        });
+        card.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggle();
+          }
+        });
+
         return card;
+      }
+
+      // ---- markdown renderer (minimal, no external deps) ----
+      function renderMd(src) {
+        if (!src) return "";
+        const lines = src.split("\n");
+        let html = "";
+        let inCode = false, codeLang = "", codeAccum = [];
+        let inUl = false, inOl = false;
+
+        function closeList() {
+          if (inUl) { html += "</ul>\n"; inUl = false; }
+          if (inOl) { html += "</ol>\n"; inOl = false; }
+        }
+        function esc(s) {
+          return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function inline(s) {
+          s = esc(s);
+          s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+          s = s.replace(/\*\*\*([^*]+)\*\*\*/g, "<strong><em>$1</em></strong>");
+          s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+          s = s.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+          s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+          return s;
+        }
+
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+
+          if (/^```/.test(line)) {
+            if (!inCode) {
+              closeList(); inCode = true;
+              codeLang = line.slice(3).trim(); codeAccum = [];
+            } else {
+              inCode = false;
+              var body = codeAccum.map(esc).join("\n");
+              html += "<pre><code" + (codeLang ? ' class="lang-' + esc(codeLang) + '"' : "") + ">" + body + "</code></pre>\n";
+              codeAccum = []; codeLang = "";
+            }
+            continue;
+          }
+          if (inCode) { codeAccum.push(line); continue; }
+
+          var hm = line.match(/^(#{1,6})\s+(.*)/);
+          if (hm) { closeList(); html += "<h" + hm[1].length + ">" + inline(hm[2]) + "</h" + hm[1].length + ">\n"; continue; }
+
+          if (/^(-{3,}|_{3,}|\*{3,})$/.test(line.trim())) { closeList(); html += "<hr/>\n"; continue; }
+
+          var bq = line.match(/^>\s?(.*)/);
+          if (bq) { closeList(); html += "<blockquote><p>" + inline(bq[1]) + "</p></blockquote>\n"; continue; }
+
+          if (/^\|/.test(line)) {
+            if (/^[\|\-\s:]+$/.test(line)) continue;
+            closeList();
+            var cells = line.split("|").slice(1, -1).map(function(c) { return c.trim(); });
+            var tag = (i > 0 && /^\|/.test(lines[i - 1]) && !lines[i - 1].replace(/[\|\-\s:]/g, "")) ? "th" : "td";
+            html += "<tr>" + cells.map(function(c) { return "<" + tag + ">" + inline(c) + "</" + tag + ">"; }).join("") + "</tr>\n";
+            continue;
+          }
+
+          var ul = line.match(/^(\s*)[-*]\s+(.*)/);
+          if (ul) {
+            if (inOl) { html += "</ol>\n"; inOl = false; }
+            if (!inUl) { html += "<ul>\n"; inUl = true; }
+            var cb = ul[2].match(/^\[( |x)\]\s+(.*)/i);
+            if (cb) {
+              html += "<li class=\"task-item\"><input type=\"checkbox\"" + (cb[1].toLowerCase() === "x" ? " checked" : "") + " disabled> " + inline(cb[2]) + "</li>\n";
+            } else {
+              html += "<li>" + inline(ul[2]) + "</li>\n";
+            }
+            continue;
+          }
+
+          var ol = line.match(/^\d+\.\s+(.*)/);
+          if (ol) {
+            if (inUl) { html += "</ul>\n"; inUl = false; }
+            if (!inOl) { html += "<ol>\n"; inOl = true; }
+            html += "<li>" + inline(ol[1]) + "</li>\n";
+            continue;
+          }
+
+          if (!line.trim()) { closeList(); continue; }
+          closeList();
+          html += "<p>" + inline(line) + "</p>\n";
+        }
+
+        closeList();
+        html = html.replace(/(<tr>[\s\S]*?<\/tr>\n)+/g, function(m) { return "<table>" + m + "</table>\n"; });
+        return html;
+      }
+
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function(resolve) {
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.style.cssText = "position:fixed;opacity:0;";
+          document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+          document.body.removeChild(ta); resolve();
+        });
       }
 
       function showToast(msg) {

@@ -182,11 +182,15 @@ gaming, evaluation. Each prompt is a real tool, not a template. Each one:
 - Has been tested against at least one listed model — and says which
 - States where it breaks down — the `notes` field is mandatory
 - Would survive being shown to a sceptical senior engineer without embarrassment
+- Can be copied, shared, opened in the playground, or sent toward a preferred
+  chat tool from the card or detail page
 
 Every prompt has its own permalink, its own complexity level, model
 recommendations, temperature, chaining suggestions, an author attribution
 line, and — on the detail page — a rating and comments surface that
-practitioners can already start using.
+practitioners can already start using. Prompts with `{{VARIABLE}}` slots render
+a quick-fill panel so reusable prompts can be tailored before copying or sent
+to the playground with the filled values intact.
 
 ### An honest tools directory — 51 entries
 
@@ -653,6 +657,9 @@ Full schema and quality bar: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
   tags:        ["research", "due-diligence"],   // lowercase, hyphenated, 2–5
   models:      ["claude", "gpt-4o"],            // actually tested
   temperature: "0.3",                           // string, not number
+  variables: [                                  // optional quick-fill slots
+    { key: "ASSET_NAME", label: "Asset", placeholder: "e.g. Uniswap" }
+  ],
   prompt:      "You are a ...",                 // full system prompt
   chaining:    "Pair with X to ...",            // optional
   notes:       "Works best when ...",           // optional — failure modes

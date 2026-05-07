@@ -33,8 +33,31 @@ All fields are required unless marked otherwise.
 | `models`      | string[]  | Models you've actually tested it on. See the capture form for valid values. |
 | `temperature` | string    | Recommended temperature, e.g. `"0.3"`.                                      |
 | `prompt`      | string    | The full system prompt, copy-paste ready. Multi-line is fine.               |
+| `variables`   | object[]  | Optional quick-fill slots for `{{TOKEN}}` placeholders.                     |
 | `chaining`    | string    | What to pipe this into next, or how it combines with other prompts. Can be empty. |
 | `notes`       | string    | Caveats, tuning tips, known failure modes. Can be empty.                    |
+
+### Variable slots
+
+Use variables when a prompt has obvious reusable placeholders. Tokens in the
+prompt body must use uppercase braces, e.g. `{{ASSET_NAME}}`, and the matching
+schema lives beside the prompt:
+
+```js
+variables: [
+  { key: "ASSET_NAME", label: "Token / project name", placeholder: "e.g. Uniswap" },
+  {
+    key: "OUTPUT_MODE",
+    label: "Output mode",
+    placeholder: "select one",
+    options: ["brief", "standard", "deep-dive"]
+  }
+]
+```
+
+`options` is optional. When present, the UI renders a select menu; otherwise it
+renders a text input. Keep variable labels short and useful, because they appear
+inside the prompt detail quick-fill panel.
 
 ### New categories
 

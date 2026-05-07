@@ -146,13 +146,15 @@
       text-transform: uppercase; letter-spacing: 0.08em;
       color: var(--text-faint); margin-bottom: 5px;
     }
-    .var-field input {
+    .var-field input,
+    .var-field select {
       width: 100%; background: var(--bg-2); border: 1px solid var(--border-2);
       border-radius: var(--radius); color: var(--text);
       font-family: var(--mono); font-size: 12.5px; padding: 8px 10px;
       outline: none; transition: border-color 0.15s;
     }
-    .var-field input:focus { border-color: var(--accent); }
+    .var-field input:focus,
+    .var-field select:focus { border-color: var(--accent); }
 
     /* ---- ratings ---- */
     .pd-stars { display: flex; gap: 4px; align-items: center; }
@@ -246,7 +248,8 @@
     function esc(s) {
       return String(s == null ? "" : s)
         .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
     function el(tag, cls, html) {
       var d = document.createElement(tag);
@@ -370,26 +373,55 @@
     });
     toolbar.appendChild(copyBtn);
 
+    var USE_TARGETS = {
+      chatgpt:    { label: "ChatGPT",    url: "https://chatgpt.com/" },
+      claude:     { label: "Claude",     url: "https://claude.ai/new", queryParam: "q" },
+      gemini:     { label: "Gemini",     url: "https://gemini.google.com/app" },
+      perplexity: { label: "Perplexity", url: "https://www.perplexity.ai/" }
+    };
+    var USE_PREF_KEY = "promptLibrary.lastUseTarget";
+    var USE_URL_LIMIT = 1500;
+
+    function buildUseTargetUrl(target, text) {
+      if (!target || !target.queryParam) return target ? target.url : "";
+      var encoded = encodeURIComponent(text);
+      var url = target.url + "?" + target.queryParam + "=" + encoded;
+      return url.length <= USE_URL_LIMIT ? url : target.url;
+    }
+
+    var PLAYGROUND_DRAFT_PREFIX = "promptLibrary.playgroundDraft.";
+    function createPlaygroundDraftUrl(promptText) {
+      var nonce = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      var payload = {
+        id: p.id,
+        title: p.title,
+        systemPrompt: promptText,
+        createdAt: Date.now()
+      };
+      try { localStorage.setItem(PLAYGROUND_DRAFT_PREFIX + nonce, JSON.stringify(payload)); } catch (_) {}
+      return "playground.html?draft=" + encodeURIComponent(nonce) + "&id=" + encodeURIComponent(p.id);
+    }
+
     // Use in dropdown
     var useInWrap = el("div", "use-in-wrap");
-    var useInBtn = el("button", "pd-btn", "Use in ▾");
+    var preferredTarget = USE_TARGETS[localStorage.getItem(USE_PREF_KEY)];
+    var useInBtn = el("button", "pd-btn", preferredTarget ? "Use in " + preferredTarget.label + " ▾" : "Use in ▾");
     useInBtn.type = "button";
     var useInMenu = el("div", "use-in-menu");
-    var USE_IN_TARGETS = {
-      "ChatGPT":    "https://chat.openai.com/",
-      "Claude":     "https://claude.ai/new",
-      "Perplexity": "https://www.perplexity.ai/",
-      "t3.chat":    "https://t3.chat/"
-    };
-    Object.keys(USE_IN_TARGETS).forEach(function (label) {
-      var a = el("a", "", esc(label));
+    Object.keys(USE_TARGETS).forEach(function (key) {
+      var target = USE_TARGETS[key];
+      var a = el("a", "", esc(target.label));
       a.href = "#";
       a.addEventListener("click", async function (e) {
         e.preventDefault();
-        await copyText($promptPre.textContent);
-        showToast("Copied — paste into " + label);
+        var promptText = $promptPre.textContent;
+        var url = buildUseTargetUrl(target, promptText);
+        try { localStorage.setItem(USE_PREF_KEY, key); } catch (_) {}
+        useInBtn.textContent = "Use in " + target.label + " ▾";
+        await copyText(promptText);
+        showToast(url !== target.url ? "Opening " + target.label : "Copied — paste into " + target.label);
         useInMenu.classList.remove("open");
-        window.open(USE_IN_TARGETS[label], "_blank", "noopener");
+        window.open(url, "_blank", "noopener");
       });
       useInMenu.appendChild(a);
     });
@@ -405,6 +437,9 @@
     // Run in playground
     var runBtn = el("a", "pd-btn", "&#9654; Run");
     runBtn.href = "playground.html?id=" + p.id;
+    runBtn.addEventListener("click", function () {
+      runBtn.href = createPlaygroundDraftUrl($promptPre.textContent);
+    });
     runBtn.style.color = "var(--accent)";
     runBtn.style.borderColor = "var(--accent-edge)";
     toolbar.appendChild(runBtn);
@@ -430,6 +465,7 @@
     // ---- prompt pre ----
     var $promptPre = el("pre", "", "");
     $promptPre.textContent = rawPrompt;
+    runBtn.href = createPlaygroundDraftUrl($promptPre.textContent);
     var promptBlock = el("div", "prompt-block");
     promptBlock.appendChild($promptPre);
 
@@ -438,7 +474,7 @@
     promptSection.appendChild(promptBlock);
 
     // ---- variable slots ----
-    var vars = p.variables || [];
+    var vars = (p.variables || []).slice();
     if (!vars.length) {
       var seen = {};
       var re = /\{\{([A-Z0-9_]+)\}\}/g;
@@ -453,9 +489,20 @@
     var varsSection = null;
     if (vars.length) {
       var fieldsHtml = vars.map(function (v) {
+        var options = Array.isArray(v.options) ? v.options : [];
+        var control = options.length
+          ? '<select id="var-' + esc(v.key) + '" data-var-key="' + esc(v.key) + '">' +
+              '<option value="">' + esc(v.placeholder || "select one") + '</option>' +
+              options.map(function (opt) {
+                var value = typeof opt === "string" ? opt : opt.value;
+                var label = typeof opt === "string" ? opt : opt.label;
+                return '<option value="' + esc(value || "") + '">' + esc(label || value || "") + '</option>';
+              }).join("") +
+            '</select>'
+          : '<input id="var-' + esc(v.key) + '" data-var-key="' + esc(v.key) + '" type="text" placeholder="' + esc(v.placeholder || "") + '" autocomplete="off" spellcheck="false" />';
         return '<div class="var-field">' +
-          '<label for="var-' + esc(v.key) + '">' + esc(v.label) + '</label>' +
-          '<input id="var-' + esc(v.key) + '" data-var-key="' + esc(v.key) + '" type="text" placeholder="' + esc(v.placeholder || "") + '" autocomplete="off" spellcheck="false" />' +
+          '<label for="var-' + esc(v.key) + '">' + esc(v.label || v.key) + '</label>' +
+          control +
         '</div>';
       }).join("");
       var varsPanel = el("div", "vars-panel",
@@ -464,13 +511,18 @@
       );
       function applyVars() {
         var vals = {};
-        varsPanel.querySelectorAll("input[data-var-key]").forEach(function (i) { vals[i.dataset.varKey] = i.value; });
+        varsPanel.querySelectorAll("[data-var-key]").forEach(function (i) { vals[i.dataset.varKey] = i.value; });
         $promptPre.textContent = rawPrompt.replace(/\{\{([A-Z0-9_]+)\}\}/g, function (_, k) { return vals[k] || "{{" + k + "}}"; });
+        runBtn.href = createPlaygroundDraftUrl($promptPre.textContent);
       }
-      varsPanel.querySelectorAll("input[data-var-key]").forEach(function (i) { i.addEventListener("input", applyVars); });
+      varsPanel.querySelectorAll("[data-var-key]").forEach(function (i) {
+        i.addEventListener("input", applyVars);
+        i.addEventListener("change", applyVars);
+      });
       varsPanel.querySelector(".vars-reset").addEventListener("click", function () {
-        varsPanel.querySelectorAll("input[data-var-key]").forEach(function (i) { i.value = ""; });
+        varsPanel.querySelectorAll("[data-var-key]").forEach(function (i) { i.value = ""; });
         $promptPre.textContent = rawPrompt;
+        runBtn.href = createPlaygroundDraftUrl($promptPre.textContent);
       });
       varsSection = el("div", "pd-section");
       varsSection.appendChild(varsPanel);

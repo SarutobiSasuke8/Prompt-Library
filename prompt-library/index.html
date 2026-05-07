@@ -147,8 +147,8 @@
               <div id="use-in-menu" class="hidden" style="position:absolute; right:0; top:calc(100% + 4px); background:var(--bg-1); border:1px solid var(--border-2); border-radius:var(--radius); min-width:140px; z-index:10; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
                 <a href="#" data-target="chatgpt" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">ChatGPT</a>
                 <a href="#" data-target="claude" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">Claude</a>
-                <a href="#" data-target="perplexity" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">Perplexity</a>
-                <a href="#" data-target="t3chat" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none;">t3.chat</a>
+                <a href="#" data-target="gemini" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">Gemini</a>
+                <a href="#" data-target="perplexity" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none;">Perplexity</a>
               </div>
             </div>
             <a class="copy-btn" id="playground-btn" href="#" target="_blank" rel="noopener" style="background:var(--bg-3); color:var(--accent); border:1px solid var(--accent-edge); text-decoration:none;">▶ run</a>
@@ -275,6 +275,16 @@
       const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
       const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
 
+      const USE_TARGETS = {
+        chatgpt:    { label: "ChatGPT",    url: "https://chatgpt.com/" },
+        claude:     { label: "Claude",     url: "https://claude.ai/new", queryParam: "q" },
+        gemini:     { label: "Gemini",     url: "https://gemini.google.com/app" },
+        perplexity: { label: "Perplexity", url: "https://www.perplexity.ai/" }
+      };
+      const USE_PREF_KEY = "promptLibrary.lastUseTarget";
+      const USE_URL_LIMIT = 1500;
+      const PLAYGROUND_DRAFT_PREFIX = "promptLibrary.playgroundDraft.";
+
       // ---- boot ----
       if (typeof PROMPTS === "undefined" || typeof CATEGORIES === "undefined") {
         $grid.innerHTML = '<div style="color:#ff6b6b; font-family:var(--mono); padding:16px;">Failed to load prompts.js.</div>';
@@ -297,20 +307,53 @@
         window.location.replace("prompt.html?id=" + id);
       })();
 
-      // ---- "Use in X" split button ----
-      // Opens the chosen tool with the (filled) prompt text copied to the
-      // clipboard. Chat sites do not accept arbitrary URL-payloads of this
-      // size, so the pattern is: copy + open, then user pastes.
+      function buildUseTargetUrl(target, text) {
+        if (!target || !target.queryParam) return target ? target.url : "";
+        const encoded = encodeURIComponent(text);
+        const url = target.url + "?" + target.queryParam + "=" + encoded;
+        return url.length <= USE_URL_LIMIT ? url : target.url;
+      }
+
+      function updateUseInLabel() {
+        const $btn = document.getElementById("use-in-btn");
+        if (!$btn) return;
+        const preferred = localStorage.getItem(USE_PREF_KEY);
+        const target = USE_TARGETS[preferred];
+        $btn.textContent = target ? "use in " + target.label + " ▾" : "use in ▾";
+      }
+
+      function createPlaygroundDraftUrl(p, promptText) {
+        const nonce = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const payload = {
+          id: p.id,
+          title: p.title,
+          systemPrompt: promptText,
+          createdAt: Date.now()
+        };
+        try { localStorage.setItem(PLAYGROUND_DRAFT_PREFIX + nonce, JSON.stringify(payload)); } catch (_) {}
+        return "playground.html?draft=" + encodeURIComponent(nonce) + "&id=" + encodeURIComponent(p.id);
+      }
+
+      async function usePromptInTarget(promptText, targetKey, sourceLabel) {
+        const key = targetKey || localStorage.getItem(USE_PREF_KEY) || "chatgpt";
+        const target = USE_TARGETS[key] || USE_TARGETS.chatgpt;
+        const url = buildUseTargetUrl(target, promptText);
+        try { localStorage.setItem(USE_PREF_KEY, key); } catch (_) {}
+        updateUseInLabel();
+        await copyToClipboard(promptText);
+        showToast(url !== target.url ? "Opening " + target.label : "Prompt copied — paste into " + target.label);
+        if (sourceLabel) sourceLabel.textContent = "use";
+        window.open(url, "_blank", "noopener");
+      }
+
+      // ---- "Use in X" menu ----
+      // Claude supports a q= prefill for short prompts. Other chat apps are
+      // opened after copying, so the user always has a reliable fallback.
       function wireUseIn() {
         const $btn  = document.getElementById("use-in-btn");
         const $menu = document.getElementById("use-in-menu");
         if (!$btn || !$menu) return;
-        const targets = {
-          chatgpt:    "https://chat.openai.com/",
-          claude:     "https://claude.ai/new",
-          perplexity: "https://www.perplexity.ai/",
-          t3chat:     "https://t3.chat/"
-        };
+        updateUseInLabel();
         $btn.addEventListener("click", (e) => {
           e.stopPropagation();
           $menu.classList.toggle("hidden");
@@ -324,11 +367,10 @@
           a.addEventListener("click", async (e) => {
             e.preventDefault();
             const key = a.getAttribute("data-target");
-            const url = targets[key];
-            await copyToClipboard($modalPrompt.textContent);
-            showToast("Prompt copied — paste into " + a.textContent);
+            const target = USE_TARGETS[key];
+            if (!target) return;
+            await usePromptInTarget($modalPrompt.textContent, key);
             $menu.classList.add("hidden");
-            if (url) window.open(url, "_blank", "noopener");
           });
         });
       }
@@ -540,6 +582,9 @@
               models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
             "</div>" +
             '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+              '<button class="card-use card-copy" type="button" aria-label="Use prompt in preferred tool">' +
+                '<span>use</span>' +
+              "</button>" +
               '<button class="card-share" type="button" aria-label="Share prompt">' +
                 shareSvg +
               "</button>" +
@@ -563,7 +608,7 @@
         });
 
         // In-card copy button — stops propagation so the modal doesn't open.
-        const copyBtn = card.querySelector(".card-copy");
+        const copyBtn = card.querySelector(".card-copy:not(.card-use)");
         copyBtn.addEventListener("click", async (e) => {
           e.stopPropagation();
           await copyToClipboard(p.prompt);
@@ -574,6 +619,20 @@
           showToast("Prompt copied");
           setTimeout(() => {
             copyBtn.classList.remove("copied");
+            labelSpan.textContent = originalLabel;
+          }, 1500);
+        });
+
+        const useBtn = card.querySelector(".card-use");
+        useBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const labelSpan = useBtn.querySelector("span");
+          const originalLabel = labelSpan.textContent;
+          labelSpan.textContent = "opening";
+          useBtn.classList.add("copied");
+          await usePromptInTarget(p.prompt, null, labelSpan);
+          setTimeout(() => {
+            useBtn.classList.remove("copied");
             labelSpan.textContent = originalLabel;
           }, 1500);
         });
@@ -814,7 +873,11 @@
         document.getElementById("comment-input").onkeydown = (e) => { if (e.key === "Enter") submitComment(p.id); };
 
         // ---- playground link ----
-        document.getElementById("playground-btn").href = "playground.html?id=" + p.id;
+        const playgroundBtn = document.getElementById("playground-btn");
+        playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
+        playgroundBtn.onclick = () => {
+          playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
+        };
 
         // ---- variable slots ----
         renderVars(p);
@@ -882,7 +945,7 @@
       // patterns in the prompt body (matches [A-Z0-9_]+).
       function renderVars(p) {
         const $vars = document.getElementById("modal-vars");
-        let vars = p.variables || [];
+        let vars = (p.variables || []).slice();
         if (!vars.length) {
           const seen = new Set();
           const re = /\{\{([A-Z0-9_]+)\}\}/g;
@@ -897,14 +960,26 @@
           return;
         }
 
-        const fields = vars.map((v) =>
-          '<div class="var-field">' +
-            '<label for="var-' + escapeAttr(v.key) + '">' + escapeHtml(v.label) + "</label>" +
-            '<input id="var-' + escapeAttr(v.key) + '" data-var-key="' + escapeAttr(v.key) + '" type="text"' +
-              ' placeholder="' + escapeAttr(v.placeholder || "") + '"' +
-              ' autocomplete="off" spellcheck="false" />' +
-          "</div>"
-        ).join("");
+        const fields = vars.map((v) => {
+          const key = escapeAttr(v.key);
+          const opts = Array.isArray(v.options) ? v.options : [];
+          const control = opts.length
+            ? '<select id="var-' + key + '" data-var-key="' + key + '">' +
+                '<option value="">' + escapeHtml(v.placeholder || "select one") + '</option>' +
+                opts.map((opt) => {
+                  const value = typeof opt === "string" ? opt : opt.value;
+                  const label = typeof opt === "string" ? opt : opt.label;
+                  return '<option value="' + escapeHtml(value || "") + '">' + escapeHtml(label || value || "") + '</option>';
+                }).join("") +
+              '</select>'
+            : '<input id="var-' + key + '" data-var-key="' + key + '" type="text"' +
+                ' placeholder="' + escapeHtml(v.placeholder || "") + '"' +
+                ' autocomplete="off" spellcheck="false" />';
+          return '<div class="var-field">' +
+            '<label for="var-' + key + '">' + escapeHtml(v.label || v.key) + "</label>" +
+            control +
+          "</div>";
+        }).join("");
 
         $vars.innerHTML =
           '<div class="vars-panel">' +
@@ -917,15 +992,21 @@
         $vars.classList.remove("hidden");
 
         const rawPrompt = p.prompt;
+        const playgroundBtn = document.getElementById("playground-btn");
         function applyVars() {
           const vals = {};
-          $vars.querySelectorAll("input[data-var-key]").forEach((i) => { vals[i.dataset.varKey] = i.value; });
+          $vars.querySelectorAll("[data-var-key]").forEach((i) => { vals[i.dataset.varKey] = i.value; });
           $modalPrompt.textContent = rawPrompt.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, k) => vals[k] || "{{" + k + "}}");
+          if (playgroundBtn) playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
         }
-        $vars.querySelectorAll("input[data-var-key]").forEach((i) => i.addEventListener("input", applyVars));
+        $vars.querySelectorAll("[data-var-key]").forEach((i) => {
+          i.addEventListener("input", applyVars);
+          i.addEventListener("change", applyVars);
+        });
         $vars.querySelector(".vars-reset").addEventListener("click", () => {
-          $vars.querySelectorAll("input[data-var-key]").forEach((i) => { i.value = ""; });
+          $vars.querySelectorAll("[data-var-key]").forEach((i) => { i.value = ""; });
           $modalPrompt.textContent = rawPrompt;
+          if (playgroundBtn) playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
         });
       }
 

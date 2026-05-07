@@ -83,6 +83,9 @@ deserves its own note.
 | 2026-05-03 | [[2026-05-03-session-report-prompt-library-product-prompt\|Head of Product prompt and MD entry]] | `main` | shipped |
 | 2026-05-05 | [[2026-05-05-session-report-prompt-library-persona-suite\|Vibe Coding persona suite — 10 MD entries + collections repo card]] | `main` | shipped |
 
+| 2026-05-05 | [[2026-05-05-session-report-prompt-library-auth-options\|Auth options and OAuth error handling]] | `main` | active |
+| 2026-05-07 | [[2026-05-07-session-report-prompt-library-workflow-polish\|Auth QA and prompt workflow polish]] | `main` | active |
+
 ## Past work — reconstructed from git log
 
 Earlier work happened before this session system existed. Captured here as

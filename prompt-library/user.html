@@ -457,6 +457,137 @@
     .btn-save:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
     .btn-save.saving { opacity: 0.6; pointer-events: none; }
 
+    /* ---- sign-in panel ---- */
+    .signin-panel {
+      grid-column: 1 / -1;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .signin-card {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .signin-card h2 {
+      font-size: 20px;
+      margin: 0 0 8px;
+      color: var(--text);
+    }
+    .signin-copy {
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 28px;
+    }
+    .signin-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .signin-provider {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--bg-1);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    }
+    .signin-provider:hover {
+      background: var(--bg-2);
+      border-color: var(--accent-edge);
+      text-decoration: none;
+    }
+    .signin-provider:disabled,
+    .signin-email button:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
+    .provider-mark {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 18px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .provider-mark svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+    .signin-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-faint);
+      font-family: var(--mono);
+      font-size: 12px;
+      margin: 4px 0;
+    }
+    .signin-divider::before,
+    .signin-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .signin-email {
+      display: flex;
+      gap: 8px;
+    }
+    .signin-email input {
+      min-width: 0;
+      flex: 1;
+      padding: 9px 12px;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--mono);
+      outline: none;
+    }
+    .signin-email input:focus {
+      border-color: var(--accent-edge);
+    }
+    .signin-email button {
+      flex-shrink: 0;
+    }
+    .signin-msg {
+      min-height: 18px;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      text-align: left;
+    }
+    .signin-msg.error { color: var(--danger); }
+    .signin-note {
+      margin: 4px 0 0;
+      color: var(--text-faint);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: left;
+    }
+    @media (max-width: 420px) {
+      .signin-email { flex-direction: column; }
+      .signin-email button { width: 100%; }
+    }
+
     /* ---- locked overlay for private section ---- */
     .locked-overlay {
       text-align: center;
@@ -735,7 +866,7 @@
   <script src="nav.js"></script>
   <script src="footer.js"></script>
   <script type="module">
-    import { sb, onAuth, signInWithGitHub, signInWithEmail, signOut,
+    import { sb, onAuth, signInWithProvider, signInWithEmail, signOut,
              updateProfile, setHandle, validateHandleShape, isHandleAvailable } from './supabase.js';
 
     (async function () {
@@ -756,6 +887,26 @@
       const params     = new URLSearchParams(window.location.search);
       const handleParam = params.get("handle") || "";
       let bookmarksPublic = true;
+
+      const SIGNIN_PROVIDERS = [
+        {
+          id: "google",
+          label: "Continue with Google",
+          mark: '<span class="provider-mark" aria-hidden="true">G</span>'
+        },
+        {
+          id: "github",
+          label: "Continue with GitHub",
+          mark: '<span class="provider-mark" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>' +
+            '</span>'
+        },
+        {
+          id: "azure",
+          label: "Continue with Microsoft",
+          mark: '<span class="provider-mark" aria-hidden="true">M</span>'
+        }
+      ];
 
       // Show loading while auth resolves
       document.getElementById("profile-wrap").innerHTML =
@@ -807,33 +958,58 @@
       // ---------------------------------------------------------------
       function renderSignIn() {
         document.getElementById("profile-wrap").innerHTML =
-          '<div style="grid-column:1/-1;padding:60px 20px;text-align:center;">' +
-          '<div style="max-width:380px;margin:0 auto;">' +
-          '<h2 style="font-size:20px;margin:0 0 8px;color:var(--text);">Your library profile</h2>' +
-          '<p style="color:var(--text-dim);font-size:14px;line-height:1.6;margin:0 0 28px;">' +
+          '<div class="signin-panel">' +
+          '<div class="signin-card">' +
+          '<h2>Your library profile</h2>' +
+          '<p class="signin-copy">' +
           'Sign in to bookmark prompts, save tools, and track your contributions.</p>' +
-          '<div style="display:flex;flex-direction:column;gap:10px;">' +
-          '<button id="signin-gh" class="btn-save" style="justify-content:center;display:flex;align-items:center;gap:8px;width:100%;">' +
-          '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>' +
-          'Continue with GitHub</button>' +
-          '<div style="display:flex;align-items:center;gap:10px;color:var(--text-faint);font-size:12px;">' +
-          '<div style="flex:1;height:1px;background:var(--border);"></div>or email<div style="flex:1;height:1px;background:var(--border);"></div></div>' +
-          '<div style="display:flex;gap:8px;">' +
-          '<input type="email" id="signin-email" placeholder="your@email.com" style="flex:1;padding:9px 12px;background:var(--bg-1);border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:13px;font-family:var(--mono);outline:none;" />' +
-          '<button id="signin-magic" class="btn-save" style="flex-shrink:0;">send link</button>' +
+          '<div class="signin-options">' +
+          SIGNIN_PROVIDERS.map((provider) =>
+            '<button id="signin-' + provider.id + '" class="signin-provider" type="button" data-provider="' + provider.id + '">' +
+            provider.mark + '<span>' + provider.label + '</span></button>'
+          ).join("") +
+          '<div class="signin-divider">or email</div>' +
+          '<div class="signin-email">' +
+          '<input type="email" id="signin-email" placeholder="your@email.com" autocomplete="email" />' +
+          '<button id="signin-magic" class="btn-save" type="button">send link</button>' +
           '</div>' +
-          '<div id="signin-msg" style="font-size:12px;color:var(--text-dim);font-family:var(--mono);min-height:18px;text-align:left;"></div>' +
+          '<div id="signin-msg" class="signin-msg"></div>' +
           '</div></div></div>';
 
-        document.getElementById("signin-gh").addEventListener("click", () => signInWithGitHub());
+        const msg = document.getElementById("signin-msg");
+        document.querySelectorAll("[data-provider]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const provider = btn.getAttribute("data-provider");
+            const label = btn.querySelector("span:last-child");
+            const original = label.textContent;
+            msg.textContent = "";
+            msg.classList.remove("error");
+            btn.disabled = true;
+            label.textContent = "redirecting...";
+            const { error } = await signInWithProvider(provider);
+            if (error) {
+              msg.textContent = "Error: " + error.message;
+              msg.classList.add("error");
+              label.textContent = original;
+              btn.disabled = false;
+            }
+          });
+        });
         document.getElementById("signin-magic").addEventListener("click", async () => {
           const email = document.getElementById("signin-email").value.trim();
-          if (!email) return;
+          if (!email) {
+            msg.textContent = "Enter an email address.";
+            msg.classList.add("error");
+            return;
+          }
           const btn = document.getElementById("signin-magic");
-          const msg = document.getElementById("signin-msg");
-          btn.textContent = "sending…"; btn.disabled = true;
+          msg.textContent = "";
+          msg.classList.remove("error");
+          btn.textContent = "sending...";
+          btn.disabled = true;
           const { error } = await signInWithEmail(email);
           btn.textContent = "send link"; btn.disabled = false;
+          msg.classList.toggle("error", !!error);
           msg.textContent = error ? "Error: " + error.message : "Check your email for the magic link.";
         });
       }
@@ -1078,7 +1254,7 @@
       if (profile.github_handle) {
         $links.innerHTML += '<a class="profile-link" href="https://github.com/' + escapeHtml(profile.github_handle) + '" target="_blank" rel="noopener">' + SVG_GH + escapeHtml(profile.github_handle) + "</a>";
       }
-      if (!profile.x_handle && !profile.github_handle) $links.remove();
+      $links.classList.toggle("hidden", !profile.x_handle && !profile.github_handle);
 
       document.getElementById("profile-stats").innerHTML =
         statBlock(authoredPrompts.length,  "prompts") +
@@ -1660,7 +1836,8 @@
           }
           await updateProfile({
             bio:      $editBio.value.trim(),
-            x_handle: $editX.value.trim()
+            x_handle: $editX.value.trim(),
+            github_handle: $editGH.value.trim()
           });
           profile.bio           = $editBio.value.trim();
           profile.x_handle      = $editX.value.trim();
@@ -1684,6 +1861,7 @@
         if (profile.github_handle) {
           $l.innerHTML += '<a class="profile-link" href="https://github.com/' + escapeHtml(profile.github_handle) + '" target="_blank" rel="noopener">' + SVG_GH + escapeHtml(profile.github_handle) + "</a>";
         }
+        $l.classList.toggle("hidden", !profile.x_handle && !profile.github_handle);
 
         showToast("Profile updated");
         $editSave.textContent = "save changes";

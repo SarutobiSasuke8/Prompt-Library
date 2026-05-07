@@ -240,6 +240,18 @@
     }
     .key-notice strong { color: var(--text); }
     .key-notice a { color: var(--accent); }
+    .draft-note {
+      background: var(--bg-2);
+      border: 1px solid var(--accent-edge);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .draft-note strong { color: var(--accent); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -300,6 +312,8 @@
               <option value="custom">— custom prompt —</option>
             </select>
           </div>
+
+          <div id="draft-note" class="draft-note hidden"></div>
 
           <div>
             <label class="pg-label" for="system-prompt">System prompt text</label>
@@ -409,6 +423,7 @@
       const $toast       = document.getElementById("toast");
 
       const KEY_STORE = "pl_api_key";
+      const PLAYGROUND_DRAFT_PREFIX = "promptLibrary.playgroundDraft.";
       let isRunning = false;
 
       // ── Load saved key ────────────────────────────────────────────
@@ -442,7 +457,8 @@
       }
 
       // ── Pre-fill from ?id= URL param ─────────────────────────────
-      const urlId = parseInt(new URLSearchParams(window.location.search).get("id"), 10);
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlId = parseInt(urlParams.get("id"), 10);
       if (urlId && typeof PROMPTS !== "undefined") {
         const matched = PROMPTS.find((p) => p.id === urlId);
         if (matched) {
@@ -450,6 +466,9 @@
           loadPrompt(matched);
         }
       }
+
+      const draftKey = urlParams.get("draft") || "";
+      if (draftKey) loadPlaygroundDraft(draftKey);
 
       // ── Events ────────────────────────────────────────────────────
       $keyToggle.addEventListener("click", () => {
@@ -502,6 +521,32 @@
         $systemPT.value = p.prompt || "";
         $tempSlider.value = parseFloat(p.temperature) || 0.7;
         $tempDisplay.textContent = parseFloat($tempSlider.value).toFixed(1);
+      }
+
+      function loadPlaygroundDraft(draftKey) {
+        const key = PLAYGROUND_DRAFT_PREFIX + draftKey;
+        let draft = null;
+        try { draft = JSON.parse(localStorage.getItem(key) || "null"); } catch (_) {}
+        try { localStorage.removeItem(key); } catch (_) {}
+        if (!draft || !draft.systemPrompt) return;
+
+        if (draft.id) $promptSel.value = String(draft.id);
+        $systemPT.value = draft.systemPrompt;
+
+        const note = document.getElementById("draft-note");
+        if (note) {
+          note.innerHTML = "Loaded filled prompt draft" + (draft.title ? " for <strong>" + escapeHtml(draft.title) + "</strong>" : "") + ".";
+          note.classList.remove("hidden");
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function setKeyStatus(ok) {

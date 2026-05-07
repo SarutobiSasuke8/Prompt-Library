@@ -55,11 +55,15 @@ sb.auth.onAuthStateChange(async (_event, session) => {
 // -------------------------------------------------------------------------
 // Sign in / out
 // -------------------------------------------------------------------------
-export async function signInWithGitHub() {
+export async function signInWithProvider(provider) {
   return sb.auth.signInWithOAuth({
-    provider: 'github',
+    provider,
     options: { redirectTo: window.location.origin + window.location.pathname }
   });
+}
+
+export async function signInWithGitHub() {
+  return signInWithProvider('github');
 }
 
 export async function signInWithEmail(email) {
@@ -104,7 +108,7 @@ export async function setHandle(h) {
 
 export async function updateProfile(fields) {
   if (!currentUser) throw new Error('not signed in');
-  const allowed = ['bio', 'x_handle', 'avatar_url'];
+  const allowed = ['bio', 'x_handle', 'github_handle', 'avatar_url'];
   const patch = {};
   for (const k of allowed) if (k in fields) patch[k] = fields[k];
   const { error } = await sb.from('profiles').update(patch).eq('id', currentUser.id);
@@ -210,7 +214,7 @@ export async function rejectSubmission(id, note) {
 // Expose on window so non-module inline scripts in index.html can use it
 window.PL = {
   sb, onAuth, getUser, getProfile,
-  signInWithGitHub, signInWithEmail, signOut,
+  signInWithProvider, signInWithGitHub, signInWithEmail, signOut,
   validateHandleShape, isHandleAvailable, setHandle, updateProfile,
   getLikeCounts, getMyLikes, toggleLike,
   submitPrompt, listMySubmissions,

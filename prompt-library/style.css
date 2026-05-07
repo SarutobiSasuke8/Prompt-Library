@@ -1018,7 +1018,8 @@ a:hover { text-decoration: underline; }
   color: var(--text-faint);
   margin-bottom: 4px;
 }
-.var-field input {
+.var-field input,
+.var-field select {
   width: 100%;
   background: var(--bg-3);
   border: 1px solid var(--border);
@@ -1030,7 +1031,8 @@ a:hover { text-decoration: underline; }
   box-sizing: border-box;
   transition: border-color 0.12s;
 }
-.var-field input:focus { outline: none; border-color: var(--accent); }
+.var-field input:focus,
+.var-field select:focus { outline: none; border-color: var(--accent); }
 .var-field input::placeholder { color: var(--text-faint); }
 
 /* ---- shared: section divider, rating, comments (item detail pages) ---- */

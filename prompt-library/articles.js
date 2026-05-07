@@ -303,6 +303,131 @@ const ARTICLES = [
       { type: "h3", text: "Why this wins over 'just use the context window'" },
       { type: "p", text: "Context windows are working memory. Vaults are long-term memory. Every model you'll use over the next five years will be able to read markdown. No vendor lock-in, no migration, no re-indexing. The vault survives model upgrades, tool churn, and your own attention drift. It's the part of your AI workflow that isn't rented." }
     ]
+  },
+
+  {
+    id: 9,
+    title: "Few-Shot Prompting",
+    summary: "How to teach a model your format in a handful of examples — and when it's worth the token cost.",
+    tags: ["fundamentals", "technique", "examples", "calibration"],
+    articleType: "methodology",
+    readTime: "5 min",
+    author: "SarutobiSasuke",
+    body: [
+      { type: "p", text: "Few-shot prompting means including worked examples in your prompt — not because the model doesn't know how to do the task, but because you want it to do the task your way. It's the fastest path from 'generally correct' to 'correct in our format, at our quality bar, in our voice.'" },
+      { type: "h3", text: "Zero-shot vs few-shot" },
+      { type: "p", text: "Zero-shot: you describe the task and let the model figure out the format. Few-shot: you describe the task and show 2–5 examples that demonstrate exactly what good output looks like. For simple or generic tasks, zero-shot is fine. For anything domain-specific, format-sensitive, or stylistically opinionated, few-shot reliably beats zero-shot." },
+      { type: "h3", text: "What few-shot examples actually calibrate" },
+      { type: "list", items: [
+        "Output format — structure, field names, order, length",
+        "Reasoning style — how much to show, how to weight evidence",
+        "Tone and register — formal vs casual, hedged vs assertive, verbose vs terse",
+        "Edge case handling — what to do when input is ambiguous, missing, or borderline",
+        "Domain vocabulary — the specific terms, abbreviations, and framings your team uses"
+      ]},
+      { type: "h3", text: "A minimal example pair" },
+      { type: "example", label: "Zero-shot (underspecified)", text: "Classify this customer complaint as: bug, feature request, or billing issue.\n\nComplaint: 'The export button doesn't show up on my screen anymore.'" },
+      { type: "example", label: "Few-shot (calibrated)", text: "Classify each customer complaint into one of: BUG, FEATURE, BILLING.\nReturn only the category label — no explanation.\n\nExamples:\nComplaint: 'The export button disappeared after the last update.' → BUG\nComplaint: 'Can you add a dark mode?' → FEATURE\nComplaint: 'I was charged twice this month.' → BILLING\nComplaint: 'The loading spinner never stops on the reports page.' → BUG\n\nNow classify:\nComplaint: 'The export button doesn't show up on my screen anymore.'" },
+      { type: "p", text: "The few-shot version is longer, but it removes ambiguity about format (label only, no explanation) and shows the model how to handle a near-duplicate of the target input. The output is reliably parseable by downstream code; the zero-shot output might include reasoning, hedging, or alternate formats." },
+      { type: "h3", text: "How many examples" },
+      { type: "list", items: [
+        "1–2 examples: enough to establish format and tone for simple tasks.",
+        "3–5 examples: the practical sweet spot for most classification and extraction tasks.",
+        "6–10+ examples: worth it for complex tasks with multiple edge cases, or when the domain is narrow enough that the model needs significant calibration.",
+        "More than 10: rare. Usually a sign the task should be fine-tuned, not prompted."
+      ]},
+      { type: "callout", text: "Examples cost tokens. For high-throughput pipelines where you'll make thousands of calls, the token cost of 4 examples at every call adds up fast. Measure whether the quality gain justifies the cost — sometimes 2 examples gets you 90% of the benefit." },
+      { type: "h3", text: "Example quality matters more than example quantity" },
+      { type: "p", text: "A bad example is worse than no example. Bad examples teach the model the wrong format, wrong reasoning, or wrong edge-case handling — and it will follow them consistently. Before adding examples, ask: is this example unambiguous? Does it represent the case I actually care about? If someone read only this example, would they understand the pattern?" },
+      { type: "h3", text: "Selecting examples for coverage" },
+      { type: "p", text: "Don't pick examples that are all easy cases. Pick examples that span the variation in your actual inputs: different lengths, different domains, at least one borderline case that illustrates how to handle ambiguity. If your real inputs include edge cases (empty fields, foreign language, very short text), include an example that shows the right behaviour there." },
+      { type: "h3", text: "When to switch from few-shot to fine-tuning" },
+      { type: "p", text: "Few-shot works well up to about 10 examples in context. Beyond that, you're paying context-window costs on every call and still getting probabilistic adherence. If you have 50+ high-quality labelled examples and a consistent task, fine-tuning is worth evaluating — you get better adherence at lower per-call cost. Few-shot is the right default until you have the data and economics to justify fine-tuning." }
+    ]
+  },
+
+  {
+    id: 10,
+    title: "System Prompt Architecture",
+    summary: "How to structure a production system prompt — sections, priority ordering, and the failure modes that sink deployed agents.",
+    tags: ["production", "architecture", "system-prompt", "agents"],
+    articleType: "methodology",
+    readTime: "7 min",
+    author: "SarutobiSasuke",
+    body: [
+      { type: "p", text: "A system prompt for a production agent is a piece of software. It has structure, a layering model, failure modes, and versioning considerations. Most prompts that fail in production fail not because of bad writing but because of bad architecture — sections that contradict each other, rules that don't cover edge cases, or instructions the model can't resolve when they conflict." },
+      { type: "h3", text: "The four layers of a system prompt" },
+      { type: "list", items: [
+        "Identity — who the model is, what it's for, and what it explicitly is not. Establishes context for every decision that follows.",
+        "Constraints — the hard edges: what the model must never do, regardless of what the user asks. These should be few, clear, and unconditional.",
+        "Behaviour rules — how the model should generally operate: format, tone, reasoning style, how to handle uncertainty, what to do when the user's request is ambiguous.",
+        "Task instructions — the specific job this deployment does. The most concrete layer; often where teams start and stop, which is why they get into trouble."
+      ]},
+      { type: "h3", text: "Why order matters" },
+      { type: "p", text: "Models read system prompts sequentially, but they also weight recency. Constraints buried at the end of a long system prompt are more likely to be overridden by subsequent user instructions than constraints stated at the top. Put your hard constraints early. State them clearly. Repeat critical ones if needed — redundancy in constraints is a feature, not a flaw." },
+      { type: "example", label: "Structural template for a production system prompt", text: "## Identity\nYou are [name], a [role description] for [company/product]. You help [user type] with [core use case]. You are not a general-purpose assistant.\n\n## Hard constraints (never violate)\n- [Constraint 1 — stated as an unconditional prohibition]\n- [Constraint 2]\n\n## Behaviour\n- Format: [format spec]\n- Tone: [tone spec]\n- When uncertain: [what to do]\n- When the request is out of scope: [exact fallback]\n\n## Task\n[Specific instructions for the core task, with examples if needed]\n\n## Edge cases\n[Explicit handling for predictable edge cases — don't leave these to the model's judgment]" },
+      { type: "h3", text: "The contradiction problem" },
+      { type: "p", text: "The most common architecture failure is contradictory instructions. 'Be concise' in behaviour and 'provide comprehensive coverage' in task instructions will produce inconsistent output depending on which clause the model weights more heavily on a given request. Resolve contradictions explicitly rather than leaving them for the model to resolve at inference time." },
+      { type: "callout", text: "Before deploying a system prompt, read every rule pair that could conflict. 'Be concise' vs 'always include reasoning' is a conflict. 'Refuse off-topic requests' vs 'be helpful' is a conflict. Name the tiebreaker in the prompt." },
+      { type: "h3", text: "Explicit edge case handling" },
+      { type: "p", text: "Every production system prompt needs an explicit edge case section. If you don't tell the model what to do when the input is empty, the user asks something out of scope, the user pushes back on the model's output, or the user asks the model about itself — the model will improvise. Sometimes that improvisation is fine. Often it produces the exact failure mode you were trying to prevent." },
+      { type: "h3", text: "The fallback instruction" },
+      { type: "example", label: "Weak fallback", text: "If you can't help with a request, let the user know." },
+      { type: "example", label: "Strong fallback", text: "If the user's request is outside your scope as [name], respond exactly: 'I can help you with [specific scope]. For [out-of-scope category], you'll need to [specific redirect — e.g. contact support at X / use Y tool].' Do not improvise a different response." },
+      { type: "p", text: "The strong version removes model judgment from the fallback path. In high-stakes deployments, you want predictable fallback behaviour, not creative responses that could say the wrong thing to the wrong user." },
+      { type: "h3", text: "Versioning your system prompt" },
+      { type: "list", items: [
+        "Treat the system prompt as code — put it in version control, not in a config field that nobody reviews.",
+        "Log which version of the prompt was used for every inference. When something goes wrong in production, you need to know which prompt state produced it.",
+        "Don't edit the deployed prompt live without testing the change against your eval set. Prompts are probabilistic; a change that looks like an improvement can regress a different failure mode.",
+        "Document why constraints exist. Future editors won't know that constraint 3 prevents the specific jailbreak that happened in beta if you don't write it down."
+      ]},
+      { type: "h3", text: "Signs your system prompt needs a rebuild" },
+      { type: "list", items: [
+        "It's over 2000 tokens and keeps growing — each addition patches a failure without fixing the structure.",
+        "You have conflicting instructions you've been 'working around' with careful phrasing.",
+        "Different outputs for the same input feel unpredictable and you can't explain why.",
+        "The identity section and the task section describe two different things.",
+        "You don't have an eval set — you're testing changes by feel."
+      ]}
+    ]
+  },
+
+  {
+    id: 11,
+    title: "Context Window Management",
+    summary: "How to stay within context limits for long tasks — and what breaks when you don't.",
+    tags: ["production", "context-window", "architecture", "technique"],
+    articleType: "methodology",
+    readTime: "6 min",
+    author: "SarutobiSasuke",
+    body: [
+      { type: "p", text: "Context window limits are one of the most misunderstood constraints in applied LLM work. Most practitioners think about context as a capacity problem — 'how much can I fit?' The more important question is: 'how does model behaviour change as context fills up?'" },
+      { type: "h3", text: "What actually happens at the context limit" },
+      { type: "p", text: "Models don't just stop when they hit the limit — they degrade before it. At 80-90% context utilisation, most models show measurable increases in: ignoring early-context instructions, confabulating details from earlier in the context, reduced adherence to format constraints, and increased repetition. The limit is a cliff, but the degradation starts on the slope." },
+      { type: "h3", text: "The lost-in-the-middle problem" },
+      { type: "p", text: "Research has consistently shown that language models attend more reliably to content at the start and end of the context window than to content in the middle. If you put your most important instructions or facts in the middle of a long context, they will be underweighted compared to the same instructions at the top or bottom. This has architectural implications for how you structure long system prompts and long document contexts." },
+      { type: "callout", text: "Critical instructions go at the top of the system prompt and are repeated at the bottom if stakes are high. If you're passing a long document, put the most relevant section first, not in the middle." },
+      { type: "h3", text: "Strategies for long tasks" },
+      { type: "h3", text: "1. Chunking" },
+      { type: "p", text: "For tasks that involve long documents, break the document into chunks and process each chunk separately, then synthesise the results. This keeps each call well within context limits and avoids the degradation problem. The synthesis step needs to be designed carefully — it's a new prompt with a new context, and it only sees the chunk summaries, not the original text." },
+      { type: "h3", text: "2. Sliding window with overlap" },
+      { type: "p", text: "For tasks where continuity matters (long transcripts, sequential analysis), use a sliding window: process chunk N, include the last 200 tokens of chunk N in the beginning of chunk N+1 as context anchor. This prevents hard breaks that lose important boundary-crossing content." },
+      { type: "h3", text: "3. Hierarchical summarisation" },
+      { type: "p", text: "For very long documents: first pass produces a summary of each section; second pass synthesises the section summaries. Three-level hierarchies (chunk → section → document) handle book-length material without hitting limits. The cost is that each level of indirection introduces compression loss — the final synthesis sees summaries, not raw text." },
+      { type: "example", label: "Context management prompt snippet", text: "You will receive this document in [N] chunks. For each chunk:\n1. Produce a 3-bullet summary of the key claims in that chunk.\n2. Note any unresolved questions raised in the chunk.\n3. Flag any direct contradictions with the summaries of previous chunks I've given you.\n\nChunk 1 of [N]:\n[CONTENT]" },
+      { type: "h3", text: "Counting tokens before you call" },
+      { type: "list", items: [
+        "All major model providers expose a tokenisation API or library (tiktoken for OpenAI, Anthropic's token counter). Use them in your pipeline to validate input size before sending.",
+        "Budget your context explicitly: system prompt tokens + few-shot tokens + input tokens + expected output tokens must fit within the limit with room to spare.",
+        "A common rule of thumb: reserve at least 20% of the context window for output. Models that run out of output tokens mid-response produce truncated output that may be worse than no output.",
+        "If your system prompt alone takes 30% of the context, audit it — length should serve clarity, not accumulate features."
+      ]},
+      { type: "h3", text: "Conversation context in multi-turn agents" },
+      { type: "p", text: "In multi-turn workflows, conversation history accumulates rapidly. Each turn adds to the context. After 10-20 turns, you may be using more context on history than on the current task. Common approaches: rolling window (drop the oldest N turns), summarisation (replace a block of history with a summary), or selective pruning (keep turns that contain decisions, discard turns that were just clarification)." },
+      { type: "h3", text: "When to increase context vs. when to restructure" },
+      { type: "p", text: "Larger context windows are not the same as solving the context problem — they delay it and make it cheaper, but the degradation dynamics still apply. Before reaching for a larger model, ask: is the content in context actually needed, or is it there because it was easier than chunking? The cleanest solution is almost always less context, better structured, rather than more context." }
+    ]
   }
 
 ];

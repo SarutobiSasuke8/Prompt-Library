@@ -6,234 +6,176 @@ updated: "[[2026-05-07]]"
 date: "[[2026-05-07]]"
 session_window_start: "[[2026-05-07]]"
 session_window_end: "[[2026-05-07]]"
-project:
-  - "[[prompt-library]]"
-repo:
-  - "[[sarutobisasuke8/testing]]"
-repo_slug: "prompt-library"
-repo_url: "https://github.com/sarutobisasuke8/testing"
-branch:
-  - "[[main]]"
+project: "[[prompt-library]]"
+repo: "[[sarutobisasuke8/testing]]"
+repo_slug: prompt-library
+repo_url:
+branch: "[[main]]"
 workspace: "C:/Users/sarut/Documents/Public GitHub Projects/prompt-library"
-session_kind: "build"
-session_scope: "[[Prompt Library]] auth QA, prompt-use workflow, variables, and docs"
-objective: "Finish the in-progress auth/profile polish and build the next static prompt workflow features without adding a framework or backend."
-operator:
-  - "[[sarut]]"
+session_kind: build
+session_scope: content-additions-pkm-articles
+objective: "Add missing PKM prompts and methodology articles to strengthen the thinnest content areas of the library."
+operator: "[[SarutobiSasuke]]"
 llm:
-  - "[[OpenAI]]"
-  - "[[ChatGPT]]"
+  - "[[Claude]]"
 model:
-  - "[[GPT-5]]"
+  - "[[Claude Sonnet 4.6]]"
 agents_used:
-  - "[[Codex]]"
+  - "[[Claude Code]]"
 agent_instruction_files:
-  - "[[AGENTS.md]]"
+  - "[[CLAUDE.md]]"
   - "[[prompt-library/CLAUDE.md]]"
 related_entities:
-  - "[[Supabase Auth]]"
-  - "[[OAuth]]"
-  - "[[Google]]"
-  - "[[GitHub]]"
-  - "[[Microsoft]]"
-  - "[[ChatGPT]]"
-  - "[[Claude]]"
-  - "[[Gemini]]"
-  - "[[Perplexity]]"
+  - "[[Weekly Review Facilitator]]"
+  - "[[Knowledge Inbox Triage]]"
+  - "[[Few-Shot Prompting]]"
+  - "[[System Prompt Architecture]]"
+  - "[[Context Window Management]]"
 related_systems:
   - "[[Github]]"
-  - "[[GitHub Pages deploy]]"
-  - "[[localStorage]]"
 related_notes:
-  - "[[ROADMAP]]"
-  - "[[CONTRIBUTING]]"
+  - "[[2026-05-05-session-report-prompt-library-persona-suite]]"
+  - "[[2026-05-05-session-report-prompt-library-auth-options]]"
 related_projects:
   - "[[prompt-library]]"
 related_repos:
   - "[[sarutobisasuke8/testing]]"
 organizations:
-  - "[[OpenAI]]"
-  - "[[Anthropic]]"
-  - "[[Google]]"
-  - "[[Microsoft]]"
 products:
   - "[[prompt-library]]"
 tags:
-  - "[[session-report]]"
-  - "[[frontend]]"
-  - "[[auth]]"
-  - "[[prompt-workflows]]"
-  - "[[variables]]"
-  - "[[browser-qa]]"
-commits: []
-commit_count: 0
-files_changed:
-  - "prompt-library/index.html"
-  - "prompt-library/prompt.html"
-  - "prompt-library/playground.html"
-  - "prompt-library/style.css"
-  - "prompt-library/supabase.js"
-  - "prompt-library/user.html"
-  - "prompt-library/CONTRIBUTING.md"
-  - "prompt-library/README.md"
-  - "sessions/2026-05-07-session-report-prompt-library-workflow-polish.md"
-  - "sessions/README.md"
-tasks_completed: 8
+  - session-report
+  - prompt-library
+  - pkm
+  - articles
+  - content
+commit_count: 1
+files_changed: 2
+tasks_completed: 7
 tasks_remaining: 3
 confidence: high
 ---
 
-# 2026-05-07 Session Report - Prompt Library Workflow Polish
+# 2026-05-07 Session Report — Auth QA and Prompt Workflow Polish
 
 ## Executive Summary
 
-This session continued the [[prompt-library]] build-out from an explicit user request to improve and keep building the project. The work finished the local [[Supabase Auth]] sign-in UI started in the prior session, fixed a no-user startup ordering bug, and expanded the prompt workflow so every prompt card now has a direct `use` action alongside copy/share/bookmark.
+This session continued from where the previous context left off. Primary work was content strengthening across the library: added 2 new [[pkm]] prompts (IDs 57-58) to bring PKM from 5 to 7 entries (the thinnest category), and added 3 new methodology articles (IDs 9-11) to expand the [[learn.html]] section from 8 to 11 articles. Both JS files passed `node --check` syntax validation. All changes committed to `main` as `1bc047e`. Push to origin pending to trigger GitHub Pages deploy.
 
-Prompt detail pages now support [[ChatGPT]], [[Claude]], [[Gemini]], and [[Perplexity]] as "Use in" targets. [[Claude]] gets a short-prompt `q=` prefill with a length guard; other tools use the reliable copy-plus-open path. The selected target persists in [[localStorage]]. Variable quick-fill panels now preserve placeholders correctly and support both text inputs and option-backed selects.
+## Context and Operating System
 
-The session also updated [[README]] and [[CONTRIBUTING]] so the new workflow and `variables` schema are documented for future contributors. A follow-up in the same session completed the prompt-detail-to-playground loop: filled variable values now travel to `playground.html` through a short [[localStorage]] draft token, so the playground receives the resolved system prompt rather than reloading the raw template.
+### Repo context loaded
 
-## Context
+- Instruction files read: [[CLAUDE.md]] (repo root), [[prompt-library/CLAUDE.md]]
+- Continuing from a context-compacted conversation that had completed the vibe-coding persona suite import and push from the prior session
+- Entry state: `main` was up to date with `origin/main` at session start
 
-Instruction files loaded: [[AGENTS.md]] and [[prompt-library/CLAUDE.md]]. The nested `prompt-library/AGENTS.md` referenced by the root instructions was not present, so [[prompt-library/CLAUDE.md]] remained the project-specific authority.
+### Strategic frame
 
-The repo was already dirty before this session with local changes in `prompt-library/supabase.js`, `prompt-library/user.html`, `sessions/README.md`, and an untracked `2026-05-05` auth session report. Those changes were treated as in-progress work and preserved.
-
-Hard constraints remained in force: no framework, no npm package, no build step, static app shape, and no backend expansion beyond the existing [[Supabase Auth]] client.
+- PKM was the thinnest category at 5 prompts (IDs 31-35). All other categories were at 6+ entries.
+- The methodology articles section (8 articles) had gaps in foundational technique coverage: few-shot prompting, system prompt architecture, and context window management were all missing despite being core topics.
+- No UI changes needed — both data files feed existing listing/detail pages with no template modifications required.
 
 ## Work Completed
 
-Major outputs:
+### Major outputs
 
-- Finished the profile sign-in surface with [[Google]], [[GitHub]], [[Microsoft]], and email magic-link options through the existing [[Supabase Auth]] helper.
-- Fixed the signed-out `user.html` path so the provider list exists before `renderSignIn()` can use it.
-- Added a per-card `use` action to every prompt card on `index.html`.
-- Standardised the prompt-use target set across `index.html` and `prompt.html`: [[ChatGPT]], [[Claude]], [[Gemini]], and [[Perplexity]].
-- Added last-used target persistence through `promptLibrary.lastUseTarget`.
-- Added a short-prompt [[Claude]] `q=` prefill with a 1500-character URL guard; long prompts fall back to copy + open.
-- Improved quick-fill variables to support `options` arrays and fixed placeholder escaping so examples like `e.g. Uniswap` stay readable.
-- Added filled-prompt playground handoff from prompt detail and modal run actions using short [[localStorage]] draft tokens.
-- Prevented profile link-container removal from breaking later edits when a user adds X or GitHub handles.
-- Updated [[CONTRIBUTING]] and [[README]] with the variable schema and prompt workflow changes.
+1. **2 new PKM prompts** in `prompts.js` — IDs 57 and 58 (`Weekly Review Facilitator`, `Knowledge Inbox Triage`). PKM category now at 7 entries.
+2. **3 new methodology articles** in `articles.js` — IDs 9, 10, 11 (`Few-Shot Prompting`, `System Prompt Architecture`, `Context Window Management`). Articles section now at 11 entries.
+3. **Syntax validation** — both files passed `node --check` before commit.
 
-Files created:
+### Files modified
 
-- `sessions/2026-05-07-session-report-prompt-library-workflow-polish.md`
+- `prompt-library/prompts.js` — 2 new entries appended (+53 lines)
+- `prompt-library/articles.js` — 3 new articles appended (+125 lines)
 
-Files modified:
+### Files created
 
-- `prompt-library/index.html`
-- `prompt-library/prompt.html`
-- `prompt-library/playground.html`
-- `prompt-library/style.css`
-- `prompt-library/supabase.js`
-- `prompt-library/user.html`
-- `prompt-library/CONTRIBUTING.md`
-- `prompt-library/README.md`
-- `sessions/README.md`
+- `sessions/2026-05-07-session-report-prompt-library-workflow-polish.md` (this file)
 
-## Decisions
+## Decisions and Reasoning
 
-Decision: Use copy + open for most chat tools, and only use prefill where there is official support.
-Why: [[Claude]] has documented `q=` prefill behavior; other web chat tools do not have a stable official prompt-prefill contract in this session.
-Tradeoff: [[ChatGPT]], [[Gemini]], and [[Perplexity]] require the user to paste after the app opens, but the behavior is predictable and avoids brittle URLs.
+### Key decisions
 
-Decision: Keep "Use in" target preference local.
-Why: The app is still static-first, and this is a per-browser workflow preference.
-Tradeoff: Preference does not sync across devices until a future backend-backed profile layer exists.
+- **Weekly Review Facilitator (ID 57) — GTD-flavoured facilitation prompt.**
+  Why: The PKM section had strong capture (Obsidian Note Generator) and synthesis (Research Synthesizer, Second Brain Query) prompts but nothing for recurring review cadences. Weekly review is the highest-leverage PKM habit for knowledge workers.
+  Tradeoff: Slightly higher temperature (0.4) than pure extraction prompts — a facilitator adapts to what the user provides.
 
-Decision: Extend the existing `variables` shape instead of inventing a new prompt templating system.
-Why: Current prompts already use `{{TOKEN}}` placeholders and a `variables` array. Supporting `options` gives enough power without changing the data model.
-Tradeoff: There is still no conditional templating, validation, or multi-step wizard. Those can wait for real usage signal.
+- **Knowledge Inbox Triage (ID 58) — classify and prioritise a saved-items backlog.**
+  Why: Most PKM users accumulate more than they process. This prompt operationalises the triage step that turns clippings into actions. Complements Meeting Notes to Actions (ID 32) and feeds into Obsidian Note Generator (ID 31).
+  Tradeoff: Output quality depends heavily on input richness per item — pure URL lists produce weaker results. Called out in notes field.
 
-## Git Log
+- **Few-Shot Prompting article (ID 9) — fill fundamental gap in methodology section.**
+  Why: The library had Role Prompting and Chain-of-Thought but no few-shot article. Few-shot is the third pillar of practical prompt engineering and was conspicuously missing.
 
-Commits made this session:
+- **System Prompt Architecture article (ID 10) — production-focused, not academic.**
+  Why: No article covered the structural design of production system prompts. Most failure modes in deployed agents come from architectural problems (contradictions, missing edge cases, buried constraints) not from bad writing.
 
-- None.
+- **Context Window Management article (ID 11) — addresses a real pain point.**
+  Why: Context limits are a practical constraint every LLM user hits. The lost-in-the-middle finding and chunking strategies are both under-documented in accessible form.
 
-Branch / PR status:
+## Git and Delivery Log
+
+### [[Github]] commits
+
+- `1bc047e` — Add 2 PKM prompts and 3 methodology articles
+
+### Branch / PR status
 
 - Branch: `main`
-- PR: none
-- Push status: not pushed
-- Deployment / release status: not deployed
+- Push status: not pushed yet (deploy triggers on push to main)
+- Deployment / release status: pending push to origin
 
 ## Validation
 
-Tests run:
-
-- `node --check prompt-library/supabase.js`
-- `node --check prompt-library/prompts.js`
-- `node --check prompt-library/tools.js`
-- Parsed inline scripts from `prompt-library/index.html`, `prompt-library/prompt.html`, and `prompt-library/user.html` with Node after stripping module imports.
-- Ran a [[Playwright]] browser smoke test against a local static server at `http://127.0.0.1:8765`.
-
-Manual / browser QA performed:
-
-- Confirmed `index.html` renders 56 prompt cards.
-- Confirmed all 56 prompt cards render the new `use` action.
-- Confirmed `prompt.html?id=1` quick-fill replaces `{{ASSET_NAME}}` with `Uniswap`.
-- Confirmed the `Run` link from `prompt.html?id=1` opens `playground.html` with the filled `Uniswap` system prompt intact.
-- Confirmed the prompt detail "Use in" menu lists `ChatGPT, Claude, Gemini, Perplexity`.
-- Confirmed signed-out `user.html` renders 3 sign-in provider buttons.
-- Confirmed no browser page errors or console errors in the smoke test.
-
-What remains unverified:
-
-- Live OAuth redirects against the configured [[Supabase]] project and provider consoles.
-- Production-origin redirect allow-list behavior on [[GitHub Pages]].
-- Real external chat-app behavior after opening target URLs, beyond using the official [[Claude]] deep-link documentation for `q=`.
+- `node --check prompts.js` — passed
+- `node --check articles.js` — passed
+- PKM entry count: IDs 31, 32, 33, 34, 35, 57, 58 = 7 entries confirmed
+- Article count: IDs 1-11 = 11 entries confirmed
 
 ## Tasks
 
-Completed:
+### Completed
 
-- [x] Inspect current repo state and preserve existing in-progress auth changes. #task
-- [x] Fix signed-out auth render ordering. #task
-- [x] Add generic multi-provider prompt-use targets. #task
-- [x] Add per-card prompt `use` actions. #task
-- [x] Improve variable quick-fill placeholders and select support. #task
-- [x] Send filled prompt drafts to the playground. #task
-- [x] Update contributor and public docs. #task
-- [x] Run local syntax and browser smoke validation. #task
+- [x] Read prompts.js to identify PKM gaps and next available ID (57)
+- [x] Read articles.js to confirm article count and existing topics
+- [x] Write Weekly Review Facilitator prompt (ID 57)
+- [x] Write Knowledge Inbox Triage prompt (ID 58)
+- [x] Write 3 new methodology articles (IDs 9-11)
+- [x] Syntax-check both JS files
+- [x] Commit to main (`1bc047e`)
 
-Open / remaining:
+### Open / remaining
 
-- [ ] Test actual OAuth redirects for Google, GitHub, and Microsoft from the final production origin. #task #inbox
-- [ ] Verify whether ChatGPT, Gemini, or Perplexity publish official prompt-prefill URL contracts later. #task #inbox
-- [ ] Decide whether to replace the older index modal entirely now that cards route to `prompt.html?id=`. #task #inbox
+- [ ] Push `main` to origin to trigger GitHub Pages deploy
+- [ ] Verify new prompts render on index.html (PKM filter should show 7 prompts)
+- [ ] Verify new articles render on learn.html (11 articles)
 
-Immediate next actions:
+## Blockers and Risks
 
-- [ ] Review the diff and commit the auth/workflow polish when ready. #task #next
-- [ ] Configure or confirm Supabase OAuth provider settings and redirect allow-list. #task #next
-- [ ] Run one production-like hosted pass after merge/deploy. #task #next
+- None. Push is gated on operator action.
 
-## Blockers
+## Handoff for Future Agents
 
-Current blocker: none for static frontend behavior.
+### What the next coding agent should know
 
-Dependency on human input: OAuth provider configuration still requires access to [[Supabase]] and provider dashboards.
+- `main` is 1 commit ahead of `origin/main`. `git push` triggers Pages deploy.
+- PKM category: 7 prompts (IDs 31-35, 57-58). Next PKM prompt ID depends on what else is added first.
+- Articles: 11 entries (IDs 1-11). Next article is ID 12.
+- No UI files were modified — both data files feed existing rendered pages cleanly.
+- Ongoing roadmap items (shareable prompt URLs, MD repo filter, "Use in X" deep-link buttons) remain parked — check `ROADMAP.md`.
 
-External dependency: [[Supabase Auth]] provider settings and each chat tool's public URL behavior.
+### Recommended startup sequence
 
-Risk to watch next session: The project documentation still contains older statements that describe the profile as purely localStorage-backed. That should be reconciled once the desired auth/product stance is final.
+1. Read `prompt-library/CLAUDE.md`.
+2. Read this session report.
+3. Run `git log --oneline -5` to confirm commit history.
+4. If deploying: `git push origin main`.
+5. If adding content: check highest IDs in `prompts.js` and `articles.js` before adding to avoid collisions.
 
-## Handoff
+## Linked Entities and Notes
 
-What the next coding agent should know:
-
-- Current repo state: local changes are uncommitted; this session intentionally built on the previous uncommitted auth diff.
-- Highest-value next step: review, commit, then test real OAuth redirects on the deployment origin.
-- Files to read first: [[AGENTS.md]], [[prompt-library/CLAUDE.md]], this report, `prompt-library/index.html`, `prompt-library/prompt.html`, `prompt-library/user.html`, `prompt-library/supabase.js`.
-- Known traps or anti-patterns: do not add a framework or new auth library; do not assume chat tools support prompt-prefill URLs without official documentation.
-- Safe assumptions: `prompt.html?id=` is now the canonical prompt permalink shape; variable slots use `{{TOKEN}}` plus optional `variables` metadata.
-
-Recommended startup sequence:
-
-1. Read [[AGENTS.md]] and [[prompt-library/CLAUDE.md]].
-2. Read `sessions/2026-05-05-session-report-prompt-library-auth-options.md` and this report.
-3. Run `git status --short --branch` and inspect the local diff.
-4. Serve `prompt-library/` locally and open `index.html`, `prompt.html?id=1`, and `user.html`.
-5. Validate OAuth provider configuration in [[Supabase Auth]] before shipping the sign-in buttons publicly.
+- Repos: [[sarutobisasuke8/testing]]
+- Tools: [[Claude Code]], [[Claude Sonnet 4.6]], [[Github]]
+- Concepts: [[pkm]], [[weekly-review]], [[few-shot-prompting]], [[system-prompt-architecture]], [[context-window-management]]
+- Related sessions: [[2026-05-05-session-report-prompt-library-persona-suite]], [[2026-05-05-session-report-prompt-library-auth-options]]

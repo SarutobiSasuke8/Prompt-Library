@@ -39,6 +39,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate prompts.js
+        run: node scripts/validate-prompts.js
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

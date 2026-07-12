@@ -12,7 +12,7 @@ your dev environment correctly on day one.
 Zero dependencies. Zero build step. Opens in a browser tab.
 Works on your phone. Ships on push to `main`.
 
-[**→ Live site**](https://sarutobisasuke8.github.io/testing/)
+[**→ Live site**](https://sarutobisasuke8.github.io/Prompt-Library/)
 
 </div>
 

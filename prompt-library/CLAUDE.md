@@ -11,10 +11,10 @@ A static, dark-themed, mobile-first web app that presents a curated library of
 production-ready system prompts. Users search, filter, read, and copy. That's
 the whole product.
 
-It lives in `prompt-library/` inside the `sarutobisasuke8/testing` repo because
-the repo is currently shared with unrelated tooling (Teneo CLI). If the project
-ever moves to its own dedicated repo (`prompt-library`), the folder becomes the
-repo root and `deploy.yml` needs one path change — see the note inside it.
+It lives in `prompt-library/` inside the `SarutobiSasuke8/Prompt-Library` repo,
+which is currently shared with unrelated tooling (Teneo CLI). If the project ever
+moves to a repo where it is the only thing, the folder becomes the repo root and
+`deploy.yml` needs one path change — see the note inside it.
 
 ---
 
@@ -419,12 +419,12 @@ workflow files at `<repo-root>/.github/workflows/`.
 
 ### URL
 
-While living inside the `testing` repo, the deploy URL is:
-`https://sarutobisasuke8.github.io/testing/`
+The repo is `SarutobiSasuke8/Prompt-Library`, so the deploy URL is:
+`https://sarutobisasuke8.github.io/Prompt-Library/`
 
-When moved to a dedicated `prompt-library` repo, change `path: ./prompt-library`
-to `path: .` in `deploy.yml`. URL becomes
-`https://sarutobisasuke8.github.io/prompt-library/`.
+If the app is ever moved to a repo where it sits at the root, change
+`path: ./prompt-library` to `path: .` in `deploy.yml`. The URL then follows the
+new repo name (`https://sarutobisasuke8.github.io/<repo>/`).
 
 ---
 

@@ -259,7 +259,9 @@
       const $statAdv       = document.getElementById("stat-adv");
 
       const $backdrop       = document.getElementById("modal-backdrop");
+      const $modal          = document.getElementById("modal");
       const $modalClose     = document.getElementById("modal-close");
+      let   modalTrigger    = null; // element to restore focus to on close
       const $modalMeta      = document.getElementById("modal-meta");
       const $modalTitle     = document.getElementById("modal-title");
       const $modalPurpose   = document.getElementById("modal-purpose");
@@ -744,8 +746,12 @@
           if (e.target === $backdrop) closeModal();
         });
         document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && !$backdrop.classList.contains("hidden")) closeModal();
-          if (e.key === "/" && document.activeElement !== $search) {
+          if (!$backdrop.classList.contains("hidden")) {
+            if (e.key === "Escape") { closeModal(); return; }
+            trapModalFocus(e);
+          }
+          if (e.key === "/" && document.activeElement !== $search &&
+              $backdrop.classList.contains("hidden")) {
             e.preventDefault();
             $search.focus();
           }
@@ -889,9 +895,30 @@
         renderRelated(p);
 
         $backdrop.dataset.promptId = p.id;
+        modalTrigger = document.activeElement;
         $backdrop.classList.remove("hidden");
         document.body.style.overflow = "hidden";
         $modalClose.focus();
+      }
+
+      // Keep keyboard focus inside the open modal (focus trap). Tabbing past
+      // the last focusable element wraps to the first, and vice versa.
+      function trapModalFocus(e) {
+        if (e.key !== "Tab") return;
+        const focusable = $modal.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const visible = Array.prototype.filter.call(focusable, (el) => el.offsetParent !== null);
+        if (!visible.length) return;
+        const first = visible[0];
+        const last = visible[visible.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
 
       // ---- local collections (localStorage) ----
@@ -1163,6 +1190,10 @@
       function closeModal() {
         $backdrop.classList.add("hidden");
         document.body.style.overflow = "";
+        if (modalTrigger && typeof modalTrigger.focus === "function") {
+          modalTrigger.focus();
+        }
+        modalTrigger = null;
       }
 
       // ============================================================

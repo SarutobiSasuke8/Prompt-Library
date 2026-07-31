@@ -72,7 +72,11 @@
           '<span class="tilde">~</span> ' +
           '<span class="sub" id="nav-sub">' + esc(sub) + '</span>' +
         '</a>' +
-        '<nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">' +
+        // No inline `display` here on purpose: style.css owns it, hiding the
+        // desktop nav below 860px in favour of the burger drawer. An inline
+        // display:flex would outrank the stylesheet and leak the nav onto
+        // mobile, pushing the header wider than the viewport.
+        '<nav style="align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">' +
           desktopNav +
         '</nav>' +
         (slot ? slot : "") +

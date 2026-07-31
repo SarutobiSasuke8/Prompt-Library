@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; writing on prompt engineering and shipping with AI</title>
+  <meta name="description" content="Writing on prompt engineering, LLM reliability, and shipping with AI — plus a curated library of production-ready system prompts, tools, agents, and docs." />
+
+  <!-- Social / share -->
+  <meta property="og:title" content="prompt-library" />
+  <meta property="og:description" content="Writing on prompt engineering, LLM reliability, and shipping with AI." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://sarutobisasuke8.github.io/Prompt-Library/screenshot.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sarutobisasuke8.github.io/Prompt-Library/screenshot.png" />
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- theme init: runs before paint to prevent flash -->
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+</head>
+<body>
+
+  <!-- ==========================================================
+       Header — sticky, logo + live count of filtered posts
+       ========================================================== -->
+  <div id="site-nav" data-active="blog" data-sub="blog">
+    <div class="count-pill">
+      <span class="num" id="count-num">0</span>
+      <span class="label" id="count-label">posts</span>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       Hero
+       ========================================================== -->
+  <section class="hero">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>notes from production</span>
+      <span class="sep">/</span>
+      <span>no hype</span>
+      <span class="sep">/</span>
+      <span>stated limits</span>
+    </div>
+    <h1>Writing on prompt engineering<br/>and shipping with <span class="accent">AI</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">What actually breaks when prompts meet production traffic, and what to do about it. Backed by a curated library of system prompts, tools, and reference docs.</p>
+    <div class="statline" id="statline">
+      <span><span class="k">posts</span> <span class="v"><strong id="stat-posts">0</strong></span></span>
+      <span><span class="k">topics</span> <span class="v"><strong id="stat-tags">0</strong></span></span>
+      <span><span class="k">latest</span> <span class="v"><strong id="stat-latest">—</strong></span></span>
+      <span class="kbd-hint">press <span class="kbd">/</span> to search</span>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Controls — search + tag filter.
+       Tag chips are generated from POSTS, so a new tag in
+       posts.js creates its filter chip with no UI changes.
+       ========================================================== -->
+  <section class="controls" aria-label="Search and filter posts">
+    <div class="search-wrap">
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="search posts by title, excerpt, tag…"
+        aria-label="Search posts"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="filter-row" id="tag-row" role="group" aria-label="Filter by topic">
+      <span class="label">topic</span>
+      <!-- chips injected by JS -->
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Featured post — hidden while a search/filter is active
+       ========================================================== -->
+  <section class="blog-section hidden" id="featured-section" style="padding-bottom:28px;">
+    <div class="blog-section-head">
+      <span class="label">featured</span>
+      <span class="rule"></span>
+    </div>
+    <div id="featured-slot"></div>
+  </section>
+
+  <!-- ==========================================================
+       Post feed — newest first
+       ========================================================== -->
+  <main>
+    <section class="blog-section" style="padding-bottom:48px;">
+      <div class="blog-section-head">
+        <span class="label" id="feed-label">latest</span>
+        <span class="rule"></span>
+      </div>
+      <div class="post-grid" id="post-grid" aria-live="polite"></div>
+      <div class="empty hidden" id="empty">
+        <strong>No posts match</strong>
+        Try clearing the topic filter or searching something shorter.
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================
+       Explore — the rest of the site, reachable from the front page.
+       Deliberately static: pulling live counts here would mean
+       loading ~400KB of data files on the front page for six numbers.
+       ========================================================== -->
+  <section class="blog-section" id="explore-section" style="padding-bottom:64px;">
+    <div class="blog-section-head">
+      <span class="label">explore the library</span>
+      <span class="rule"></span>
+    </div>
+    <div class="explore-grid">
+      <a class="explore-tile" href="library.html">
+        <span class="name">prompts <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">The curated library of production-ready system prompts, searchable by category and complexity.</span>
+      </a>
+      <a class="explore-tile" href="mdrepo.html">
+        <span class="name">md repo <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">Reference markdown docs — checklists, specs, and working notes you can lift into your own repo.</span>
+      </a>
+      <a class="explore-tile" href="tools.html">
+        <span class="name">tools <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">A directory of AI tools worth knowing about, with honest notes on what each is actually good for.</span>
+      </a>
+      <a class="explore-tile" href="agents.html">
+        <span class="name">agents <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">Agent patterns and architectures, with the prompts that make each one work.</span>
+      </a>
+      <a class="explore-tile" href="collections.html">
+        <span class="name">collections <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">Curated packs of prompts grouped around a single job, so you can start from a set rather than a search.</span>
+      </a>
+      <a class="explore-tile" href="learn.html">
+        <span class="name">articles <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">Evergreen methodology on prompting technique — the fundamentals behind the posts above.</span>
+      </a>
+      <a class="explore-tile" href="playground.html">
+        <span class="name">playground <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">Compose and test a prompt in the browser before you commit it to anything.</span>
+      </a>
+      <a class="explore-tile" href="about.html">
+        <span class="name">about <span class="arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="desc">What this project is, the quality bar content has to clear, and how it is built.</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Footer
+       ========================================================== -->
+  <div id="site-footer"></div>
+
+  <!-- ==========================================================
+       Data source — kept deliberately separate from UI code
+       ========================================================== -->
+  <script src="posts.js"></script>
+  <script src="blocks.js"></script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script type="module" src="auth-nav.js"></script>
+
+  <!-- ==========================================================
+       App — search, tag filter, render feed
+       ========================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      const esc = window.PL_BLOCKS.escapeHtml;
+
+      const $grid     = document.getElementById("post-grid");
+      const $empty    = document.getElementById("empty");
+      const $search   = document.getElementById("search");
+      const $tagRow   = document.getElementById("tag-row");
+      const $countNum = document.getElementById("count-num");
+      const $countLbl = document.getElementById("count-label");
+      const $featSec  = document.getElementById("featured-section");
+      const $featSlot = document.getElementById("featured-slot");
+      const $feedLbl  = document.getElementById("feed-label");
+
+      if (typeof POSTS === "undefined" || !POSTS.length) {
+        $empty.classList.remove("hidden");
+        return;
+      }
+
+      // Canonical order: newest first.
+      const ordered = POSTS.slice().sort((a, b) => b.date.localeCompare(a.date));
+      const featured = ordered.find((p) => p.featured) || null;
+
+      // ---- state, seeded from ?tag= so post tag links deep-link in ----
+      const initialTag = new URLSearchParams(window.location.search).get("tag");
+      let activeTag = "all";
+      let query     = "";
+
+      // ---- tag chips, generated from the data ----
+      const tagCounts = new Map();
+      ordered.forEach((p) => (p.tags || []).forEach((t) => {
+        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+      }));
+      const tags = [...tagCounts.keys()].sort();
+      if (initialTag && tagCounts.has(initialTag)) activeTag = initialTag;
+
+      const chipHtml = ['<button class="chip' + (activeTag === "all" ? " active" : "") +
+        '" data-tag="all">all <span class="count">' + ordered.length + "</span></button>"];
+      tags.forEach((t) => {
+        chipHtml.push('<button class="chip' + (activeTag === t ? " active" : "") +
+          '" data-tag="' + esc(t) + '">' + esc(t) +
+          ' <span class="count">' + tagCounts.get(t) + "</span></button>");
+      });
+      $tagRow.insertAdjacentHTML("beforeend", chipHtml.join(""));
+
+      $tagRow.addEventListener("click", (e) => {
+        const chip = e.target.closest(".chip");
+        if (!chip) return;
+        activeTag = chip.getAttribute("data-tag");
+        $tagRow.querySelectorAll(".chip").forEach((c) => {
+          c.classList.toggle("active", c === chip);
+        });
+        render();
+      });
+
+      // ---- search ----
+      $search.addEventListener("input", () => {
+        query = $search.value.trim().toLowerCase();
+        render();
+      });
+
+      // `/` focuses search, matching the library page's shortcut.
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "/" && document.activeElement !== $search) {
+          e.preventDefault();
+          $search.focus();
+        }
+        if (e.key === "Escape" && document.activeElement === $search) {
+          $search.value = ""; query = ""; render(); $search.blur();
+        }
+      });
+
+      // ---- helpers ----
+      function fmtDate(iso) {
+        // Parse as UTC so the displayed day doesn't shift by timezone.
+        return new Date(iso + "T00:00:00Z").toLocaleDateString(undefined, {
+          year: "numeric", month: "short", day: "numeric", timeZone: "UTC"
+        });
+      }
+
+      function matches(p) {
+        if (activeTag !== "all" && !(p.tags || []).includes(activeTag)) return false;
+        if (!query) return true;
+        const hay = [p.title, p.excerpt, (p.tags || []).join(" "), p.author]
+          .join(" ").toLowerCase();
+        return hay.includes(query);
+      }
+
+      function metaRow(p, withFlag) {
+        return '<div class="post-meta">' +
+          (withFlag ? '<span class="featured-flag">featured</span><span class="dot-sep">&middot;</span>' : "") +
+          '<time datetime="' + esc(p.date) + '">' + esc(fmtDate(p.date)) + "</time>" +
+          '<span class="dot-sep">&middot;</span>' +
+          "<span>" + esc(p.readTime) + " read</span>" +
+        "</div>";
+      }
+
+      function tagPills(p) {
+        return '<div class="post-card-foot">' +
+          (p.tags || []).map((t) => '<span class="tag">#' + esc(t) + "</span>").join("") +
+        "</div>";
+      }
+
+      function featuredCard(p) {
+        return '<a class="featured-card" href="post.html?id=' + p.id + '">' +
+          metaRow(p, true) +
+          "<h2>" + esc(p.title) + "</h2>" +
+          '<p class="excerpt">' + esc(p.excerpt) + "</p>" +
+          tagPills(p) +
+        "</a>";
+      }
+
+      function postCard(p) {
+        return '<a class="post-card" href="post.html?id=' + p.id + '">' +
+          metaRow(p, false) +
+          "<h3>" + esc(p.title) + "</h3>" +
+          '<p class="excerpt">' + esc(p.excerpt) + "</p>" +
+          tagPills(p) +
+        "</a>";
+      }
+
+      // ---- render ----
+      function render() {
+        const filtering = activeTag !== "all" || query !== "";
+        const visible   = ordered.filter(matches);
+
+        // The featured post gets its own slot only on the unfiltered view;
+        // once you're filtering, it belongs in the feed like anything else.
+        const showFeatured = featured && !filtering;
+        const feed = showFeatured
+          ? visible.filter((p) => p.id !== featured.id)
+          : visible;
+
+        $featSec.classList.toggle("hidden", !showFeatured);
+        $featSlot.innerHTML = showFeatured ? featuredCard(featured) : "";
+
+        $grid.innerHTML = feed.map(postCard).join("");
+        $empty.classList.toggle("hidden", visible.length > 0);
+        $feedLbl.textContent = filtering ? "results" : "latest";
+
+        $countNum.textContent = visible.length;
+        $countLbl.textContent = visible.length === 1 ? "post" : "posts";
+      }
+
+      // ---- hero stats ----
+      document.getElementById("stat-posts").textContent = ordered.length;
+      document.getElementById("stat-tags").textContent  = tags.length;
+      document.getElementById("stat-latest").textContent = fmtDate(ordered[0].date);
+
+      render();
+    })();
+  </script>
+
+</body>
+</html>

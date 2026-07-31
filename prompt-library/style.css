@@ -1084,6 +1084,202 @@ a:hover { text-decoration: underline; }
 }
 
 /* ==========================================================
+   Blog front page (index.html)
+   ========================================================== */
+.blog-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 18px 40px;
+}
+.blog-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.blog-section-head .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+.blog-section-head .rule { flex: 1; height: 1px; background: var(--border); }
+
+/* ---- featured post ---- */
+.featured-card {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 26px 22px 22px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.featured-card:hover,
+.featured-card:focus-visible {
+  background: var(--bg-2);
+  border-color: var(--accent-edge);
+  border-left-color: var(--accent);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+.featured-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.featured-card h2 {
+  margin: 10px 0 10px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+  transition: color 0.15s;
+}
+.featured-card:hover h2 { color: var(--accent); }
+@media (min-width: 720px) { .featured-card h2 { font-size: 28px; } }
+.featured-card .excerpt {
+  margin: 0 0 14px;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+/* ---- post cards ---- */
+.post-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 640px)  { .post-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .post-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.post-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 20px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.post-card::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.18s ease;
+}
+.post-card:hover,
+.post-card:focus-visible {
+  background: var(--bg-2);
+  border-color: var(--accent-edge);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+.post-card:hover::before,
+.post-card:focus-visible::before { transform: scaleY(1); }
+.post-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.post-card h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  transition: color 0.15s;
+}
+.post-card:hover h3 { color: var(--accent); }
+.post-card .excerpt {
+  margin: 0;
+  flex: 1;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* shared meta row for featured + post cards */
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.post-meta .dot-sep { color: var(--border-2); }
+.post-meta .featured-flag {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+}
+.post-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+/* ---- explore tiles: the rest of the site, from the front page ---- */
+.explore-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 560px)  { .explore-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px)  { .explore-grid { grid-template-columns: repeat(3, 1fr); } }
+.explore-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.explore-tile:hover,
+.explore-tile:focus-visible {
+  border-color: var(--accent-edge);
+  background: var(--bg-2);
+  text-decoration: none;
+}
+.explore-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.explore-tile .name {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: color 0.15s;
+}
+.explore-tile:hover .name { color: var(--accent); }
+.explore-tile .name .arrow { color: var(--text-faint); transition: color 0.15s, transform 0.15s; }
+.explore-tile:hover .name .arrow { color: var(--accent); transform: translateX(2px); }
+.explore-tile .desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ==========================================================
    Long-form content — shared by article.html and post.html.
    Moved here out of article.html when post.html started needing
    the same reading styles. Class names are kept as-is so the

@@ -1083,6 +1083,216 @@ a:hover { text-decoration: underline; }
   padding: 16px 0; text-align: center;
 }
 
+/* ==========================================================
+   Long-form content — shared by article.html and post.html.
+   Moved here out of article.html when post.html started needing
+   the same reading styles. Class names are kept as-is so the
+   existing article markup is unchanged.
+   ========================================================== */
+.article-wrap {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 0 18px 80px;
+}
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.article-meta .read-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.article-wrap h1 {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 720px) { .article-wrap h1 { font-size: 36px; } }
+.article-wrap .summary {
+  font-size: 17px;
+  color: var(--text-dim);
+  margin: 0 0 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px dashed var(--border-2);
+}
+.article-body { line-height: 1.75; font-size: 15.5px; }
+.article-body p {
+  margin: 0 0 18px;
+  color: var(--text);
+}
+.article-body h3 {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin: 36px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.article-body h3::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 1px;
+  background: var(--accent);
+}
+.article-body ul {
+  margin: 0 0 18px;
+  padding-left: 0;
+  list-style: none;
+}
+.article-body ul li {
+  color: var(--text);
+  padding: 6px 0 6px 20px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+.article-body ul li:last-child { border-bottom: 0; }
+.article-body ul li::before {
+  content: "\203A";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.example-block {
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 0 0 18px;
+  position: relative;
+}
+.example-block .example-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  padding: 8px 14px 0;
+}
+.example-block .ex-copy {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-edge);
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  line-height: 1;
+}
+.example-block .ex-copy:hover { background: var(--accent); color: var(--bg); }
+.example-block .ex-copy.copied { background: var(--accent); color: var(--bg); }
+.example-block pre {
+  margin: 0;
+  padding: 10px 14px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.65;
+  color: #d0e8d0;
+}
+.callout {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-edge);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 0 0 18px;
+  font-size: 14.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.article-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+.article-nav a {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.article-nav a:hover { color: var(--accent); }
+.reference-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 0 0 18px;
+}
+.reference-block .ref-icon {
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.reference-block .ref-body { flex: 1; min-width: 0; }
+.reference-block .ref-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+.reference-block .ref-title {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.reference-block a.ref-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+.reference-block a.ref-link:hover { text-decoration: underline; }
+
+/* Post-specific meta: publish date + revision marker */
+.post-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.post-updated {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
 /* ---- reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

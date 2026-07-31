@@ -702,6 +702,16 @@
             </div>
           </div>
 
+          <!-- Saved posts -->
+          <div class="bm-section">
+            <div class="bm-section-head">saved posts</div>
+            <div class="grid bm-section-grid" id="saved-posts-grid"></div>
+            <div class="panel-empty hidden" id="saved-posts-empty">
+              <strong>No saved posts</strong>
+              Bookmark any post on the <a href="index.html" style="color:var(--accent);">blog</a> to see it here.
+            </div>
+          </div>
+
           <!-- Saved articles -->
           <div class="bm-section">
             <div class="bm-section-head">saved articles</div>
@@ -860,6 +870,7 @@
   <div class="toast" id="toast">Copied</div>
 
   <script src="prompts.js"></script>
+  <script src="posts.js"></script>
   <script src="articles.js"></script>
   <script src="mds.js"></script>
   <script src="agents.js"></script>
@@ -1358,6 +1369,7 @@
 
         const sections = [
           { grid: "bookmarks-grid",       empty: "bookmarks-empty",       render: renderSavedPrompts  },
+          { grid: "saved-posts-grid",     empty: "saved-posts-empty",     render: renderSavedPosts    },
           { grid: "saved-articles-grid",  empty: "saved-articles-empty",  render: renderSavedArticles },
           { grid: "saved-agents-grid",    empty: "saved-agents-empty",    render: renderSavedAgents   },
           { grid: "saved-docs-grid",      empty: "saved-docs-empty",      render: renderSavedDocs     },
@@ -1400,6 +1412,19 @@
         if (!items.length) return;
         const frag = document.createDocumentFragment();
         items.forEach((p) => frag.appendChild(buildPromptCard(p)));
+        $grid.appendChild(frag);
+      }
+
+      function renderSavedPosts($grid, $empty) {
+        $grid.innerHTML = "";
+        const ids = window.PL_BOOKMARKS ? new Set(window.PL_BOOKMARKS.load().post || []) : new Set();
+        const items = (typeof POSTS !== "undefined" ? POSTS : [])
+          .filter((p) => ids.has(p.id))
+          .sort((a, b) => b.date.localeCompare(a.date));
+        $empty.classList.toggle("hidden", items.length > 0);
+        if (!items.length) return;
+        const frag = document.createDocumentFragment();
+        items.forEach((p) => frag.appendChild(buildPostCard(p)));
         $grid.appendChild(frag);
       }
 
@@ -1710,6 +1735,24 @@
         });
 
         return card;
+      }
+
+      function buildPostCard(p) {
+        const el = document.createElement("a");
+        el.className = "article-card";
+        el.href = "post.html?id=" + p.id;
+        const tagsHtml = (p.tags || []).map((t) => '<span class="tag">#' + escapeHtml(t) + "</span>").join("");
+        // Date parsed as UTC so the shown day doesn't shift by timezone.
+        const when = new Date(p.date + "T00:00:00Z").toLocaleDateString(undefined, {
+          year: "numeric", month: "short", day: "numeric", timeZone: "UTC"
+        });
+        el.innerHTML =
+          '<div class="card-head"><span class="card-cat">' + escapeHtml(when) + "</span>" +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">' + escapeHtml(p.readTime) + " read</span></div>" +
+          "<h3>" + escapeHtml(p.title) + "</h3>" +
+          "<p>" + escapeHtml(p.excerpt) + "</p>" +
+          '<div class="article-card-foot">' + tagsHtml + '<span class="read-cta">read &rarr;</span></div>';
+        return el;
       }
 
       function buildArticleCard(a) {

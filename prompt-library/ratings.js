@@ -20,7 +20,7 @@
 //   </div>
 //
 // Then call: PL_RATINGS.mount({ type: "prompt", id: 123 });
-// type must match the item taxonomy in CLAUDE.md: prompt | article | tool | agent | doc
+// type must match the item taxonomy in CLAUDE.md: prompt | post | article | tool | agent | doc
 
 (function () {
   "use strict";

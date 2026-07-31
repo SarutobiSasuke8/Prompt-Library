@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Blog front page -->
   <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/</loc><priority>1.0</priority></url>
   <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/index.html</loc><priority>1.0</priority></url>
+
+  <!-- Posts — add a line here when a post is added to posts.js -->
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/post.html?id=1</loc><priority>0.8</priority></url>
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/post.html?id=2</loc><priority>0.8</priority></url>
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/post.html?id=3</loc><priority>0.8</priority></url>
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/post.html?id=4</loc><priority>0.8</priority></url>
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/post.html?id=5</loc><priority>0.8</priority></url>
+
+  <!-- Library and other surfaces -->
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/library.html</loc><priority>0.9</priority></url>
   <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/learn.html</loc><priority>0.9</priority></url>
+  <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/mdrepo.html</loc><priority>0.8</priority></url>
   <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/collections.html</loc><priority>0.8</priority></url>
   <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/tools.html</loc><priority>0.8</priority></url>
   <url><loc>https://sarutobisasuke8.github.io/Prompt-Library/agents.html</loc><priority>0.8</priority></url>

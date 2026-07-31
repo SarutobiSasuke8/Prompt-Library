@@ -33,15 +33,22 @@ If the user is working on the web app (which is almost always the case),
 
 ## Active branch
 
-Development is on **`claude/prompt-library-app-LQzGJ`**. The GitHub Pages
-deploy workflow triggers on pushes to `main`, so this branch needs to be
-merged before the site goes live.
+Blog-variant development is on **`claude/maine-ai-blog-variant-02v4ej`**.
+The branch name contains a typo — "maine" means `main`, not the US state.
+There is no geographic or localisation requirement in this work.
+
+The GitHub Pages deploy workflow triggers on pushes to `main`, so this
+branch needs to be merged before the site goes live.
 
 ## Quick orientation
 
-- `prompt-library/index.html`  — app shell + runtime JS
-- `prompt-library/prompts.js`  — data (CATEGORIES + PROMPTS)
-- `prompt-library/style.css`   — dark theme, mobile-first
+- `prompt-library/index.html`   — BLOG front page (post feed + explore tiles)
+- `prompt-library/post.html`    — single post view
+- `prompt-library/posts.js`     — data (POSTS) — dated blog content
+- `prompt-library/library.html` — the prompt library grid (was `index.html`)
+- `prompt-library/prompts.js`   — data (CATEGORIES + PROMPTS)
+- `prompt-library/blocks.js`    — shared body-block renderer (posts + articles)
+- `prompt-library/style.css`    — dark theme, mobile-first
 - `prompt-library/add-prompt.html` — local capture utility (NOT linked from site)
 - `prompt-library/README.md`   — public project doc
 - `prompt-library/CONTRIBUTING.md` — schema + quality bar + PR flow
@@ -51,7 +58,10 @@ merged before the site goes live.
 ## Current state at a glance
 
 - Shipping on `main` via GitHub Pages.
-- 54 prompts across all 9 categories. Launch content target met.
+- **The blog is the front page.** `index.html` is the post feed; the prompt
+  library lives at `library.html`. Every other surface is unchanged and is
+  reachable from the blog's nav and its "explore the library" section.
+- 58 prompts across all 9 categories, plus 5 blog posts. Launch target met.
 - Full v1 surface: prompts / articles / tools / agents / md repo / user
   profile, with standardised bookmarks and localStorage-backed ratings
   + comments on every detail page. Backend wire-up is parked in

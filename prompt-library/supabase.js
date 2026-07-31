@@ -1,7 +1,7 @@
 // =========================================================================
 // supabase.js — client init + auth/data helpers for prompt-library v2
 //
-// Loaded as a <script type="module"> from index.html. Exposes window.PL
+// Loaded as a <script type="module"> from user.html. Exposes window.PL
 // so existing inline scripts can call into it without a refactor.
 //
 // SECURITY: the anon key below is *public* by design. All access control
@@ -211,7 +211,7 @@ export async function rejectSubmission(id, note) {
   }).eq('id', id);
 }
 
-// Expose on window so non-module inline scripts in index.html can use it
+// Expose on window so non-module inline scripts in user.html can use it
 window.PL = {
   sb, onAuth, getUser, getProfile,
   signInWithProvider, signInWithGitHub, signInWithEmail, signOut,

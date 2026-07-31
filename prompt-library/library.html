@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; production-ready prompts for AI builders</title>
+  <meta name="description" content="A curated, searchable library of production-ready prompts for building with AI — across web3, agents, dev, business, marketing, and more." />
+
+  <!-- Social / share -->
+  <meta property="og:title" content="prompt-library" />
+  <meta property="og:description" content="A curated, searchable library of production-ready prompts for building with AI." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://sarutobisasuke8.github.io/Prompt-Library/screenshot.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sarutobisasuke8.github.io/Prompt-Library/screenshot.png" />
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- theme init: runs before paint to prevent flash -->
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+</head>
+<body>
+
+  <!-- ==========================================================
+       Header — sticky, logo + live count
+       ========================================================== -->
+  <div id="site-nav" data-active="library" data-sub="curated">
+    <div class="count-pill">
+      <span class="num" id="count-num">0</span>
+      <span class="label" id="count-label">prompts</span>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       Hero
+       ========================================================== -->
+  <section class="hero">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>v1 &middot; static build</span>
+      <span class="sep">/</span>
+      <span>zero dependencies</span>
+      <span class="sep">/</span>
+      <span>copy, paste, ship</span>
+    </div>
+    <h1>Production-ready prompts<br/>for people building with <span class="accent">AI</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">A curated, searchable library of system prompts battle-tested across real workflows. No fluff, no hype &mdash; just the prompt text and enough context to run it confidently.</p>
+    <div class="statline" id="statline">
+      <span><span class="k">total</span> <span class="v"><strong id="stat-total">0</strong></span></span>
+      <span><span class="k">categories</span> <span class="v"><strong id="stat-cats">0</strong></span></span>
+      <span><span class="k">beginner</span> <span class="v"><strong id="stat-beg">0</strong></span></span>
+      <span><span class="k">intermediate</span> <span class="v"><strong id="stat-int">0</strong></span></span>
+      <span><span class="k">advanced</span> <span class="v"><strong id="stat-adv">0</strong></span></span>
+      <span class="kbd-hint">press <span class="kbd">/</span> to search &middot; <span class="kbd">esc</span> to close</span>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Controls — search + category + complexity filters
+       Category chips are rendered dynamically from CATEGORIES,
+       so adding a new category in prompts.js auto-creates its
+       filter button with no UI changes.
+       ========================================================== -->
+  <section class="controls" aria-label="Search and filter">
+    <div class="search-wrap">
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="search title, purpose, tags…"
+        aria-label="Search prompts"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="filter-row" id="category-row" role="group" aria-label="Filter by category">
+      <span class="label">category</span>
+      <!-- chips injected by JS -->
+    </div>
+
+    <div class="filter-row" id="complexity-row" role="group" aria-label="Filter by complexity">
+      <span class="label">complexity</span>
+      <button class="chip active" data-complexity="all">all</button>
+      <button class="chip" data-complexity="beginner">beginner</button>
+      <button class="chip" data-complexity="intermediate">intermediate</button>
+      <button class="chip" data-complexity="advanced">advanced</button>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Trending — top 3 most-copied prompts
+       ========================================================== -->
+  <section id="trending-section" class="hidden" style="padding:0 18px 28px; max-width:1200px; margin:0 auto;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <span style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-faint);">trending</span>
+      <span style="flex:1; height:1px; background:var(--border);"></span>
+    </div>
+    <div id="trending-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px;"></div>
+  </section>
+
+  <!-- ==========================================================
+       Card grid — cards injected by JS
+       ========================================================== -->
+  <main>
+    <div class="grid" id="grid" aria-live="polite"></div>
+    <div class="empty hidden" id="empty">
+      <strong>No prompts match</strong>
+      Try clearing a filter or searching something shorter.
+    </div>
+  </main>
+
+  <!-- ==========================================================
+       Recently viewed — up to 6 prompts you last opened
+       ========================================================== -->
+  <section id="recent-section" class="hidden" style="padding:24px 18px 40px; max-width:1200px; margin:0 auto;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <span style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-faint);">recently viewed</span>
+      <span style="flex:1; height:1px; background:var(--border);"></span>
+      <button id="recent-clear" type="button" style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); background:none; border:none; cursor:pointer; padding:0;">clear</button>
+    </div>
+    <div id="recent-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px;"></div>
+  </section>
+
+  <!-- ==========================================================
+       Modal — full prompt view, one-click copy
+       ========================================================== -->
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <article class="modal" id="modal">
+      <header class="modal-head">
+        <div>
+          <div class="meta" id="modal-meta"></div>
+          <h2 id="modal-title"></h2>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="purpose" id="modal-purpose"></p>
+
+        <h4>System prompt</h4>
+        <div class="prompt-block">
+          <div class="prompt-toolbar">
+            <div id="use-in-wrap" style="position:relative;">
+              <button class="copy-btn" id="use-in-btn" type="button" style="background:var(--bg-3); border:1px solid var(--border-2); color:var(--text-dim);">use in ▾</button>
+              <div id="use-in-menu" class="hidden" style="position:absolute; right:0; top:calc(100% + 4px); background:var(--bg-1); border:1px solid var(--border-2); border-radius:var(--radius); min-width:140px; z-index:10; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
+                <a href="#" data-target="chatgpt" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">ChatGPT</a>
+                <a href="#" data-target="claude" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">Claude</a>
+                <a href="#" data-target="gemini" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);">Gemini</a>
+                <a href="#" data-target="perplexity" style="padding:8px 12px; font-family:var(--mono); font-size:12px; color:var(--text); text-decoration:none;">Perplexity</a>
+              </div>
+            </div>
+            <a class="copy-btn" id="playground-btn" href="#" target="_blank" rel="noopener" style="background:var(--bg-3); color:var(--accent); border:1px solid var(--accent-edge); text-decoration:none;">▶ run</a>
+            <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          </div>
+          <pre id="modal-prompt"></pre>
+        </div>
+        <div id="modal-vars" class="hidden"></div>
+
+        <h4>Details</h4>
+        <dl class="meta-grid" id="modal-details"></dl>
+
+        <div id="modal-chaining-wrap" class="hidden">
+          <h4>Chaining</h4>
+          <p id="modal-chaining"></p>
+        </div>
+
+        <div id="modal-notes-wrap" class="hidden">
+          <h4>Notes</h4>
+          <p id="modal-notes"></p>
+        </div>
+
+        <!-- Save to a local collection (localStorage, no account) -->
+        <div id="modal-collections" style="margin-top:20px; padding-top:14px; border-top:1px solid var(--border);">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint);">my collections</span>
+            <div id="modal-collections-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+            <button id="new-collection-btn" type="button" style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); background:none; border:1px dashed var(--border-2); padding:4px 10px; border-radius:var(--radius); cursor:pointer;">+ new</button>
+          </div>
+        </div>
+
+        <!-- Ratings + copy count -->
+        <div id="modal-social" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+          <div>
+            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">rating</div>
+            <div id="modal-stars" style="display:flex; gap:4px; align-items:center;"></div>
+            <div id="modal-rating-label" style="font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:4px;"></div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">times copied</div>
+            <div id="modal-copy-count" style="font-family:var(--mono); font-size:22px; font-weight:600; color:var(--accent); line-height:1;"></div>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div id="modal-comments-wrap" style="margin-top:20px;">
+          <h4>Comments</h4>
+          <div id="modal-comments-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;"></div>
+          <div style="display:flex; gap:8px;">
+            <input id="comment-input" type="text" placeholder="Add a comment…" maxlength="300" style="flex:1; background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--radius); color:var(--text); font-family:var(--mono); font-size:13px; padding:9px 12px; outline:none; transition:border-color 0.15s;" />
+            <button id="comment-submit" type="button" style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--bg); background:var(--accent); border:none; padding:9px 16px; border-radius:var(--radius); cursor:pointer; transition:background 0.12s; white-space:nowrap;">post</button>
+          </div>
+        </div>
+
+        <!-- Related prompts -->
+        <div id="modal-related" style="margin-top:24px; padding-top:18px; border-top:1px solid var(--border);"></div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ==========================================================
+       Footer
+       ========================================================== -->
+  <div id="site-footer">
+    <a href="#" id="download-json">download json</a>
+    <a href="#" id="download-csv">download csv</a>
+  </div>
+
+  <!-- toast for copy confirmation -->
+  <div class="toast" id="toast">Copied</div>
+
+  <!-- ==========================================================
+       Data source — kept deliberately separate from UI code
+       ========================================================== -->
+  <script src="prompts.js"></script>
+  <script src="bookmarks.js"></script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script type="module" src="auth-nav.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+
+  <!-- ==========================================================
+       App — search, filter, render, modal
+       ========================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      const state = {
+        query: "",
+        category: "all",
+        complexity: "all"
+      };
+
+      const $grid          = document.getElementById("grid");
+      const $empty         = document.getElementById("empty");
+      const $search        = document.getElementById("search");
+      const $categoryRow   = document.getElementById("category-row");
+      const $complexityRow = document.getElementById("complexity-row");
+      const $countNum      = document.getElementById("count-num");
+      const $countLabel    = document.getElementById("count-label");
+
+      const $statTotal     = document.getElementById("stat-total");
+      const $statCats      = document.getElementById("stat-cats");
+      const $statBeg       = document.getElementById("stat-beg");
+      const $statInt       = document.getElementById("stat-int");
+      const $statAdv       = document.getElementById("stat-adv");
+
+      const $backdrop       = document.getElementById("modal-backdrop");
+      const $modal          = document.getElementById("modal");
+      const $modalClose     = document.getElementById("modal-close");
+      let   modalTrigger    = null; // element to restore focus to on close
+      const $modalMeta      = document.getElementById("modal-meta");
+      const $modalTitle     = document.getElementById("modal-title");
+      const $modalPurpose   = document.getElementById("modal-purpose");
+      const $modalPrompt    = document.getElementById("modal-prompt");
+      const $modalDetails   = document.getElementById("modal-details");
+      const $modalChaining  = document.getElementById("modal-chaining");
+      const $modalChainWrap = document.getElementById("modal-chaining-wrap");
+      const $modalNotes     = document.getElementById("modal-notes");
+      const $modalNotesWrap = document.getElementById("modal-notes-wrap");
+      const $copyBtn        = document.getElementById("copy-btn");
+      const $toast          = document.getElementById("toast");
+
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+
+      const USE_TARGETS = {
+        chatgpt:    { label: "ChatGPT",    url: "https://chatgpt.com/" },
+        claude:     { label: "Claude",     url: "https://claude.ai/new", queryParam: "q" },
+        gemini:     { label: "Gemini",     url: "https://gemini.google.com/app" },
+        perplexity: { label: "Perplexity", url: "https://www.perplexity.ai/" }
+      };
+      const USE_PREF_KEY = "promptLibrary.lastUseTarget";
+      const USE_URL_LIMIT = 1500;
+      const PLAYGROUND_DRAFT_PREFIX = "promptLibrary.playgroundDraft.";
+
+      // ---- boot ----
+      if (typeof PROMPTS === "undefined" || typeof CATEGORIES === "undefined") {
+        $grid.innerHTML = '<div style="color:#ff6b6b; font-family:var(--mono); padding:16px;">Failed to load prompts.js.</div>';
+        return;
+      }
+
+      renderStatline();
+      renderCategoryChips();
+      render();
+      renderTrending();
+      wireEvents();
+      renderRecent();
+      wireDownloads();
+      wireUseIn();
+
+      // ---- deep-link: ?id=42 — redirect to the dedicated prompt page ----
+      (function () {
+        const id = parseInt(new URLSearchParams(window.location.search).get("id"), 10);
+        if (!id) return;
+        window.location.replace("prompt.html?id=" + id);
+      })();
+
+      function buildUseTargetUrl(target, text) {
+        if (!target || !target.queryParam) return target ? target.url : "";
+        const encoded = encodeURIComponent(text);
+        const url = target.url + "?" + target.queryParam + "=" + encoded;
+        return url.length <= USE_URL_LIMIT ? url : target.url;
+      }
+
+      function updateUseInLabel() {
+        const $btn = document.getElementById("use-in-btn");
+        if (!$btn) return;
+        const preferred = localStorage.getItem(USE_PREF_KEY);
+        const target = USE_TARGETS[preferred];
+        $btn.textContent = target ? "use in " + target.label + " ▾" : "use in ▾";
+      }
+
+      function createPlaygroundDraftUrl(p, promptText) {
+        const nonce = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const payload = {
+          id: p.id,
+          title: p.title,
+          systemPrompt: promptText,
+          createdAt: Date.now()
+        };
+        try { localStorage.setItem(PLAYGROUND_DRAFT_PREFIX + nonce, JSON.stringify(payload)); } catch (_) {}
+        return "playground.html?draft=" + encodeURIComponent(nonce) + "&id=" + encodeURIComponent(p.id);
+      }
+
+      async function usePromptInTarget(promptText, targetKey, sourceLabel) {
+        const key = targetKey || localStorage.getItem(USE_PREF_KEY) || "chatgpt";
+        const target = USE_TARGETS[key] || USE_TARGETS.chatgpt;
+        const url = buildUseTargetUrl(target, promptText);
+        try { localStorage.setItem(USE_PREF_KEY, key); } catch (_) {}
+        updateUseInLabel();
+        await copyToClipboard(promptText);
+        showToast(url !== target.url ? "Opening " + target.label : "Prompt copied — paste into " + target.label);
+        if (sourceLabel) sourceLabel.textContent = "use";
+        window.open(url, "_blank", "noopener");
+      }
+
+      // ---- "Use in X" menu ----
+      // Claude supports a q= prefill for short prompts. Other chat apps are
+      // opened after copying, so the user always has a reliable fallback.
+      function wireUseIn() {
+        const $btn  = document.getElementById("use-in-btn");
+        const $menu = document.getElementById("use-in-menu");
+        if (!$btn || !$menu) return;
+        updateUseInLabel();
+        $btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          $menu.classList.toggle("hidden");
+        });
+        document.addEventListener("click", (e) => {
+          if (!$menu.classList.contains("hidden") && !$menu.contains(e.target) && e.target !== $btn) {
+            $menu.classList.add("hidden");
+          }
+        });
+        $menu.querySelectorAll("a[data-target]").forEach((a) => {
+          a.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const key = a.getAttribute("data-target");
+            const target = USE_TARGETS[key];
+            if (!target) return;
+            await usePromptInTarget($modalPrompt.textContent, key);
+            $menu.classList.add("hidden");
+          });
+        });
+      }
+
+      // ---- full library downloads (JSON + CSV) ----
+      function download(filename, mime, text) {
+        const blob = new Blob([text], { type: mime });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 100);
+      }
+      function csvEscape(v) {
+        if (v == null) return "";
+        const s = String(v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }
+      function wireDownloads() {
+        const $dj = document.getElementById("download-json");
+        const $dc = document.getElementById("download-csv");
+        if ($dj) $dj.addEventListener("click", (e) => {
+          e.preventDefault();
+          const payload = {
+            exported_at: new Date().toISOString(),
+            count: PROMPTS.length,
+            categories: CATEGORIES,
+            prompts: PROMPTS
+          };
+          download("prompt-library.json", "application/json", JSON.stringify(payload, null, 2));
+        });
+        if ($dc) $dc.addEventListener("click", (e) => {
+          e.preventDefault();
+          const cols = ["id","title","category","complexity","purpose","tags","models","temperature","author","prompt","chaining","notes"];
+          const header = cols.join(",");
+          const rows = PROMPTS.map((p) => cols.map((c) => {
+            const v = p[c];
+            if (Array.isArray(v)) return csvEscape(v.join("; "));
+            return csvEscape(v);
+          }).join(","));
+          download("prompt-library.csv", "text/csv", [header].concat(rows).join("\n"));
+        });
+      }
+
+      function renderStatline() {
+        const total = PROMPTS.length;
+        const cats  = new Set(PROMPTS.map((p) => p.category)).size;
+        const by    = { beginner: 0, intermediate: 0, advanced: 0 };
+        PROMPTS.forEach((p) => { if (by[p.complexity] != null) by[p.complexity]++; });
+        $statTotal.textContent = total;
+        $statCats.textContent  = cats;
+        $statBeg.textContent   = by.beginner;
+        $statInt.textContent   = by.intermediate;
+        $statAdv.textContent   = by.advanced;
+      }
+
+      // ============================================================
+      // Trending
+      // ============================================================
+
+      function renderTrending() {
+        const scored = PROMPTS.map((p) => ({
+          prompt: p,
+          copies: parseInt(localStorage.getItem("pl_copies_" + p.id) || "0", 10)
+        }))
+        .filter((x) => x.copies > 0)
+        .sort((a, b) => b.copies - a.copies)
+        .slice(0, 3);
+
+        const $section = document.getElementById("trending-section");
+        const $grid    = document.getElementById("trending-grid");
+
+        if (scored.length === 0) { $section.classList.add("hidden"); return; }
+        $section.classList.remove("hidden");
+
+        $grid.innerHTML = "";
+        scored.forEach(({ prompt: p, copies }) => {
+          const catLabel = CATEGORIES[p.category] || p.category;
+          const card = document.createElement("div");
+          card.style.cssText = "cursor:pointer; background:var(--bg-1); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; display:flex; flex-direction:column; gap:6px; transition:border-color 0.15s;";
+          card.innerHTML =
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+              '<span class="card-cat" style="font-size:10px;">' + escapeHtml(catLabel) + '</span>' +
+              '<span style="font-family:var(--mono); font-size:11px; color:var(--accent);">' + copies + ' cop' + (copies === 1 ? 'y' : 'ies') + '</span>' +
+            '</div>' +
+            '<div style="font-weight:600; font-size:14px; color:var(--text); line-height:1.3;">' + escapeHtml(p.title) + '</div>' +
+            '<div style="font-size:12px; color:var(--text-dim); line-height:1.4;">' + escapeHtml(p.purpose) + '</div>';
+          card.addEventListener("mouseenter", () => card.style.borderColor = "var(--accent-edge)");
+          card.addEventListener("mouseleave", () => card.style.borderColor = "var(--border)");
+          card.addEventListener("click", () => { window.location.href = "prompt.html?id=" + p.id; });
+          $grid.appendChild(card);
+        });
+      }
+
+      // ============================================================
+      // Rendering
+      // ============================================================
+
+      // Category chips are generated from CATEGORIES so adding a new
+      // category requires only a one-line change in prompts.js.
+      function renderCategoryChips() {
+        const counts = countByCategory();
+        const allCount = PROMPTS.length;
+
+        const frag = document.createDocumentFragment();
+        frag.appendChild(buildChip("all", "all", allCount, "data-category"));
+
+        Object.keys(CATEGORIES).forEach((key) => {
+          const label = CATEGORIES[key];
+          frag.appendChild(buildChip(key, label, counts[key] || 0, "data-category"));
+        });
+
+        // Append after the "category" label span.
+        const label = $categoryRow.querySelector(".label");
+        $categoryRow.innerHTML = "";
+        $categoryRow.appendChild(label);
+        $categoryRow.appendChild(frag);
+
+        // First chip (All) is active by default.
+        const first = $categoryRow.querySelector(".chip");
+        if (first) first.classList.add("active");
+      }
+
+      function buildChip(value, labelText, count, attrName) {
+        const btn = document.createElement("button");
+        btn.className = "chip";
+        btn.setAttribute(attrName, value);
+        btn.innerHTML =
+          escapeHtml(labelText) +
+          '<span class="count">' + count + "</span>";
+        return btn;
+      }
+
+      function countByCategory() {
+        const c = {};
+        PROMPTS.forEach((p) => { c[p.category] = (c[p.category] || 0) + 1; });
+        return c;
+      }
+
+      function render() {
+        const filtered = applyFilters(PROMPTS, state);
+
+        $countNum.textContent = filtered.length;
+        $countLabel.textContent = (state.query || state.category !== "all" || state.complexity !== "all")
+          ? "of " + PROMPTS.length + " prompts"
+          : "prompts";
+
+        if (filtered.length === 0) {
+          $grid.innerHTML = "";
+          $empty.classList.remove("hidden");
+          return;
+        }
+        $empty.classList.add("hidden");
+
+        const frag = document.createDocumentFragment();
+        filtered.forEach((p) => frag.appendChild(buildCard(p)));
+        $grid.innerHTML = "";
+        $grid.appendChild(frag);
+      }
+
+      function buildCard(p) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("data-id", p.id);
+        card.setAttribute("aria-label", p.title);
+
+        const catLabel = CATEGORIES[p.category] || p.category;
+        const tags    = (p.tags || []).slice(0, 3);
+        const models  = (p.models || []).slice(0, 3);
+
+        // Inline SVG icons — no external assets.
+        const clipboardSvg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
+            '<rect x="4" y="3" width="8" height="11" rx="1"/>' +
+            '<path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>' +
+          '</svg>';
+        const shareSvg =
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M5 8H3v6h10V8h-2"/>' +
+            '<path d="M8 1v7M5.5 3.5L8 1l2.5 2.5"/>' +
+          '</svg>';
+
+        const isSaved = window.PL_BOOKMARKS ? window.PL_BOOKMARKS.isBookmarked("prompt", p.id) : false;
+        const bmSvg   = isSaved ? BM_FILLED : BM_OUTLINE;
+
+        const idStr = String(p.id).padStart(3, "0");
+        card.innerHTML =
+          '<div class="card-head">' +
+            '<div class="card-head-left">' +
+              '<span class="card-id">#' + escapeHtml(idStr) + "</span>" +
+              '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+            "</div>" +
+            '<div style="display:flex;align-items:center;gap:6px;">' +
+              '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>" +
+              '<button class="bookmark-btn card-bookmark' + (isSaved ? " saved" : "") + '" type="button" ' +
+                'aria-label="' + (isSaved ? "Remove bookmark" : "Bookmark") + '" aria-pressed="' + isSaved + '">' +
+                bmSvg +
+              "</button>" +
+            "</div>" +
+          "</div>" +
+          "<h3>" + escapeHtml(p.title) + "</h3>" +
+          '<p class="purpose">' + escapeHtml(p.purpose) + "</p>" +
+          '<div class="card-foot">' +
+            '<div class="card-tags">' +
+              tags.map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join("") +
+              models.map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join("") +
+            "</div>" +
+            '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+              '<button class="card-use card-copy" type="button" aria-label="Use prompt in preferred tool">' +
+                '<span>use</span>' +
+              "</button>" +
+              '<button class="card-share" type="button" aria-label="Share prompt">' +
+                shareSvg +
+              "</button>" +
+              '<button class="card-copy" type="button" aria-label="Copy prompt">' +
+                clipboardSvg + '<span>copy</span>' +
+              "</button>" +
+            "</div>" +
+          "</div>";
+
+        // Card navigates to prompt detail page on click / Enter / Space.
+        const openFromCard = (e) => {
+          if (e.target.closest(".card-copy") || e.target.closest(".card-share") || e.target.closest(".card-bookmark")) return;
+          window.location.href = "prompt.html?id=" + p.id;
+        };
+        card.addEventListener("click", openFromCard);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openFromCard(e);
+          }
+        });
+
+        // In-card copy button — stops propagation so the modal doesn't open.
+        const copyBtn = card.querySelector(".card-copy:not(.card-use)");
+        copyBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          await copyToClipboard(p.prompt);
+          copyBtn.classList.add("copied");
+          const labelSpan = copyBtn.querySelector("span");
+          const originalLabel = labelSpan.textContent;
+          labelSpan.textContent = "copied";
+          showToast("Prompt copied");
+          setTimeout(() => {
+            copyBtn.classList.remove("copied");
+            labelSpan.textContent = originalLabel;
+          }, 1500);
+        });
+
+        const useBtn = card.querySelector(".card-use");
+        useBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const labelSpan = useBtn.querySelector("span");
+          const originalLabel = labelSpan.textContent;
+          labelSpan.textContent = "opening";
+          useBtn.classList.add("copied");
+          await usePromptInTarget(p.prompt, null, labelSpan);
+          setTimeout(() => {
+            useBtn.classList.remove("copied");
+            labelSpan.textContent = originalLabel;
+          }, 1500);
+        });
+
+        // In-card share button — copies permalink, or uses native share on mobile.
+        const shareBtn = card.querySelector(".card-share");
+        shareBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const permalink = window.location.origin + window.location.pathname.replace(/[^/]*$/, "") + "prompt.html?id=" + p.id;
+          await shareItem(permalink, p.title, p.purpose, shareBtn);
+        });
+
+        // Bookmark button
+        const bmEl = card.querySelector(".card-bookmark");
+        if (bmEl) {
+          bmEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (!window.PL_BOOKMARKS) return;
+            const saved = window.PL_BOOKMARKS.toggle("prompt", p.id);
+            bmEl.classList.toggle("saved", saved);
+            bmEl.setAttribute("aria-pressed", saved);
+            bmEl.setAttribute("aria-label", saved ? "Remove bookmark" : "Bookmark");
+            bmEl.innerHTML = saved ? BM_FILLED : BM_OUTLINE;
+          });
+        }
+
+        return card;
+      }
+
+      async function shareItem(url, title, text, btn) {
+        if (navigator.share) {
+          try { await navigator.share({ url, title, text }); return; } catch (_) {}
+        }
+        await copyToClipboard(url);
+        showToast("Link copied");
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML =
+            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l4 4 6-7"/></svg>';
+          setTimeout(() => { btn.innerHTML = orig; }, 1200);
+        }
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
+      }
+
+      // ============================================================
+      // Filtering
+      // ============================================================
+
+      function applyFilters(list, s) {
+        const q = s.query.trim().toLowerCase();
+        return list.filter((p) => {
+          if (s.category !== "all" && p.category !== s.category) return false;
+          if (s.complexity !== "all" && p.complexity !== s.complexity) return false;
+          if (q) {
+            const hay =
+              (p.title || "")   + " " +
+              (p.purpose || "") + " " +
+              (p.tags || []).join(" ");
+            if (hay.toLowerCase().indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+      }
+
+      // ============================================================
+      // Events
+      // ============================================================
+
+      function wireEvents() {
+        $search.addEventListener("input", (e) => {
+          state.query = e.target.value;
+          render();
+        });
+
+        $categoryRow.addEventListener("click", (e) => {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $categoryRow.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          state.category = chip.getAttribute("data-category");
+          render();
+        });
+
+        $complexityRow.addEventListener("click", (e) => {
+          const chip = e.target.closest(".chip");
+          if (!chip) return;
+          $complexityRow.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          state.complexity = chip.getAttribute("data-complexity");
+          render();
+        });
+
+        $modalClose.addEventListener("click", closeModal);
+        $backdrop.addEventListener("click", (e) => {
+          if (e.target === $backdrop) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (!$backdrop.classList.contains("hidden")) {
+            if (e.key === "Escape") { closeModal(); return; }
+            trapModalFocus(e);
+          }
+          if (e.key === "/" && document.activeElement !== $search &&
+              $backdrop.classList.contains("hidden")) {
+            e.preventDefault();
+            $search.focus();
+          }
+        });
+
+        $copyBtn.addEventListener("click", async () => {
+          await copyToClipboard($modalPrompt.textContent);
+          $copyBtn.classList.add("copied");
+          $copyBtn.textContent = "Copied";
+          showToast("Prompt copied");
+          // increment copy counter
+          const activeId = $backdrop.dataset.promptId;
+          if (activeId) {
+            const key = "pl_copies_" + activeId;
+            const next = parseInt(localStorage.getItem(key) || "0", 10) + 1;
+            localStorage.setItem(key, next);
+            const $count = document.getElementById("modal-copy-count");
+            if ($count) $count.textContent = next;
+            renderTrending();
+            // TODO: sb.rpc('increment_copies', { prompt_id: activeId })
+          }
+          setTimeout(() => {
+            $copyBtn.classList.remove("copied");
+            $copyBtn.textContent = "Copy";
+          }, 1500);
+        });
+      }
+
+      // ============================================================
+      // Modal
+      // ============================================================
+
+      // ---- recently viewed tracking ----
+      const RECENT_KEY = "pl_recently_viewed";
+      const RECENT_MAX = 6;
+      function loadRecent() {
+        try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); }
+        catch (_) { return []; }
+      }
+      function pushRecent(id) {
+        let ids = loadRecent().filter((x) => x !== id);
+        ids.unshift(id);
+        ids = ids.slice(0, RECENT_MAX);
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(ids)); } catch (_) {}
+        renderRecent();
+      }
+      function renderRecent() {
+        const sec = document.getElementById("recent-section");
+        const grid = document.getElementById("recent-grid");
+        if (!sec || !grid) return;
+        const ids = loadRecent();
+        const items = ids.map((id) => PROMPTS.find((p) => p.id === id)).filter(Boolean);
+        if (!items.length) { sec.classList.add("hidden"); return; }
+        sec.classList.remove("hidden");
+        grid.innerHTML = items.map((p) => {
+          const cat = CATEGORIES[p.category] || p.category;
+          return '<button class="recent-card" data-id="' + p.id + '" type="button" style="text-align:left; background:var(--bg-1); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; color:var(--text); cursor:pointer; font-family:var(--sans); display:flex; flex-direction:column; gap:6px;">' +
+            '<span style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint);">' + escapeHtml(cat) + '</span>' +
+            '<span style="font-size:14px; font-weight:600; line-height:1.3;">' + escapeHtml(p.title) + '</span>' +
+          '</button>';
+        }).join("");
+        grid.querySelectorAll(".recent-card").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            window.location.href = "prompt.html?id=" + btn.getAttribute("data-id");
+          });
+        });
+      }
+      const $recentClear = document.getElementById("recent-clear");
+      if ($recentClear) {
+        $recentClear.addEventListener("click", () => {
+          try { localStorage.removeItem(RECENT_KEY); } catch (_) {}
+          renderRecent();
+        });
+      }
+
+      function openModal(p) {
+        pushRecent(p.id);
+        const catLabel = CATEGORIES[p.category] || p.category;
+
+        $modalMeta.innerHTML =
+          '<span class="card-cat">' + escapeHtml(catLabel) + "</span>" +
+          '<span class="badge ' + escapeAttr(p.complexity) + '">' + escapeHtml(p.complexity) + "</span>";
+        $modalTitle.textContent   = p.title;
+        $modalPurpose.textContent = p.purpose;
+        $modalPrompt.textContent  = p.prompt;
+
+        const tagsHtml   = (p.tags || []).map((t)   => '<span class="tag">#' + escapeHtml(t) + "</span>").join(" ");
+        const modelsHtml = (p.models || []).map((m) => '<span class="model-pill">' + escapeHtml(m) + "</span>").join(" ");
+
+        $modalDetails.innerHTML =
+          "<dt>id</dt><dd class=\"mono\">#" + p.id + "</dd>" +
+          "<dt>author</dt><dd class=\"mono\"><a href=\"user.html?handle=" + encodeURIComponent(p.author || "") + "\" style=\"color:var(--accent);text-decoration:none;\">" + escapeHtml(p.author || "—") + "</a></dd>" +
+          "<dt>temperature</dt><dd class=\"mono\">" + escapeHtml(p.temperature) + "</dd>" +
+          "<dt>models</dt><dd>" + (modelsHtml || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>" +
+          "<dt>tags</dt><dd>"   + (tagsHtml   || '<span class="mono" style="color:var(--text-faint)">—</span>') + "</dd>";
+
+        if (p.chaining && p.chaining.trim()) {
+          $modalChaining.textContent = p.chaining;
+          $modalChainWrap.classList.remove("hidden");
+        } else {
+          $modalChainWrap.classList.add("hidden");
+        }
+
+        if (p.notes && p.notes.trim()) {
+          $modalNotes.textContent = p.notes;
+          $modalNotesWrap.classList.remove("hidden");
+        } else {
+          $modalNotesWrap.classList.add("hidden");
+        }
+
+        // ---- copy counter ----
+        const copyKey = "pl_copies_" + p.id;
+        const copies = parseInt(localStorage.getItem(copyKey) || "0", 10);
+        document.getElementById("modal-copy-count").textContent = copies;
+
+        // ---- ratings ----
+        const ratingKey = "pl_rating_" + p.id;
+        const myRating = parseInt(localStorage.getItem(ratingKey) || "0", 10);
+        renderStars(p.id, myRating);
+
+        // ---- comments ----
+        renderComments(p.id);
+        document.getElementById("comment-input").value = "";
+        document.getElementById("comment-submit").onclick = () => submitComment(p.id);
+        document.getElementById("comment-input").onkeydown = (e) => { if (e.key === "Enter") submitComment(p.id); };
+
+        // ---- playground link ----
+        const playgroundBtn = document.getElementById("playground-btn");
+        playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
+        playgroundBtn.onclick = () => {
+          playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
+        };
+
+        // ---- variable slots ----
+        renderVars(p);
+
+        // ---- collections chips ----
+        renderCollections(p);
+
+        // ---- related prompts ----
+        renderRelated(p);
+
+        $backdrop.dataset.promptId = p.id;
+        modalTrigger = document.activeElement;
+        $backdrop.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        $modalClose.focus();
+      }
+
+      // Keep keyboard focus inside the open modal (focus trap). Tabbing past
+      // the last focusable element wraps to the first, and vice versa.
+      function trapModalFocus(e) {
+        if (e.key !== "Tab") return;
+        const focusable = $modal.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const visible = Array.prototype.filter.call(focusable, (el) => el.offsetParent !== null);
+        if (!visible.length) return;
+        const first = visible[0];
+        const last = visible[visible.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+
+      // ---- local collections (localStorage) ----
+      const COLLECTIONS_KEY = "promptLibrary.collections";
+      function loadCollections() {
+        try { return JSON.parse(localStorage.getItem(COLLECTIONS_KEY) || "{}"); }
+        catch (_) { return {}; }
+      }
+      function saveCollections(obj) {
+        try { localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(obj)); } catch (_) {}
+      }
+      function renderCollections(p) {
+        const $list = document.getElementById("modal-collections-list");
+        const $new  = document.getElementById("new-collection-btn");
+        if (!$list || !$new) return;
+        const cols = loadCollections();
+        const names = Object.keys(cols).sort();
+        $list.innerHTML = names.map((name) => {
+          const inCol = (cols[name] || []).indexOf(p.id) !== -1;
+          const style = inCol
+            ? "background:var(--accent); color:var(--bg); border:1px solid var(--accent);"
+            : "background:var(--bg-2); color:var(--text-dim); border:1px solid var(--border-2);";
+          return '<button data-col="' + escapeAttr(name) + '" type="button" style="' + style + ' font-family:var(--mono); font-size:11px; padding:4px 10px; border-radius:var(--radius); cursor:pointer;">' + (inCol ? "✓ " : "+ ") + escapeHtml(name) + '</button>';
+        }).join("");
+        $list.querySelectorAll("button[data-col]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const name = btn.getAttribute("data-col");
+            const all = loadCollections();
+            all[name] = all[name] || [];
+            const idx = all[name].indexOf(p.id);
+            if (idx === -1) { all[name].push(p.id); showToast("Saved to " + name); }
+            else { all[name].splice(idx, 1); showToast("Removed from " + name); }
+            saveCollections(all);
+            renderCollections(p);
+          });
+        });
+        $new.onclick = () => {
+          const name = (window.prompt("Name this collection:") || "").trim();
+          if (!name) return;
+          const all = loadCollections();
+          if (!all[name]) all[name] = [];
+          if (all[name].indexOf(p.id) === -1) all[name].push(p.id);
+          saveCollections(all);
+          renderCollections(p);
+          showToast("Saved to " + name);
+        };
+      }
+
+      // ---- variable slots ----
+      // Accepts explicit p.variables schema, else auto-detects {{TOKEN}}
+      // patterns in the prompt body (matches [A-Z0-9_]+).
+      function renderVars(p) {
+        const $vars = document.getElementById("modal-vars");
+        let vars = (p.variables || []).slice();
+        if (!vars.length) {
+          const seen = new Set();
+          const re = /\{\{([A-Z0-9_]+)\}\}/g;
+          let m;
+          while ((m = re.exec(p.prompt)) !== null) {
+            if (!seen.has(m[1])) { seen.add(m[1]); vars.push({ key: m[1], label: m[1].toLowerCase().replace(/_/g, " "), placeholder: "" }); }
+          }
+        }
+        if (!vars.length) {
+          $vars.innerHTML = "";
+          $vars.classList.add("hidden");
+          return;
+        }
+
+        const fields = vars.map((v) => {
+          const key = escapeAttr(v.key);
+          const opts = Array.isArray(v.options) ? v.options : [];
+          const control = opts.length
+            ? '<select id="var-' + key + '" data-var-key="' + key + '">' +
+                '<option value="">' + escapeHtml(v.placeholder || "select one") + '</option>' +
+                opts.map((opt) => {
+                  const value = typeof opt === "string" ? opt : opt.value;
+                  const label = typeof opt === "string" ? opt : opt.label;
+                  return '<option value="' + escapeHtml(value || "") + '">' + escapeHtml(label || value || "") + '</option>';
+                }).join("") +
+              '</select>'
+            : '<input id="var-' + key + '" data-var-key="' + key + '" type="text"' +
+                ' placeholder="' + escapeHtml(v.placeholder || "") + '"' +
+                ' autocomplete="off" spellcheck="false" />';
+          return '<div class="var-field">' +
+            '<label for="var-' + key + '">' + escapeHtml(v.label || v.key) + "</label>" +
+            control +
+          "</div>";
+        }).join("");
+
+        $vars.innerHTML =
+          '<div class="vars-panel">' +
+            '<div class="vars-panel-head">' +
+              '<span class="vars-panel-label">fill variables</span>' +
+              '<button class="vars-reset" type="button">reset ↺</button>' +
+            "</div>" +
+            '<div class="vars-grid">' + fields + "</div>" +
+          "</div>";
+        $vars.classList.remove("hidden");
+
+        const rawPrompt = p.prompt;
+        const playgroundBtn = document.getElementById("playground-btn");
+        function applyVars() {
+          const vals = {};
+          $vars.querySelectorAll("[data-var-key]").forEach((i) => { vals[i.dataset.varKey] = i.value; });
+          $modalPrompt.textContent = rawPrompt.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, k) => vals[k] || "{{" + k + "}}");
+          if (playgroundBtn) playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
+        }
+        $vars.querySelectorAll("[data-var-key]").forEach((i) => {
+          i.addEventListener("input", applyVars);
+          i.addEventListener("change", applyVars);
+        });
+        $vars.querySelector(".vars-reset").addEventListener("click", () => {
+          $vars.querySelectorAll("[data-var-key]").forEach((i) => { i.value = ""; });
+          $modalPrompt.textContent = rawPrompt;
+          if (playgroundBtn) playgroundBtn.href = createPlaygroundDraftUrl(p, $modalPrompt.textContent);
+        });
+      }
+
+      // ---- related prompts ----
+      function renderRelated(p) {
+        const $rel = document.getElementById("modal-related");
+        const tags = new Set(p.tags || []);
+
+        // Score every other prompt by tag overlap, break ties by same category
+        const scored = PROMPTS
+          .filter((q) => q.id !== p.id)
+          .map((q) => {
+            const overlap = (q.tags || []).filter((t) => tags.has(t)).length;
+            const catBonus = q.category === p.category ? 0.5 : 0;
+            return { prompt: q, score: overlap + catBonus };
+          })
+          .filter((x) => x.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+
+        if (scored.length === 0) {
+          $rel.innerHTML = "";
+          return;
+        }
+
+        const cards = scored.map(({ prompt: q }) => {
+          const catLabel = CATEGORIES[q.category] || q.category;
+          return (
+            '<div data-rel-id="' + q.id + '" style="cursor:pointer; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; transition:border-color 0.15s;" ' +
+            'onmouseenter="this.style.borderColor=\'var(--accent-edge)\'" onmouseleave="this.style.borderColor=\'var(--border)\'">' +
+              '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">' +
+                '<span class="card-cat" style="font-size:10px;">' + escapeHtml(catLabel) + '</span>' +
+                '<span class="badge ' + escapeAttr(q.complexity) + '" style="font-size:9px;">' + escapeHtml(q.complexity) + '</span>' +
+              '</div>' +
+              '<div style="font-weight:600; font-size:13.5px; color:var(--text); margin-bottom:4px;">' + escapeHtml(q.title) + '</div>' +
+              '<div style="font-size:12px; color:var(--text-dim); line-height:1.4;">' + escapeHtml(q.purpose) + '</div>' +
+            '</div>'
+          );
+        }).join("");
+
+        $rel.innerHTML =
+          '<div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:10px;">related prompts</div>' +
+          '<div style="display:flex; flex-direction:column; gap:8px;">' + cards + '</div>';
+
+        // Wire clicks on related cards to open that prompt
+        $rel.querySelectorAll("[data-rel-id]").forEach((el) => {
+          el.addEventListener("click", () => {
+            const rid = parseInt(el.dataset.relId, 10);
+            const rp = PROMPTS.find((x) => x.id === rid);
+            if (rp) openModal(rp);
+          });
+        });
+      }
+
+      // ---- ratings ----
+      function renderStars(promptId, myRating) {
+        const $stars = document.getElementById("modal-stars");
+        const $label = document.getElementById("modal-rating-label");
+        // TODO: fetch aggregate rating from Supabase
+        // const { avg, count } = await sb.from('ratings').select('stars').eq('prompt_id', promptId)
+        const ratingKey  = "pl_rating_" + promptId;
+        const ratingsKey = "pl_ratings_all";
+        const all = JSON.parse(localStorage.getItem(ratingsKey) || "{}");
+        const vals = Object.values(all[promptId] || {});
+        const avg  = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
+
+        $stars.innerHTML = "";
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement("button");
+          star.type = "button";
+          star.setAttribute("aria-label", i + " star");
+          star.style.cssText = "font-size:20px; background:none; border:none; cursor:pointer; padding:0 2px; line-height:1; transition:transform 0.1s;";
+          star.textContent = i <= myRating ? "\u2605" : "\u2606";
+          star.style.color = i <= myRating ? "var(--accent)" : "var(--text-faint)";
+          const idx = i;
+          star.addEventListener("mouseenter", () => highlightStars(idx));
+          star.addEventListener("mouseleave", () => highlightStars(myRating));
+          star.addEventListener("click", () => {
+            // TODO: persist via sb.from('ratings').upsert({ user_id, prompt_id: promptId, stars: idx })
+            localStorage.setItem("pl_rating_" + promptId, idx);
+            const all = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
+            if (!all[promptId]) all[promptId] = {};
+            all[promptId]["local"] = idx;
+            localStorage.setItem("pl_ratings_all", JSON.stringify(all));
+            renderStars(promptId, idx);
+            showToast("Rating saved");
+          });
+          $stars.appendChild(star);
+        }
+
+        function highlightStars(n) {
+          $stars.querySelectorAll("button").forEach((s, i) => {
+            s.textContent = i < n ? "\u2605" : "\u2606";
+            s.style.color = i < n ? "var(--accent)" : "var(--text-faint)";
+          });
+        }
+
+        $label.textContent = avg ? "\u2605 " + avg + " avg" : "be the first to rate";
+      }
+
+      // ---- comments ----
+      function getComments(promptId) {
+        // TODO: fetch from sb.from('comments').select('*').eq('prompt_id', promptId).order('created_at')
+        const key = "pl_comments_" + promptId;
+        return JSON.parse(localStorage.getItem(key) || "[]");
+      }
+
+      function saveComments(promptId, comments) {
+        localStorage.setItem("pl_comments_" + promptId, JSON.stringify(comments));
+        // TODO: sb.from('comments').insert({ prompt_id: promptId, user_id, body: text })
+      }
+
+      function renderComments(promptId) {
+        const $list = document.getElementById("modal-comments-list");
+        const comments = getComments(promptId);
+
+        if (comments.length === 0) {
+          $list.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No comments yet. Be the first.</div>';
+          return;
+        }
+
+        $list.innerHTML = comments.map((c) =>
+          '<div style="display:flex; gap:10px; align-items:flex-start;">' +
+            '<div style="width:28px; height:28px; border-radius:50%; background:var(--bg-3); border:1px solid var(--border-2); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; color:var(--accent); flex-shrink:0;">' +
+              escapeHtml((c.author || "A").charAt(0).toUpperCase()) +
+            "</div>" +
+            '<div style="flex:1; min-width:0;">' +
+              '<div style="display:flex; gap:8px; align-items:baseline; margin-bottom:3px;">' +
+                '<span style="font-family:var(--mono); font-size:11px; color:var(--accent);">' + escapeHtml(c.author || "anonymous") + "</span>" +
+                '<span style="font-family:var(--mono); font-size:10px; color:var(--text-faint);">' + escapeHtml(c.time || "") + "</span>" +
+              "</div>" +
+              '<div style="font-size:13.5px; color:var(--text-dim); line-height:1.5;">' + escapeHtml(c.body) + "</div>" +
+            "</div>" +
+          "</div>"
+        ).join("");
+      }
+
+      function submitComment(promptId) {
+        const $input = document.getElementById("comment-input");
+        const body = $input.value.trim();
+        if (!body) return;
+        const comments = getComments(promptId);
+        comments.push({
+          author: "SarutobiSasuke", // TODO: replace with currentUser.handle
+          body,
+          time: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+        });
+        saveComments(promptId, comments);
+        $input.value = "";
+        renderComments(promptId);
+        showToast("Comment posted");
+      }
+
+      function closeModal() {
+        $backdrop.classList.add("hidden");
+        document.body.style.overflow = "";
+        if (modalTrigger && typeof modalTrigger.focus === "function") {
+          modalTrigger.focus();
+        }
+        modalTrigger = null;
+      }
+
+      // ============================================================
+      // Utilities
+      // ============================================================
+
+      function showToast(msg) {
+        $toast.textContent = msg;
+        $toast.classList.add("show");
+        setTimeout(() => $toast.classList.remove("show"), 1400);
+      }
+
+      function escapeHtml(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g,  "&amp;")
+          .replace(/</g,  "&lt;")
+          .replace(/>/g,  "&gt;")
+          .replace(/"/g,  "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+      function escapeAttr(s) {
+        return String(s == null ? "" : s).replace(/[^a-zA-Z0-9_-]/g, "");
+      }
+    })();
+  </script>
+
+</body>
+</html>

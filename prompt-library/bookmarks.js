@@ -2,7 +2,8 @@
 // Exposes window.PL_BOOKMARKS.{load, save, isBookmarked, toggle}
 //
 // Storage key: 'promptLibrary.bookmarks'
-// Shape: { prompt: number[], article: number[], tool: string[], collection: string[] }
+// Shape: { prompt: number[], post: number[], article: number[], agent: string[],
+//          doc: string[], tool: string[], collection: string[] }
 //
 // One-time migration: legacy 'promptLibrary.starredTools' array → bookmarks.tool
 (function () {
@@ -12,7 +13,7 @@
   var LEGACY_TOOLS_KEY = "promptLibrary.starredTools";
 
   function empty() {
-    return { prompt: [], article: [], tool: [], agent: [], doc: [], collection: [] };
+    return { prompt: [], post: [], article: [], tool: [], agent: [], doc: [], collection: [] };
   }
 
   function load() {
@@ -22,6 +23,7 @@
       if (raw) {
         var p = JSON.parse(raw);
         d.prompt     = p.prompt     || [];
+        d.post       = p.post       || [];
         d.article    = p.article    || [];
         d.tool       = p.tool       || [];
         d.agent      = p.agent      || [];

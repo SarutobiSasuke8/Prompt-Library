@@ -11,199 +11,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
-  <style>
-    .article-wrap {
-      max-width: 740px;
-      margin: 0 auto;
-      padding: 0 18px 80px;
-    }
-    .article-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .article-meta .read-time {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-    .article-wrap h1 {
-      font-family: var(--mono);
-      font-size: 28px;
-      font-weight: 600;
-      line-height: 1.2;
-      color: var(--text);
-      margin: 0 0 14px;
-      letter-spacing: -0.01em;
-    }
-    @media (min-width: 720px) { .article-wrap h1 { font-size: 36px; } }
-    .article-wrap .summary {
-      font-size: 17px;
-      color: var(--text-dim);
-      margin: 0 0 32px;
-      padding-bottom: 28px;
-      border-bottom: 1px dashed var(--border-2);
-    }
-    .article-body { line-height: 1.75; font-size: 15.5px; }
-    .article-body p {
-      margin: 0 0 18px;
-      color: var(--text);
-    }
-    .article-body h3 {
-      font-family: var(--mono);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      margin: 36px 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .article-body h3::before {
-      content: "";
-      display: inline-block;
-      width: 10px;
-      height: 1px;
-      background: var(--accent);
-    }
-    .article-body ul {
-      margin: 0 0 18px;
-      padding-left: 0;
-      list-style: none;
-    }
-    .article-body ul li {
-      color: var(--text);
-      padding: 6px 0 6px 20px;
-      position: relative;
-      border-bottom: 1px solid var(--border);
-    }
-    .article-body ul li:last-child { border-bottom: 0; }
-    .article-body ul li::before {
-      content: "›";
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-family: var(--mono);
-    }
-    .example-block {
-      background: #050505;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin: 0 0 18px;
-      position: relative;
-    }
-    .example-block .example-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-faint);
-      padding: 8px 14px 0;
-    }
-    .example-block .ex-copy {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-soft);
-      border: 1px solid var(--accent-edge);
-      padding: 4px 8px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.12s ease;
-      line-height: 1;
-    }
-    .example-block .ex-copy:hover { background: var(--accent); color: var(--bg); }
-    .example-block .ex-copy.copied { background: var(--accent); color: var(--bg); }
-    .example-block pre {
-      margin: 0;
-      padding: 10px 14px 14px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.65;
-      color: #d0e8d0;
-    }
-    .callout {
-      background: var(--accent-soft);
-      border: 1px solid var(--accent-edge);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin: 0 0 18px;
-      font-size: 14.5px;
-      color: var(--text);
-      line-height: 1.6;
-    }
-    .article-nav {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      padding-top: 40px;
-      border-top: 1px solid var(--border);
-      margin-top: 40px;
-    }
-    .article-nav a {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-dim);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .article-nav a:hover { color: var(--accent); }
-    .reference-block {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      background: var(--bg-2);
-      border: 1px solid var(--border-2);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin: 0 0 18px;
-    }
-    .reference-block .ref-icon {
-      font-family: var(--mono);
-      font-size: 18px;
-      color: var(--accent);
-      flex-shrink: 0;
-      line-height: 1;
-    }
-    .reference-block .ref-body { flex: 1; min-width: 0; }
-    .reference-block .ref-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-faint);
-      margin-bottom: 4px;
-    }
-    .reference-block .ref-title {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    .reference-block a.ref-link {
-      display: inline-block;
-      margin-top: 6px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent);
-      text-decoration: none;
-      letter-spacing: 0.04em;
-    }
-    .reference-block a.ref-link:hover { text-decoration: underline; }
-  </style>
 </head>
 <body>
 
@@ -234,6 +41,7 @@
 
   <script src="articles.js"></script>
   <script src="bookmarks.js"></script>
+  <script src="blocks.js"></script>
   <script src="ratings.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
@@ -290,7 +98,7 @@
         "</div>" +
         "<h1>" + escapeHtml(article.title) + "</h1>" +
         '<p class="summary">' + escapeHtml(article.summary) + "</p>" +
-        '<div class="article-body">' + renderBody(article.body) + "</div>" +
+        '<div class="article-body">' + window.PL_BLOCKS.render(article.body) + "</div>" +
         '<div class="section-divider"><span>rating</span><hr /></div>' +
         '<div class="rating-widget">' +
           '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this article"></div>' +
@@ -337,64 +145,7 @@
       }
 
       // Wire copy buttons on example blocks
-      $root.querySelectorAll(".example-block").forEach((block) => {
-        const btn = block.querySelector(".ex-copy");
-        const pre = block.querySelector("pre");
-        if (!btn || !pre) return;
-        btn.addEventListener("click", async () => {
-          await copyToClipboard(pre.textContent);
-          btn.textContent = "copied";
-          btn.classList.add("copied");
-          setTimeout(() => { btn.textContent = "copy"; btn.classList.remove("copied"); }, 1500);
-        });
-      });
-
-      function renderBody(blocks) {
-        return (blocks || []).map((b) => {
-          if (b.type === "p") {
-            return "<p>" + escapeHtml(b.text) + "</p>";
-          }
-          if (b.type === "h3") {
-            return "<h3>" + escapeHtml(b.text) + "</h3>";
-          }
-          if (b.type === "example") {
-            return '<div class="example-block">' +
-              '<div class="example-label">' + escapeHtml(b.label || "example") + "</div>" +
-              '<button class="ex-copy" type="button">copy</button>' +
-              "<pre>" + escapeHtml(b.text) + "</pre>" +
-              "</div>";
-          }
-          if (b.type === "callout") {
-            return '<div class="callout">' + escapeHtml(b.text) + "</div>";
-          }
-          if (b.type === "reference") {
-            return '<div class="reference-block">' +
-              '<div class="ref-icon">&#9646;</div>' +
-              '<div class="ref-body">' +
-                '<div class="ref-label">source</div>' +
-                '<div class="ref-title">' + escapeHtml(b.title) + "</div>" +
-                (b.url ? '<a class="ref-link" href="' + escapeHtml(b.url) + '" target="_blank" rel="noopener">view on Amazon &rarr;</a>' : "") +
-              "</div>" +
-            "</div>";
-          }
-          if (b.type === "list") {
-            const items = (b.items || []).map((i) => "<li>" + escapeHtml(i) + "</li>").join("");
-            return "<ul>" + items + "</ul>";
-          }
-          return "";
-        }).join("");
-      }
-
-      async function copyToClipboard(text) {
-        try {
-          await navigator.clipboard.writeText(text);
-        } catch {
-          const ta = document.createElement("textarea");
-          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-          document.body.appendChild(ta); ta.select();
-          document.execCommand("copy"); document.body.removeChild(ta);
-        }
-      }
+      window.PL_BLOCKS.wireCopyButtons($root);
 
       function escapeHtml(s) {
         return String(s == null ? "" : s)

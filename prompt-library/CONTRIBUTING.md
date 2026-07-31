@@ -12,7 +12,7 @@ contact with real work, we want it.
 2. Open `add-prompt.html` in your browser (local file, no install)
 3. Fill the form → click **Generate JSON** → copy the output
 4. Paste into `prompts.js` inside the `PROMPTS` array, bump the `id`
-5. Test locally by opening `index.html`
+5. Test locally by opening `library.html`
 6. Open a PR
 
 ---
@@ -66,7 +66,53 @@ Adding a new category is a two-line change:
 1. Add a `"key": "Display Name"` entry to `CATEGORIES` at the top of `prompts.js`.
 2. Add at least two prompts with that category so the filter button isn't lonely.
 
-The filter UI is data-driven — no changes to `index.html` needed.
+The filter UI is data-driven — no changes to `library.html` needed.
+
+---
+
+## Post schema
+
+Blog posts live in `posts.js` and appear on the front page (`index.html`).
+They are **not** the same thing as articles: a post is dated and read
+newest-first, an article is evergreen methodology. If what you're writing has
+no meaningful publish date, it belongs in `articles.js`.
+
+```js
+{
+  id: 6,                                   // unique integer, next unused
+  title: "Post Title",
+  slug: "post-title",                      // lowercase-hyphenated, stable
+  date: "2026-08-04",                      // YYYY-MM-DD, drives ordering
+  updated: "2026-08-09",                   // optional
+  excerpt: "One or two lines for the front page card.",
+  author: "YourHandle",
+  tags: ["reliability", "evaluation"],     // lowercase, hyphenated, 2–4
+  readTime: "6 min",
+  featured: false,                         // at most ONE post may be true
+  body: [
+    { type: "p",       text: "A paragraph." },
+    { type: "h3",      text: "A subheading" },
+    { type: "list",    items: ["First", "Second"] },
+    { type: "callout", text: "A highlighted point." },
+    { type: "example", label: "Prompt", text: "Copyable block." },
+    { type: "reference", title: "Source", url: "https://…", linkLabel: "read it" }
+  ]
+}
+```
+
+Body blocks are shared with articles and rendered by `blocks.js`.
+
+**Before opening a PR:**
+
+1. Run `node scripts/validate-posts.js` — it checks required fields, unique ids
+   and slugs, slug format, real calendar dates, a single featured post, and
+   known block types. CI runs it too, so a failure blocks the deploy.
+2. Add a `<url>` entry to `sitemap.xml`.
+3. Open `index.html` and confirm the card renders and its tag chip appears.
+   New tags create their own filter chips — no UI change needed.
+
+Posts are held to the same tone bar as prompts: no hype, no price predictions,
+state the limits, neutral analytical register.
 
 ---
 
@@ -109,7 +155,7 @@ we'd rather have 50 great prompts than 500 mediocre ones.
 6. Open `prompts.js`, paste the object into the `PROMPTS` array (before the
    closing `];`), and make sure it has a trailing comma if it's not the last
    entry.
-7. Save, then open `index.html` in your browser to verify the new card renders.
+7. Save, then open `library.html` in your browser to verify the new card renders.
 
 ### B. By hand
 
@@ -134,7 +180,8 @@ the `"line1\n" +\n"line2"` pattern shown in existing entries.
 
 ## Local testing
 
-No build step. Open `prompt-library/index.html` directly in your browser
+No build step. Open `prompt-library/index.html` (the blog) or
+`prompt-library/library.html` (the prompt grid) directly in your browser
 (double-click in most file managers, or `file://…` in the address bar).
 
 Things to check before opening a PR:
@@ -164,7 +211,7 @@ When creating a new `.html` page, use the structure below as your template. Copy
       <span class="sub"><!-- page label, e.g. tools --></span>
     </a>
     <nav style="display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:12px;">
-      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">library</a>
+      <a href="library.html" style="color:var(--text-dim); text-decoration:none;">library</a>
       <a href="learn.html" style="color:var(--text-dim); text-decoration:none;">methodology</a>
       <a href="tools.html" style="color:var(--text-dim); text-decoration:none;">tools</a>
       <!-- set color:var(--accent) on the link that matches the current page -->
@@ -188,7 +235,7 @@ When creating a new `.html` page, use the structure below as your template. Copy
   <div class="inner">
     <div>&gt; built for people shipping with AI</div>
     <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
-      <a href="index.html">library</a>
+      <a href="library.html">library</a>
       <a href="learn.html">methodology</a>
       <a href="tools.html">tools</a>
       <a href="privacy.html">privacy</a>

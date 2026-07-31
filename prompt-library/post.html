@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-library &middot; blog</title>
+  <meta name="description" content="Writing on prompt engineering, LLM reliability, and shipping with AI — from the prompt-library blog." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("pl_theme") || "dark");</script>
+</head>
+<body>
+
+  <div id="site-nav" data-active="blog" data-sub="blog">
+    <div class="count-pill" id="read-time-pill" style="display:none;">
+      <span class="num" id="read-time-val"></span>
+      <span class="label">read</span>
+    </div>
+  </div>
+
+  <section class="hero" style="padding-bottom:24px;">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <a href="index.html" style="color:var(--text-dim); text-decoration:none;">&larr; back to blog</a>
+    </div>
+  </section>
+
+  <div class="article-wrap">
+    <div id="post-root">
+      <div class="empty">
+        <strong>Post not found</strong>
+        <a href="index.html">Back to blog</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="posts.js"></script>
+  <script src="bookmarks.js"></script>
+  <script src="blocks.js"></script>
+  <script src="ratings.js"></script>
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <script type="module" src="auth-nav.js"></script>
+  <script src="theme.js"></script>
+  <script defer src="shortcuts.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const esc    = window.PL_BLOCKS.escapeHtml;
+      const params = new URLSearchParams(window.location.search);
+      const $root  = document.getElementById("post-root");
+
+      if (typeof POSTS === "undefined") return;
+
+      // Newest first — this is the canonical reading order for posts and
+      // drives the newer/older navigation at the foot of the page.
+      const ordered = POSTS.slice().sort((a, b) => b.date.localeCompare(a.date));
+
+      // Accept ?id= (canonical) or ?slug= (share-friendly).
+      const rawId = parseInt(params.get("id"), 10);
+      const slug  = params.get("slug");
+      const post  = Number.isInteger(rawId)
+        ? ordered.find((p) => p.id === rawId)
+        : slug ? ordered.find((p) => p.slug === slug) : null;
+
+      if (!post) return;
+
+      document.title = "prompt-library · " + post.title;
+      const $sub = document.getElementById("nav-sub");
+      if ($sub) $sub.textContent = post.title;
+
+      const $pill = document.getElementById("read-time-pill");
+      const $pillVal = document.getElementById("read-time-val");
+      if ($pill && $pillVal) {
+        $pillVal.textContent = post.readTime;
+        $pill.style.display = "";
+      }
+
+      // Description + canonical link for this specific post.
+      const $desc = document.querySelector('meta[name="description"]');
+      if ($desc) $desc.setAttribute("content", post.excerpt);
+
+      function fmtDate(iso) {
+        // Parse as UTC so the displayed day doesn't shift by timezone.
+        const d = new Date(iso + "T00:00:00Z");
+        return d.toLocaleDateString(undefined, {
+          year: "numeric", month: "long", day: "numeric", timeZone: "UTC"
+        });
+      }
+
+      const tagsHtml = (post.tags || [])
+        .map((t) => '<a href="index.html?tag=' + encodeURIComponent(t) + '" class="tag" style="text-decoration:none;">#' + esc(t) + "</a>")
+        .join(" ");
+
+      const authorHtml = post.author
+        ? '<a href="user.html?handle=' + encodeURIComponent(post.author) + '" style="color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none;">' + esc(post.author) + "</a>"
+        : "";
+
+      const updatedHtml = post.updated
+        ? '<span class="post-updated">updated ' + esc(fmtDate(post.updated)) + "</span>"
+        : "";
+
+      const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
+      const isSaved = window.PL_BOOKMARKS && window.PL_BOOKMARKS.isBookmarked("post", post.id);
+      const bmHtml =
+        '<button type="button" class="bookmark-btn article-bm' + (isSaved ? " saved" : "") + '" ' +
+          'id="post-bookmark" aria-label="Save ' + esc(post.title) + '" ' +
+          'aria-pressed="' + (isSaved ? "true" : "false") + '" ' +
+          'style="margin-left:auto;">' +
+          (isSaved ? BM_FILLED : BM_OUTLINE) +
+        "</button>";
+
+      let html =
+        '<div class="article-meta">' +
+          '<time class="post-date" datetime="' + esc(post.date) + '">' + esc(fmtDate(post.date)) + "</time>" +
+          (tagsHtml ? tagsHtml : "") +
+          '<span class="read-time">' + esc(post.readTime) + " read</span>" +
+          (authorHtml ? authorHtml : "") +
+          bmHtml +
+        "</div>" +
+        "<h1>" + esc(post.title) + "</h1>" +
+        '<p class="summary">' + esc(post.excerpt) + "</p>" +
+        (updatedHtml ? '<div style="margin:-22px 0 26px;">' + updatedHtml + "</div>" : "") +
+        '<div class="article-body">' + window.PL_BLOCKS.render(post.body) + "</div>" +
+        '<div class="section-divider"><span>rating</span><hr /></div>' +
+        '<div class="rating-widget">' +
+          '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this post"></div>' +
+          '<span class="rating-count" id="rating-count">not yet rated</span>' +
+        "</div>" +
+        '<div class="section-divider"><span>comments</span><hr /></div>' +
+        '<div class="comments-section">' +
+          '<div class="comment-list" id="comment-list">' +
+            '<div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>' +
+          "</div>" +
+          '<div class="comment-input-row">' +
+            '<input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />' +
+            '<button class="comment-submit" id="comment-submit" type="button">post</button>' +
+          "</div>" +
+        "</div>";
+
+      // Newer / older navigation, following reverse-chronological order.
+      const idx   = ordered.findIndex((p) => p.id === post.id);
+      const newer = ordered[idx - 1];
+      const older = ordered[idx + 1];
+      html += '<div class="article-nav">';
+      html += newer
+        ? '<a href="post.html?id=' + newer.id + '">&larr; ' + esc(newer.title) + "</a>"
+        : "<span></span>";
+      html += older
+        ? '<a href="post.html?id=' + older.id + '">' + esc(older.title) + " &rarr;</a>"
+        : "<span></span>";
+      html += "</div>";
+
+      $root.innerHTML = html;
+
+      // Structured data — helps the post surface correctly when shared.
+      const ld = document.createElement("script");
+      ld.type = "application/ld+json";
+      ld.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.excerpt,
+        datePublished: post.date,
+        dateModified: post.updated || post.date,
+        author: { "@type": "Person", name: post.author },
+        keywords: (post.tags || []).join(", "),
+        mainEntityOfPage: window.location.href
+      });
+      document.head.appendChild(ld);
+
+      if (window.PL_RATINGS) window.PL_RATINGS.mount({ type: "post", id: post.id });
+
+      const $bm = document.getElementById("post-bookmark");
+      if ($bm && window.PL_BOOKMARKS) {
+        $bm.addEventListener("click", (e) => {
+          e.preventDefault();
+          const nowSaved = window.PL_BOOKMARKS.toggle("post", post.id);
+          $bm.innerHTML = nowSaved ? BM_FILLED : BM_OUTLINE;
+          $bm.classList.toggle("saved", nowSaved);
+          $bm.setAttribute("aria-pressed", nowSaved ? "true" : "false");
+        });
+      }
+
+      window.PL_BLOCKS.wireCopyButtons($root);
+    })();
+  </script>
+
+</body>
+</html>

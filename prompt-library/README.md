@@ -466,7 +466,8 @@ that keeps the site coherent as it grows.
 
 | Type | Display | Listing page | Detail page | Data |
 |---|---|---|---|---|
-| `prompt` | Prompt | `index.html` | `prompt.html?id=` | `prompts.js` |
+| `post` | Post | `index.html` | `post.html?id=` | `posts.js` |
+| `prompt` | Prompt | `library.html` | `prompt.html?id=` | `prompts.js` |
 | `article` | Article | `learn.html` | `article.html?id=` | `articles.js` |
 | `tool` | Tool | `tools.html` | `tool.html?id=` | `tools.js` |
 | `agent` | Agent | `agents.html` | `agent.html?id=` | `agents.js` |
@@ -485,7 +486,9 @@ Every HTML file in the live site, and what it's for.
 
 | Page | Purpose |
 |---|---|
-| `index.html` | Prompts — listing + search + filters |
+| `index.html` | Blog — post feed, tag filter, explore tiles |
+| `post.html` | Blog post — single post view |
+| `library.html` | Prompts — listing + search + filters |
 | `prompt.html` | Single prompt detail |
 | `learn.html` | Articles listing |
 | `article.html` | Single article detail |
@@ -614,7 +617,8 @@ fix it back.
 ```bash
 git clone https://github.com/SarutobiSasuke8/Prompt-Library.git
 cd Prompt-Library/prompt-library
-# Open index.html in a browser. No install. No serve required.
+# Open index.html (blog) or library.html (prompts) in a browser.
+# No install. No serve required.
 ```
 
 Or with a local server:
@@ -634,7 +638,7 @@ python3 -m http.server 8000
    the right place
 2. Fill every field → **Generate JSON** → **Copy**
 3. Paste into `prompts.js` inside the `PROMPTS` array
-4. Refresh `index.html` — the card appears immediately
+4. Refresh `library.html` — the card appears immediately
 
 **By hand:**
 

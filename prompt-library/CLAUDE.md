@@ -42,7 +42,7 @@ These words have exact meanings. Use them consistently in code, UI copy,
 commit messages, and docs.
 
 - **Item** — a piece of content that has its own dedicated page. Every
-  item has one of the five type keys below. Items can be bookmarked,
+  item has one of the six type keys below. Items can be bookmarked,
   rated, and commented on.
 - **Card** — the *preview* of an item on a listing page. Clicking a card
   opens the item's dedicated page. A card is never the item itself; it
@@ -54,20 +54,36 @@ commit messages, and docs.
 
 ### Item taxonomy
 
-Every item is one of five types. All tooling (bookmarks, ratings, comments,
+Every item is one of six types. All tooling (bookmarks, ratings, comments,
 profile surfacing) must use these exact type keys.
 
 | Type key  | Display name | Listing page   | Detail page            | Data source    |
 |-----------|--------------|----------------|------------------------|----------------|
-| `prompt`  | Prompt       | `index.html`   | `prompt.html?id=`      | `prompts.js`   |
+| `post`    | Post         | `index.html`   | `post.html?id=`        | `posts.js`     |
+| `prompt`  | Prompt       | `library.html` | `prompt.html?id=`      | `prompts.js`   |
 | `article` | Article      | `learn.html`   | `article.html?id=`     | `articles.js`  |
 | `tool`    | Tool         | `tools.html`   | `tool.html?id=`        | inline in page |
 | `agent`   | Agent        | `agents.html`  | inline (no detail yet) | inline         |
 | `doc`     | MD doc       | `mdrepo.html`  | `md.html?id=`          | `mds.js`       |
 
+#### Why `post` exists as its own type
+
+This list was previously described as locked at five types. `post` was added
+deliberately, and the reasoning is worth keeping:
+
+- **Posts and articles sort differently.** A post is dated and read newest-first.
+  An article is evergreen methodology with no meaningful publish date. Sharing
+  one type would leave the listing page with no coherent order.
+- **The constraint was costly, not impossible.** A locked list invites the worse
+  failure — cramming a genuinely new kind of thing into an existing type because
+  the rules forbid adding one. That is mislabelling, and it is harder to undo.
+
+Adding a seventh type is still expensive: every type multiplies bookmarks,
+ratings, comments, and profile handling. Justify it the same way before adding.
+
 ### Bookmark behaviour per item type
 
-- `prompt`, `article`, `agent`, `doc` → bookmarked items surface in the
+- `post`, `prompt`, `article`, `agent`, `doc` → bookmarked items surface in the
   **Bookmarks panel** on `user.html`.
 - `tool` → bookmarked tools surface in the **My Tools** tab on `user.html`
   (intentionally separate; tools are treated as a personal toolkit, not a
@@ -102,7 +118,9 @@ Every item card renders the bookmark button in the same visual position:
 │   └── workflows/
 │       └── deploy.yml      # GitHub Pages deploy on push to main (must live at repo root)
 └── prompt-library/
-    ├── index.html          # app shell + all runtime JS (inline)
+    ├── index.html          # BLOG front page — post feed + explore section
+    ├── post.html           # single post view (driven by posts.js)
+    ├── library.html        # prompt library — grid, filters, modal (was index.html)
     ├── learn.html          # methodology / articles listing
     ├── article.html        # single article view (driven by articles.js)
     ├── collections.html    # curated prompt packs
@@ -110,8 +128,10 @@ Every item card renders the bookmark button in the same visual position:
     ├── about.html          # project mission, quality bar, tech specs
     ├── user.html           # user profile page
     ├── privacy.html        # privacy policy
+    ├── posts.js            # POSTS array — dated blog content
     ├── prompts.js          # CATEGORIES map + PROMPTS array — the data
     ├── articles.js         # ARTICLES array — methodology content
+    ├── blocks.js           # shared body-block renderer (posts + articles)
     ├── style.css           # all styles; dark theme, mobile-first
     ├── theme.js            # light/dark toggle (shared across pages)
     ├── add-prompt.html     # LOCAL capture utility, not linked from site
@@ -124,12 +144,16 @@ Every item card renders the bookmark button in the same visual position:
 ### Responsibility of each file
 
 - **`prompts.js`** is the source of truth. Everything else is rendering.
-- **`index.html`** never hardcodes a category. Chips are generated from
+- **`library.html`** never hardcodes a category. Chips are generated from
   `CATEGORIES`. Adding a category = one key-value in `CATEGORIES` + at least
   one prompt using it. The UI absorbs it.
+- **`index.html`** (the blog) never hardcodes a tag. Chips are generated from
+  the tags present in `POSTS`. Same principle, different data source.
+- **`blocks.js`** owns body-block rendering for both posts and articles. If a
+  block type needs changing, change it there — not in a page.
 - **`style.css`** holds all styling. `add-prompt.html` currently inlines its
   own styles to stay fully self-contained for local use — that is deliberate.
-- **`add-prompt.html`** is **not** linked from `index.html`. It carries a red
+- **`add-prompt.html`** is **not** linked from `library.html`. It carries a red
   banner so it's never confused with the live site.
 
 ---
@@ -176,6 +200,49 @@ Defined in `CATEGORIES` at the top of `prompts.js`:
   target met.
 - For the live distribution, run:
   `grep -oE 'category:\s*"[^"]+"' prompts.js | sort | uniq -c`
+
+---
+
+## Data schema (posts.js)
+
+The blog's data source. Dated, reverse-chronological. Kept separate from
+`articles.js` — see "Why `post` exists as its own type" above.
+
+```js
+{
+  id: 1,                                   // unique integer, next unused
+  title: "Why Your Prompt Works in Chat…",
+  slug: "works-in-chat-fails-in-production", // lowercase-hyphenated, stable
+  date: "2026-07-24",                      // YYYY-MM-DD — drives ordering
+  updated: "2026-07-28",                   // optional revision date
+  excerpt: "One or two lines for the front page card.",
+  author: "SarutobiSasuke",
+  tags: ["production", "reliability"],     // lowercase, hyphenated — front page chips
+  readTime: "7 min",
+  featured: false,                         // at most ONE post may be true
+  body: [ /* blocks — see blocks.js */ ]
+}
+```
+
+Body blocks are shared with `articles.js` and rendered by `blocks.js`:
+`p`, `h3`, `example`, `callout`, `list`, `reference`.
+
+`scripts/validate-posts.js` enforces all of the above in CI — required
+fields, unique ids and slugs, slug format, real calendar dates, a single
+featured post, and known block types. Run it locally before pushing:
+
+```
+node scripts/validate-posts.js
+```
+
+### Adding a post
+
+1. Append an object to `POSTS` in `posts.js` with the next unused `id`.
+2. Run `node scripts/validate-posts.js`.
+3. Add a `<url>` line to `sitemap.xml`.
+4. Open `index.html` and confirm the card renders and its tag chip appears.
+
+Tags create their own filter chips — no UI change is needed to add one.
 
 ### Tone bar for prompt content
 
@@ -274,7 +341,7 @@ entry.
 
 ### Do not
 
-- Do not link to it from `index.html`.
+- Do not link to it from `library.html`.
 - Do not remove the warning banner.
 - Do not change the output format without also updating existing entries —
   the file is hand-editable and consistency matters.
@@ -293,9 +360,9 @@ each div's `outerHTML` with the canonical header/footer markup. The mount
 div's `innerHTML` is preserved as a slot.
 
 **Header — `<div id="site-nav" data-active="<key>" data-sub="<label>">…pill slot…</div>`**
-- `data-active`: one of `library`, `methodology`, `collections`, `tools`,
-  `agents`, `playground`, `about`. Use `""` (empty) on pages with no
-  top-level nav highlight (`user`, `privacy`).
+- `data-active`: one of `blog`, `library`, `docs`, `methodology`,
+  `collections`, `tools`, `agents`, `playground`, `about`. Use `""` (empty)
+  on pages with no top-level nav highlight (`user`, `privacy`).
 - `data-sub`: short string shown after the logo in `<span class="sub">`
   (e.g. `curated`, `learn`, `tools`).
 - `innerHTML`: optional pill markup (a `.count-pill`, read-time pill, etc.)
@@ -307,8 +374,10 @@ div's `innerHTML` is preserved as a slot.
 
 ### Canonical nav links (order)
 ```
-library · methodology · collections · tools · agents · playground · about
+blog · library · md repo · tools · explore ▾ (agents · collections · playground · articles) · about
 ```
+`blog` points at `index.html` (the site home). The logo also points at
+`index.html`. `library` points at `library.html`.
 Active page link uses `color:var(--accent)`. All others use `color:var(--text-dim)`.
 
 ### Canonical footer link order
@@ -375,7 +444,7 @@ For pages with an inline IIFE that touches injected elements (`user.html`,
 3. Click **Generate JSON** → **Copy**.
 4. Paste into `prompts.js` inside the `PROMPTS` array, before the closing
    `];`. Ensure a trailing comma if not the last entry.
-5. Open `index.html` and verify the card renders, filters count correctly,
+5. Open `library.html` and verify the card renders, filters count correctly,
    modal opens, copy works.
 
 ### By hand
@@ -395,7 +464,7 @@ Three steps, and only one touches the UI — in `prompts.js`:
 3. Optionally update `CONTRIBUTING.md` / `README.md` / `CLAUDE.md` category
    tables.
 
-The filter chip auto-appears. No changes to `index.html` are needed.
+The filter chip auto-appears. No changes to `library.html` are needed.
 
 ---
 
@@ -461,7 +530,30 @@ See `ROADMAP.md` for full detail. Short version:
 
 ## Testing checklist
 
-Run these locally (open `index.html` in a browser) before any PR:
+### Blog front page (`index.html`)
+
+- [ ] Post cards render, newest first
+- [ ] Featured post appears in its own slot, and moves into the feed
+      once a search or tag filter is active
+- [ ] Tag chips are generated from the data, with correct counts
+- [ ] Search matches title, excerpt, tag, and author
+- [ ] Empty state shows when nothing matches
+- [ ] `?tag=x` deep-links a filtered view; an unknown tag falls back to "all"
+- [ ] Clicking a card opens `post.html`
+- [ ] Explore tiles all resolve
+- [ ] `node scripts/validate-posts.js` passes
+
+### Post detail (`post.html`)
+
+- [ ] Renders by `?id=` and by `?slug=`
+- [ ] A bad or missing id shows "Post not found"
+- [ ] Newer/older nav is correct at both ends of the range
+- [ ] Example blocks copy to clipboard
+- [ ] Bookmark toggles and survives reload
+
+### Library (`library.html`)
+
+Run these locally (open `library.html` in a browser) before any PR:
 
 - [ ] All cards render
 - [ ] Count in the header pill reflects current filter set
@@ -491,10 +583,26 @@ Run these locally (open `index.html` in a browser) before any PR:
 4. **Phase 5** — deploy workflow, CONTRIBUTING, README, ROADMAP. In-card
    copy button added. CLAUDE.md (this file) added.
 
+5. **Blog variant** — the blog became the front page. `index.html` is now
+   the post feed; the prompt library moved to `library.html`. Added
+   `posts.js`, `post.html`, `blocks.js` (a shared body-block renderer
+   extracted from `article.html`), and `scripts/validate-posts.js`. The
+   long-form reading styles moved from `article.html` into `style.css`.
+   Added the `post` item type across bookmarks, ratings, and the profile.
+
 ### Work branch
 
-All development has happened on `claude/prompt-library-app-LQzGJ`. Merge to
-`main` to trigger the Pages deploy.
+Blog-variant work happened on `claude/maine-ai-blog-variant-02v4ej`
+(the branch name carries a typo for "main"; the work is not
+location-specific). Earlier work was on `claude/prompt-library-app-LQzGJ`.
+Merge to `main` to trigger the Pages deploy.
+
+### Known issues
+
+- The site header overflows a 375px viewport on every page (the count
+  pill, theme toggle, avatar chip and burger don't fit alongside the
+  logo). Pre-existing. Fixing it means choosing what the header drops on
+  mobile — a product decision, not yet made.
 
 ---
 

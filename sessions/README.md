@@ -85,6 +85,7 @@ deserves its own note.
 
 | 2026-05-05 | [[2026-05-05-session-report-prompt-library-auth-options\|Auth options and OAuth error handling]] | `main` | active |
 | 2026-05-07 | [[2026-05-07-session-report-prompt-library-workflow-polish\|Auth QA and prompt workflow polish — PKM prompts + methodology articles]] | `main` | active |
+| 2026-07-31 | [[2026-07-31-session-report-prompt-library-blog-front-page\|Blog front page variant — posts.js, post.html, library.html move, post item type]] | `claude/maine-ai-blog-variant-02v4ej` | active |
 
 ## Past work — reconstructed from git log
 

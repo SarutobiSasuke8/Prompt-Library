@@ -42,6 +42,9 @@ jobs:
       - name: Validate prompts.js
         run: node scripts/validate-prompts.js
 
+      - name: Validate posts.js
+        run: node scripts/validate-posts.js
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

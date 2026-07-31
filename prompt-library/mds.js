@@ -696,7 +696,7 @@ Every contribution must clear all of the following:
 1. Open \`add-prompt.html\` locally and fill every field.
 2. Click **Generate JSON → Copy**.
 3. Paste into \`prompts.js\` inside the \`PROMPTS\` array.
-4. Verify in \`index.html\`: card renders, filters work, modal opens, copy works.
+4. Verify in \`library.html\`: card renders, filters work, modal opens, copy works.
 5. Open a PR: \`prompt: [title] — [category]\`
 
 ---
@@ -710,7 +710,7 @@ Every contribution must clear all of the following:
 
 ### PR checklist
 
-- [ ] \`index.html\` opens and core flow works
+- [ ] \`library.html\` opens and core flow works
 - [ ] Tested at 375px width
 - [ ] No new runtime dependencies
 - [ ] Session log written to \`sessions/YYYY-MM-DD-description.md\`

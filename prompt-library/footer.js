@@ -16,7 +16,8 @@
       '<div class="inner">' +
         '<div>&gt; built for people shipping with AI</div>' +
         '<div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">' +
-          '<a href="index.html">library</a>' +
+          '<a href="index.html">blog</a>' +
+          '<a href="library.html">library</a>' +
           '<a href="learn.html">articles</a>' +
           '<a href="collections.html">collections</a>' +
           '<a href="mdrepo.html">md repo</a>' +

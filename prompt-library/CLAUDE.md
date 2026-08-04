@@ -27,12 +27,20 @@ These were chosen deliberately. Do not "helpfully" violate them.
 | No frameworks             | Anyone can fork and understand the whole app in 20m.  |
 | No npm / package.json     | Zero install. Zero supply chain. Zero rot.            |
 | No build step             | `file://` open works. CI is a single upload action.   |
-| No external JS at runtime | Fonts are the only network call. Everything else ships in-tree. |
+| One external JS dependency | `@supabase/supabase-js` from esm.sh, for optional sign-in only. Everything else ships in-tree. |
 | Data separate from UI     | `prompts.js` must stay browsable by hand.             |
-| Static hosting only (v1)  | GitHub Pages tier. No backend. No DB. No env vars.    |
+| Static hosting only       | GitHub Pages tier. No server runtime, no build, no env vars. |
 
-The first time you're tempted to add React / Tailwind / a bundler / Supabase —
-don't. Read `ROADMAP.md`. Backend features are parked until v1 has users.
+The first time you're tempted to add React / Tailwind / a bundler — don't.
+Read `ROADMAP.md`.
+
+**Supabase is already here.** `supabase.js` + `auth-nav.js` load as modules on
+every public page and back optional sign-in (email, handle, avatar). That is
+the *only* thing the backend does. Content is static files; bookmarks, ratings
+and notes are `localStorage`. Do not widen that footprint without an explicit
+product decision — the exact promises are in the **v1 contract** table in
+`README.md`, and `privacy.html` is its user-facing version. If you change
+runtime behaviour, change all three together.
 
 ---
 
@@ -61,8 +69,8 @@ profile surfacing) must use these exact type keys.
 |-----------|--------------|----------------|------------------------|----------------|
 | `prompt`  | Prompt       | `index.html`   | `prompt.html?id=`      | `prompts.js`   |
 | `article` | Article      | `learn.html`   | `article.html?id=`     | `articles.js`  |
-| `tool`    | Tool         | `tools.html`   | `tool.html?id=`        | inline in page |
-| `agent`   | Agent        | `agents.html`  | inline (no detail yet) | inline         |
+| `tool`    | Tool         | `tools.html`   | `tool.html?id=`        | `tools.js`     |
+| `agent`   | Agent        | `agents.html`  | `agent.html?id=`       | `agents.js`    |
 | `doc`     | MD doc       | `mdrepo.html`  | `md.html?id=`          | `mds.js`       |
 
 ### Bookmark behaviour per item type
@@ -172,9 +180,9 @@ Defined in `CATEGORIES` at the top of `prompts.js`:
 
 ### Current state
 
-- **54 prompts** across all 9 categories (5–7 each). Launch content
-  target met.
-- For the live distribution, run:
+- All 9 categories are populated. Launch content target met.
+- Don't hardcode the count here — it goes stale. For the live number and
+  distribution, run `node ../scripts/validate-content.js`, or:
   `grep -oE 'category:\s*"[^"]+"' prompts.js | sort | uniq -c`
 
 ### Tone bar for prompt content
@@ -313,8 +321,8 @@ Active page link uses `color:var(--accent)`. All others use `color:var(--text-di
 
 ### Canonical footer link order
 ```
-library · methodology · collections · tools · agents · playground · about · privacy  |  github · [X button]  [extras slot]  [contribute a prompt]
-© 2025 prompt-library · MIT license
+library · articles · collections · md repo · tools · agents · playground · about · privacy  |  github · [X button, only when X_URL is set]  [extras slot]  [contribute a prompt]
+© <current year> prompt-library · MIT license
 ```
 
 ### Script ordering (required, on every page)
@@ -446,8 +454,11 @@ See `ROADMAP.md` for full detail. Short version:
 
 - **Don't add a framework "just for this one thing".** If the task seems to
   need one, the task is wrong.
-- **Don't persist anything to `localStorage` in the live site.** The one
-  exception is `add-prompt.html`'s id tracker, which is local-utility only.
+- **Don't present per-browser `localStorage` values as social proof.**
+  Bookmarks, ratings, notes and copy counts are per-browser. Label them
+  "your rating" / "your notes" / "times you copied". Never compute an
+  "average" or a "times copied" total from local data — a previous version
+  did exactly that and it read as a community signal.
 - **Don't couple the UI to a specific set of categories.** Read `CATEGORIES`.
 - **Don't add analytics scripts, tracker pixels, or third-party embeds.**
 - **Don't add a backend stub "so it's ready later".** You'll build the wrong

@@ -33,9 +33,9 @@ If the user is working on the web app (which is almost always the case),
 
 ## Active branch
 
-Development is on **`claude/prompt-library-app-LQzGJ`**. The GitHub Pages
-deploy workflow triggers on pushes to `main`, so this branch needs to be
-merged before the site goes live.
+`main` is the shipping branch — the GitHub Pages deploy workflow triggers on
+pushes to it. Work on a topic branch and merge; don't assume any particular
+long-lived feature branch exists.
 
 ## Quick orientation
 

@@ -9,8 +9,11 @@ production-ready prompts, an honest tools directory, an agents catalogue,
 methodology essays worth reading, and the markdown infrastructure to set up
 your dev environment correctly on day one.
 
-Zero dependencies. Zero build step. Opens in a browser tab.
+No build step. No npm. Opens in a browser tab.
 Works on your phone. Ships on push to `main`.
+Browse, search, read and copy without an account — see
+[the v1 contract](#the-v1-contract) for exactly what the page does and
+doesn't do.
 
 [**→ Live site**](https://sarutobisasuke8.github.io/Prompt-Library/)
 
@@ -31,6 +34,7 @@ Works on your phone. Ships on push to `main`.
 - [Item taxonomy](#item-taxonomy)
 - [Surface area](#surface-area)
 - [Personal workspace](#personal-workspace)
+- [The v1 contract](#the-v1-contract)
 - [Tech stack](#tech-stack)
 - [Design](#design)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -256,15 +260,22 @@ saved items into provisional folders. Export the workspace as
 Obsidian-compatible markdown with `[[wikilinks]]` and frontmatter — drop
 the whole library into your second brain as a collection of linked notes.
 
-No account. No server. Nothing leaves the tab. The UI is built now so the
-social layer can slot in cleanly when v2 lands; the storage keys will
-migrate.
+The workspace itself needs no account: bookmarks, ratings, notes and
+folders are `localStorage` keys in your browser and are never uploaded.
+Signing in is optional and only exists to reserve a handle and sync a
+profile. Ratings and notes stay private to your browser either way —
+they are labelled "your rating" and "your notes" because that is
+literally what they are. See [the v1 contract](#the-v1-contract).
 
 ### An in-browser playground
 
 A scratchpad for composing and iterating on a prompt before copying it
 into your tool of choice. Shares design tokens with the rest of the site.
-No external API calls. No telemetry.
+You can optionally paste an Anthropic API key and run the prompt live: the
+key is held in `localStorage` and the request goes from your browser
+straight to Anthropic. There is no proxy in between and no telemetry, but
+this is the one page that talks to a model provider — leave the key field
+empty and the playground is a pure scratchpad.
 
 ---
 
@@ -337,7 +348,8 @@ to start a data relationship with you.
 ### 5. The substrate should be boring
 
 Vanilla HTML. A few JS files. CSS custom properties. Static hosting.
-Fonts are the only network call. The bundle for a framework would
+The only third-party code on a page is the Supabase auth client; fonts
+are the only other network call. The bundle for a framework would
 outweigh the actual application code. Boring infrastructure means we
 can spend all of our effort on the content — the thing that actually
 differentiates this — and that the project outlives the current fashion
@@ -448,8 +460,8 @@ readers who would benefit from it are.
 
 The library becomes load-bearing infrastructure for a profession that
 didn't exist five years ago. The fact that it runs on a few KB of HTML
-served from GitHub Pages, with no frameworks and no backend until the
-community earns it, is the point.
+served from GitHub Pages, with no frameworks and nothing behind the
+content that a reader has to trust, is the point.
 
 Small surface. High trust. Long half-life.
 
@@ -542,6 +554,28 @@ keys will migrate cleanly when it lands.
 
 ---
 
+## The v1 contract
+
+The product makes exactly these promises. If the code and this table ever
+disagree, the code is the bug.
+
+| Question | Answer for v1 |
+|---|---|
+| What does a page request over the network? | The HTML/CSS/JS in this repo, Google Fonts, `@supabase/supabase-js` from esm.sh, and logo images from Simple Icons. Nothing else. |
+| Is there a backend? | Only for optional sign-in. A Supabase project holds an email address, a handle and an avatar URL. The library content is static files in this repo. |
+| What happens if I never sign in? | Everything except reserving a handle. Browsing, search, filters, copy, bookmarks, ratings, notes, folders and export all work. |
+| Where do my ratings and notes live? | `localStorage` in this browser, under `pl_rating_<type>_<id>` and `pl_comments_<type>_<id>`. They are never uploaded and no other visitor can see them. |
+| Are any counts or scores aggregated across users? | No. There is no "average rating" and no "times copied" across visitors. Anything the UI shows you is yours. That is why it reads "your rating", not "rating". |
+| Are there cookies? | One Supabase auth cookie, and only after you sign in. No analytics or advertising cookies. |
+| Is there analytics or tracking? | No. No trackers, no pixels, no third-party embeds, no server-side logs of browsing beyond Supabase's own operational logs. |
+| Does anything talk to a model provider? | Only `playground.html`, only if you paste an API key, and only from your browser directly to Anthropic. |
+
+The user-facing version of this lives in
+[`privacy.html`](./privacy.html). `ROADMAP.md` tracks what would change
+this table.
+
+---
+
 ## Tech stack
 
 Chosen deliberately. See [`CLAUDE.md`](./CLAUDE.md) for why each
@@ -561,10 +595,11 @@ constraint matters.
 | Capture tool | `add-prompt.html` | Local-only form → JSON output |
 | Hosting | GitHub Pages | Free, CDN-backed, static |
 | CI/CD | GitHub Actions | Deploys on push to `main` |
-| Fonts | JetBrains Mono + Inter | Google Fonts — only network call |
+| Fonts | JetBrains Mono + Inter | Google Fonts |
+| Auth | `supabase.js` / `auth-nav.js` | Optional sign-in; `@supabase/supabase-js` from esm.sh |
 
 **No** React. **No** Tailwind. **No** npm. **No** bundler. **No**
-backend. **No** trackers. **No** cookies.
+trackers. **No** analytics cookies.
 
 This isn't a limitation. A searchable library of text is a textbook case
 where vanilla JS wins on speed, readability, and longevity. The bundle
@@ -759,9 +794,12 @@ profiles, shared folders), that's the v2 trigger. Until then, the `.js`
 data files are the database and `git log` is the audit trail.
 
 **The profile page works — so there's a backend?**
-No. The profile surface is entirely `localStorage` per browser. Nothing
-leaves your tab. The UI is built out now so the social layer can be wired
-in cleanly once there's demand for it; the storage format will migrate.
+Partly. There is a Supabase project behind optional sign-in, and it stores
+an email address plus a profile handle and avatar. Everything else in the
+workspace — bookmarks, ratings, notes, folders, the tools toolkit — is
+`localStorage` per browser and is never uploaded. The content itself
+(prompts, articles, tools, agents, MDs) is static files in this repo; no
+database serves it. See [the v1 contract](#the-v1-contract).
 
 **What's different about agents vs. tools?**
 Tools are products you use. Agents are **frameworks, fine-tuned models,

@@ -82,9 +82,9 @@ deserves its own note.
 | 2026-04-24 | [[2026-04-24-session-report-prompt-library\|Karpathy bundle, creative tools, MD rendering fix, README rewrite]] | `main` | shipped |
 | 2026-05-03 | [[2026-05-03-session-report-prompt-library-product-prompt\|Head of Product prompt and MD entry]] | `main` | shipped |
 | 2026-05-05 | [[2026-05-05-session-report-prompt-library-persona-suite\|Vibe Coding persona suite — 10 MD entries + collections repo card]] | `main` | shipped |
-
 | 2026-05-05 | [[2026-05-05-session-report-prompt-library-auth-options\|Auth options and OAuth error handling]] | `main` | active |
 | 2026-05-07 | [[2026-05-07-session-report-prompt-library-workflow-polish\|Auth QA and prompt workflow polish — PKM prompts + methodology articles]] | `main` | active |
+| 2026-07-12 | [[2026-07-12-session-report-prompt-library\|Strategic product and technical audit]] | `main` | parked |
 
 ## Past work — reconstructed from git log
 

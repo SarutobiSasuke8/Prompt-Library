@@ -394,6 +394,76 @@ var TOOLS = [
     deepLink: 'none',
     purpose: 'Managed integrations layer for AI agents. 100+ tools (GitHub, Gmail, Slack) with auth, rate-limiting, and error handling built in.',
     description: "A managed tool integrations layer for AI agents. Abstracts away OAuth flows, credential storage, rate-limit handling, and error normalisation across 100+ external services — GitHub, Gmail, Slack, Linear, Notion, HubSpot, and more. Each integration exposes typed function schemas that plug directly into LangChain, CrewAI, or the OpenAI function-calling interface with no custom wiring. The alternative to Composio is implementing each integration yourself, which is weeks of work and ongoing maintenance. Weak point: you're delegating access-token storage to Composio — evaluate the security posture carefully before connecting production credentials to sensitive services."
+  },
+  {
+    id: 'agno', group: 'agents', mark: 'AN', icon: '', name: 'Agno', sub: 'agent runtime',
+    pricing: 'free', url: 'https://agno.com/', x: 'https://x.com/agnoagi', github: 'https://github.com/agno-agi/agno',
+    deepLink: 'none',
+    purpose: 'Apache-2.0 Python framework plus a self-hosted runtime that serves your agents as a real API with database-backed memory.',
+    description: "Three things in one Apache-2.0 package: a Python SDK for defining agents, tools and multi-agent workflows; AgentOS, a runtime that serves those agents as a production API over REST, SSE and WebSocket; and a web UI for managing and observing them. Sessions, memory, knowledge and traces persist to a database you own, so an agent remembers a user or a project across calls instead of resetting each conversation. Ships JWT-based RBAC with multi-tenant isolation, OpenTelemetry tracing, audit logs, cron scheduling, 100+ tool integrations, chat-surface connectors, and deploy targets from Docker to AWS, GCP, Azure, Fly, Render and Helm. This is the tier above a framework: it exists for when an agent has to become a service other software and other people can call. Weak point: that also means real software delivery — Python, a database, a deploy target — so it is a poor fit if a prompt in a chat UI would have done."
+  },
+  {
+    id: 'hermes-agent', group: 'agents', mark: 'HA', icon: '', name: 'Hermes Agent', sub: 'Nous Research',
+    pricing: 'free', url: 'https://hermes-agent.nousresearch.com/', x: 'https://x.com/NousResearch', github: 'https://github.com/NousResearch',
+    deepLink: 'none',
+    purpose: 'Persistent single-operator agent runtime with a Telegram gateway, memory controls, and a bring-your-own-model provider.',
+    description: "A self-hosted runtime for always-on personal agents from Nous Research, distributed as a Docker image. It supplies the parts a long-lived agent needs and a chat completion does not: a persistent identity, a data directory that survives restarts, memory controls, a tool and context layer, and a messaging gateway — most commonly Telegram, with a numeric user allowlist rather than a public endpoint. The model is yours to choose; it speaks to any configured inference provider. The design point is one operator and one agent, which makes it markedly cheaper to run and reason about than a multi-channel control plane. Weak point: that same narrowness. If you need many agents fronting many platforms with shared routing, you want a gateway like OpenClaw instead."
+  },
+  {
+    id: 'openclaw', group: 'agents', mark: 'OC', icon: '', name: 'OpenClaw', sub: 'multi-channel gateway',
+    pricing: 'free', url: 'https://docs.openclaw.ai/', x: '', github: 'https://github.com/openclaw/openclaw',
+    deepLink: 'none',
+    purpose: 'Open-source self-hosted gateway that fronts many messaging platforms at once and routes each to a different agent.',
+    description: "A single self-hosted Gateway process, written in TypeScript, that bridges messaging platforms to always-available AI agents. One deployment fronts Telegram, WhatsApp, Discord, Signal, Slack, iMessage, Microsoft Teams, Matrix, Google Chat and more, and routing is configurable per channel, per contact or per group — so different agents can answer in different rooms. Guided setup runs through `openclaw onboard`. Because it is self-hosted there is no dependence on a vendor's uptime or data handling. Weak point: operator burden. A Node gateway plus a marketplace and security posture to keep current is meaningfully more to maintain than a single-agent runtime, and it is only worth it once you actually have several agents or several channels."
+  },
+  {
+    id: 'buzz', group: 'agents', mark: 'BZ', icon: '', name: 'Buzz', sub: 'Block',
+    pricing: 'free', url: 'https://github.com/block/buzz', x: '', github: 'https://github.com/block/buzz',
+    deepLink: 'none',
+    purpose: 'Self-hostable workspace where humans, agents, workflows and git events share one signed, auditable event log.',
+    description: "A collaboration workspace from Block, built on the idea that agents should work in a shared room rather than in isolated one-to-one bot chats. Messages, reactions, workflow steps, approvals and git events all use the same event model, and agents hold distinct keys and channel memberships, so the history is inspectable and attributable. That makes it interesting for a project room where several people and several agents work one case together — and largely redundant if what you have is a single private agent conversation that already works. Weak point: it describes itself as unfinished, its supported line is pre-1.0 `main`, and workflow approval gates are still being wired up — so do not assume a visible approval event is an enforced boundary. Channel membership is the real authorization boundary; adding an agent to a channel grants it the scope of a teammate."
+  },
+  {
+    id: 'manus', group: 'agents', mark: 'MN', icon: '', name: 'Manus', sub: 'general-purpose agent',
+    pricing: 'freemium', url: 'https://manus.im/', x: 'https://x.com/ManusAI_HQ', github: '',
+    deepLink: 'none',
+    purpose: 'General-purpose agent platform built around execution — slides, sites, desktop apps, research, and browser operation.',
+    description: "An agent platform positioned around doing rather than answering: building slide decks and websites, developing desktop apps, design work, research runs, operating a browser, handling email, Slack integration and API access. It is the most useful current benchmark for the \"AI that acts\" category, which is why it is worth trying even if it does not stay in your stack — running the same task through Manus and through a coding agent tells you a lot about where autonomous execution is genuinely ahead. As of mid-2026 its official site states that Manus is now part of Meta. Weak point: the breadth is also the risk. Wide-surface agents tend to be beaten by a specialist on any single task, so test it against the tool it would replace before committing a workflow to it."
+  },
+  {
+    id: 'okara', group: 'agents', mark: 'OK', icon: '', name: 'Okara', sub: 'marketing agents',
+    pricing: 'paid', url: 'https://okara.ai/', x: 'https://x.com/askOkara', github: '',
+    deepLink: 'none',
+    purpose: 'Marketing-agent suite positioned as an "AI CMO" — a separate agent per channel rather than one general writer.',
+    description: "A set of marketing agents split by channel and function: Reddit, SEO, long-form writing, X, LinkedIn, Hacker News, GEO, technical SEO and coding, and UGC-style video. The architectural bet is worth noting independently of the product — channel-specific agents with their own context and conventions generally beat one general-purpose writer told to \"adapt the tone\", because the failure mode of generic AI marketing copy is register, not grammar. Useful as a reference point for how to structure your own GTM prompts even if you never subscribe. Weak point: it is a young product in a crowded category, and an agent suite is only as good as the brand context you feed it — expect to spend real time on setup before output beats a well-written prompt in a chat UI."
+  },
+  {
+    id: 'hamster', group: 'coding', mark: 'HM', icon: '', name: 'Hamster Studio', sub: 'AI-native planning',
+    pricing: 'freemium', url: 'https://tryhamster.com/', x: '', github: '',
+    deepLink: 'none',
+    purpose: 'Workspace built on the argument that AI removed the capacity bottleneck, so the remaining bottleneck is clear direction.',
+    description: "An AI-native workspace for planning and shipping software, built around a stated method rather than a feature list. Its core unit is the Brief — a structured document covering what is being built, who for, constraints, expected behaviour and completion criteria — on the argument that this is what takes AI output from roughly 70% to 99%. The same spec that works for a human contributor works for an agent, because both fail for the same reason: missing context and no acceptance criteria. An approved Brief becomes the contract. Also ships Taskmaster, a free open-source CLI for solo operators who want the task loop without the workspace. Weak point: the method is the product, and if your team will not actually write Briefs you are buying a project tool you will use as a to-do list."
+  },
+  {
+    id: 'altllm', group: 'infra', mark: 'AL', icon: '', name: 'AltLLM', sub: 'crypto-specialised API',
+    pricing: 'paid', url: 'https://platform.altllm.ai/docs', x: '', github: '',
+    deepLink: 'none',
+    purpose: 'OpenAI-compatible chat completions endpoint that injects crypto and DeFi context through built-in tools.',
+    description: "An OpenAI-compatible API at `https://api.altllm.ai/v1` with crypto intelligence attached. Because the surface matches OpenAI's, you point the official Python or TypeScript SDK at a different `base_url` and keep the rest of your code — which makes it cheap to evaluate against whatever you run today. It supports streaming, tools and function calling, JSON mode and structured outputs, with documented default limits of 60 requests and 100,000 tokens per minute. The pitch is automatic crypto context — token prices, news, gas, tokenomics, team info, web search and DeFi calculators — without wiring MCP tools client-side. Weak point: the documented catalogue and the public API have not agreed. A check in mid-2026 found only two of the advertised models listed publicly and a tool count well below the documented figure, so treat the docs as plan-level marketing until you have verified it with an authenticated key. Also note their own TypeScript example uses `dangerouslyAllowBrowser` — do not ship a key to the client."
+  },
+  {
+    id: 'anythingllm', group: 'local', mark: 'AY', icon: '', name: 'AnythingLLM', sub: 'private RAG workspace',
+    pricing: 'free', url: 'https://anythingllm.com/', x: '', github: 'https://github.com/Mintplex-Labs/anything-llm',
+    deepLink: 'none',
+    purpose: 'Desktop or self-hosted app that turns a folder of documents into a private RAG workspace over a local or hosted model.',
+    description: "Ingests your files, chunks and embeds them into a local vector store, and answers questions over them using a model of your choice — local or hosted. The point is that both the knowledge base and the retrieval stay on your machine, which is what makes it viable for material you would not paste into a hosted chat. A natural fit for querying a notes vault or a document set with a local model instead of shipping it to a provider. Weak point: local embedding plus local inference is bounded by your RAM, and a laptop-class machine will struggle with large local models. The practical move is to point it at a scoped export rather than an entire archive — small curated context beats large raw access, and that holds for retrieval as much as for prompting."
+  },
+  {
+    id: 'pixellab', group: 'creative', mark: 'PX', icon: '', name: 'PixelLab', sub: 'pixel art generation',
+    pricing: 'paid', url: 'https://pixellab.ai/', x: '', github: '',
+    deepLink: 'none',
+    purpose: 'Generates game-ready pixel art — directional characters, animations, tilesets, portraits, fonts — and runs as an MCP server.',
+    description: "A pixel-art generation service aimed at game assets rather than illustrations: characters with multiple directional views, character and object animations, isometric tiles, top-down and sidescroller tilesets, portraits, fonts and UI assets. It exposes an MCP server, so an agent session can drive it directly — list projects, create a character, animate it, export — which is the difference between a generator you visit and one that sits inside your build loop. Generation is asynchronous and returns job IDs, and it needs a subscription or credits. Weak point: treat output as draft assets. It removes the art bottleneck for prototyping, not the need for an artist on anything shipping, and you should check the licensing terms before commercial use."
   }
 
 ];

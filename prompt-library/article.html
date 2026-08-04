@@ -221,14 +221,14 @@
     </div>
   </section>
 
-  <div class="article-wrap">
+  <main class="article-wrap">
     <div id="article-root">
       <div class="empty">
         <strong>Article not found</strong>
         <a href="learn.html">Back to articles</a>
       </div>
     </div>
-  </div>
+  </main>
 
   <div id="site-footer"></div>
 
@@ -291,19 +291,19 @@
         "<h1>" + escapeHtml(article.title) + "</h1>" +
         '<p class="summary">' + escapeHtml(article.summary) + "</p>" +
         '<div class="article-body">' + renderBody(article.body) + "</div>" +
-        '<div class="section-divider"><span>rating</span><hr /></div>' +
+        '<div class="section-divider"><span>your rating</span><hr /></div>' +
         '<div class="rating-widget">' +
           '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this article"></div>' +
           '<span class="rating-count" id="rating-count">not yet rated</span>' +
         '</div>' +
-        '<div class="section-divider"><span>comments</span><hr /></div>' +
+        '<div class="section-divider"><span>your notes</span><hr /></div>' +
         '<div class="comments-section">' +
           '<div class="comment-list" id="comment-list">' +
-            '<div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>' +
+            '<div class="comments-empty" id="comments-empty">No notes yet. Notes stay in this browser.</div>' +
           '</div>' +
           '<div class="comment-input-row">' +
-            '<input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />' +
-            '<button class="comment-submit" id="comment-submit" type="button">post</button>' +
+            '<input class="comment-input" id="comment-input" type="text" placeholder="Add a private note…" maxlength="280" />' +
+            '<button class="comment-submit" id="comment-submit" type="button">save</button>' +
           '</div>' +
         '</div>';
 

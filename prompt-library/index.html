@@ -180,26 +180,26 @@
           </div>
         </div>
 
-        <!-- Ratings + copy count -->
+        <!-- Ratings + copy count — both per-browser, never a community aggregate -->
         <div id="modal-social" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
           <div>
-            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">rating</div>
+            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">your rating</div>
             <div id="modal-stars" style="display:flex; gap:4px; align-items:center;"></div>
             <div id="modal-rating-label" style="font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:4px;"></div>
           </div>
           <div style="text-align:right;">
-            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">times copied</div>
+            <div style="font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-faint); margin-bottom:6px;">times you copied</div>
             <div id="modal-copy-count" style="font-family:var(--mono); font-size:22px; font-weight:600; color:var(--accent); line-height:1;"></div>
           </div>
         </div>
 
         <!-- Comments -->
         <div id="modal-comments-wrap" style="margin-top:20px;">
-          <h4>Comments</h4>
+          <h4>Your notes</h4>
           <div id="modal-comments-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;"></div>
           <div style="display:flex; gap:8px;">
-            <input id="comment-input" type="text" placeholder="Add a comment…" maxlength="300" style="flex:1; background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--radius); color:var(--text); font-family:var(--mono); font-size:13px; padding:9px 12px; outline:none; transition:border-color 0.15s;" />
-            <button id="comment-submit" type="button" style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--bg); background:var(--accent); border:none; padding:9px 16px; border-radius:var(--radius); cursor:pointer; transition:background 0.12s; white-space:nowrap;">post</button>
+            <input id="comment-input" type="text" placeholder="Add a private note…" maxlength="300" style="flex:1; background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--radius); color:var(--text); font-family:var(--mono); font-size:13px; padding:9px 12px; outline:none; transition:border-color 0.15s;" />
+            <button id="comment-submit" type="button" style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--bg); background:var(--accent); border:none; padding:9px 16px; border-radius:var(--radius); cursor:pointer; transition:background 0.12s; white-space:nowrap;">save</button>
           </div>
         </div>
 
@@ -1092,14 +1092,8 @@
       function renderStars(promptId, myRating) {
         const $stars = document.getElementById("modal-stars");
         const $label = document.getElementById("modal-rating-label");
-        // TODO: fetch aggregate rating from Supabase
-        // const { avg, count } = await sb.from('ratings').select('stars').eq('prompt_id', promptId)
-        const ratingKey  = "pl_rating_" + promptId;
-        const ratingsKey = "pl_ratings_all";
-        const all = JSON.parse(localStorage.getItem(ratingsKey) || "{}");
-        const vals = Object.values(all[promptId] || {});
-        const avg  = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
-
+        // v1 has no aggregate to average — this browser is the only rater, so
+        // the label states the user's own rating rather than a fake mean.
         $stars.innerHTML = "";
         for (let i = 1; i <= 5; i++) {
           const star = document.createElement("button");
@@ -1112,12 +1106,7 @@
           star.addEventListener("mouseenter", () => highlightStars(idx));
           star.addEventListener("mouseleave", () => highlightStars(myRating));
           star.addEventListener("click", () => {
-            // TODO: persist via sb.from('ratings').upsert({ user_id, prompt_id: promptId, stars: idx })
             localStorage.setItem("pl_rating_" + promptId, idx);
-            const all = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
-            if (!all[promptId]) all[promptId] = {};
-            all[promptId]["local"] = idx;
-            localStorage.setItem("pl_ratings_all", JSON.stringify(all));
             renderStars(promptId, idx);
             showToast("Rating saved");
           });
@@ -1131,7 +1120,9 @@
           });
         }
 
-        $label.textContent = avg ? "\u2605 " + avg + " avg" : "be the first to rate";
+        $label.textContent = myRating
+          ? "\u2605 " + myRating + " \u00b7 saved in this browser"
+          : "not yet rated";
       }
 
       // ---- comments ----
@@ -1151,7 +1142,7 @@
         const comments = getComments(promptId);
 
         if (comments.length === 0) {
-          $list.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No comments yet. Be the first.</div>';
+          $list.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No notes yet. Notes stay in this browser.</div>';
           return;
         }
 

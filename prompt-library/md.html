@@ -202,7 +202,7 @@
     </div>
   </section>
 
-  <div class="md-detail-wrap">
+  <main class="md-detail-wrap">
 
     <!-- action bar: title + copy + download + bookmark -->
     <div class="md-action-bar" id="action-bar">
@@ -232,25 +232,25 @@
     <div class="md-body" id="md-body"></div>
 
     <!-- rating -->
-    <div class="section-divider"><span>rating</span><hr /></div>
+    <div class="section-divider"><span>your rating</span><hr /></div>
     <div class="rating-widget">
       <div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this template"></div>
       <span class="rating-count" id="rating-count">not yet rated</span>
     </div>
 
     <!-- comments -->
-    <div class="section-divider"><span>comments</span><hr /></div>
+    <div class="section-divider"><span>your notes</span><hr /></div>
     <div class="comments-section">
       <div class="comment-list" id="comment-list">
-        <div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>
+        <div class="comments-empty" id="comments-empty">No notes yet. Notes stay in this browser.</div>
       </div>
       <div class="comment-input-row">
-        <input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />
-        <button class="comment-submit" id="comment-submit" type="button">post</button>
+        <input class="comment-input" id="comment-input" type="text" placeholder="Add a private note…" maxlength="280" />
+        <button class="comment-submit" id="comment-submit" type="button">save</button>
       </div>
     </div>
 
-  </div>
+  </main>
 
   <div id="site-footer"></div>
   <div class="toast" id="toast">Copied</div>
@@ -358,6 +358,18 @@
       setTimeout(() => { copyBtn.querySelector("span").textContent = "copy"; copyBtn.classList.remove("copied"); }, 1500);
     });
 
+    // One-time move of pre-fix `..._article_<id>` values onto the correct
+    // `..._doc_<id>` key. No-op once the old key is gone.
+    function migrateLegacyKey(oldKey, newKey) {
+      try {
+        if (localStorage.getItem(newKey) === null) {
+          const legacy = localStorage.getItem(oldKey);
+          if (legacy !== null) localStorage.setItem(newKey, legacy);
+        }
+        localStorage.removeItem(oldKey);
+      } catch (_) {}
+    }
+
     // ---- bookmark ----
     const BM_OUTLINE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
     const BM_FILLED  = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v13l-5-3-5 3V2z"/></svg>';
@@ -379,7 +391,10 @@
     (function () {
       const starsEl = document.getElementById("rating-stars");
       const countEl = document.getElementById("rating-count");
-      const key = "pl_rating_article_" + m.id;
+      // Item type is `doc` (see CLAUDE.md item taxonomy). This used to write
+      // `pl_rating_article_<id>`, which collided with same-id articles.
+      const key = "pl_rating_doc_" + m.id;
+      migrateLegacyKey("pl_rating_article_" + m.id, key);
       let current = parseInt(localStorage.getItem(key) || "0", 10);
       const LABELS = ["", "1 star", "2 stars", "3 stars", "4 stars", "5 stars"];
 
@@ -416,7 +431,8 @@
       const emptyEl  = document.getElementById("comments-empty");
       const inputEl  = document.getElementById("comment-input");
       const submitEl = document.getElementById("comment-submit");
-      const key = "pl_comments_article_" + m.id;
+      const key = "pl_comments_doc_" + m.id;
+      migrateLegacyKey("pl_comments_article_" + m.id, key);
       let comments = [];
       try { comments = JSON.parse(localStorage.getItem(key) || "[]"); } catch (_) {}
 

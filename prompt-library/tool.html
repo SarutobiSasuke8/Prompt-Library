@@ -44,7 +44,8 @@
     .td-logo .td-glyph svg { width: 100%; height: 100%; display: block; }
 
     .td-identity { flex: 1 1 auto; min-width: 0; }
-    .td-name { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.15; }
+    /* h1 element — margin reset so the promotion from div is visually neutral */
+    .td-name { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.15; margin: 0; }
     .td-sub  { font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin-top: 4px; letter-spacing: 0.04em; }
     .td-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
     .td-badge {
@@ -142,12 +143,12 @@
 
   <div id="site-nav" data-active="tools" data-sub="tool"></div>
 
-  <div class="tool-detail-wrap" id="tool-detail">
+  <main class="tool-detail-wrap" id="tool-detail">
     <div class="td-404 hidden" id="td-404">
       <strong>Tool not found</strong>
       <a href="tools.html" style="color:var(--accent);">Browse all tools</a>
     </div>
-  </div>
+  </main>
 
   <div id="site-footer"></div>
 
@@ -276,7 +277,8 @@
     }
 
     // ---- Identity block ----
-    var nameEl = document.createElement('div');
+    // h1: the tool name is the page's top-level heading.
+    var nameEl = document.createElement('h1');
     nameEl.className = 'td-name';
     nameEl.textContent = tool.name;
 
@@ -406,19 +408,19 @@
 
     // ---- Rating + comments ----
     var ratingCommentsHtml =
-      '<div class="section-divider"><span>rating</span><hr /></div>' +
+      '<div class="section-divider"><span>your rating</span><hr /></div>' +
       '<div class="rating-widget">' +
         '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this tool"></div>' +
         '<span class="rating-count" id="rating-count">not yet rated</span>' +
       '</div>' +
-      '<div class="section-divider"><span>comments</span><hr /></div>' +
+      '<div class="section-divider"><span>your notes</span><hr /></div>' +
       '<div class="comments-section">' +
         '<div class="comment-list" id="comment-list">' +
-          '<div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>' +
+          '<div class="comments-empty" id="comments-empty">No notes yet. Notes stay in this browser.</div>' +
         '</div>' +
         '<div class="comment-input-row">' +
-          '<input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />' +
-          '<button class="comment-submit" id="comment-submit" type="button">post</button>' +
+          '<input class="comment-input" id="comment-input" type="text" placeholder="Add a private note…" maxlength="280" />' +
+          '<button class="comment-submit" id="comment-submit" type="button">save</button>' +
         '</div>' +
       '</div>';
     var rcDiv = document.createElement('div');

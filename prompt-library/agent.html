@@ -34,7 +34,8 @@
     }
 
     .ad-identity { flex: 1 1 auto; min-width: 0; }
-    .ad-name { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.15; }
+    /* h1 element — margin reset so the promotion from div is visually neutral */
+    .ad-name { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.15; margin: 0; }
     .ad-sub  { font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin-top: 4px; letter-spacing: 0.04em; }
     .ad-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
     .ad-badge {
@@ -126,12 +127,12 @@
 
   <div id="site-nav" data-active="agents" data-sub="agent"></div>
 
-  <div class="agent-detail-wrap" id="agent-detail">
+  <main class="agent-detail-wrap" id="agent-detail">
     <div class="ad-404 hidden" id="ad-404">
       <strong>Agent not found</strong>
       <a href="agents.html" style="color:var(--accent);">Browse all agents</a>
     </div>
-  </div>
+  </main>
 
   <div id="site-footer"></div>
 
@@ -236,7 +237,8 @@
     badgesDiv.appendChild(badge(groupLabel(agent.group), 'group'));
 
     // ---- Identity ----
-    var nameEl = document.createElement('div'); nameEl.className = 'ad-name'; nameEl.textContent = agent.name;
+    // h1: the agent name is the page's top-level heading.
+    var nameEl = document.createElement('h1'); nameEl.className = 'ad-name'; nameEl.textContent = agent.name;
     var subEl  = document.createElement('div'); subEl.className  = 'ad-sub';  subEl.textContent  = agent.sub;
 
     var identityDiv = document.createElement('div');
@@ -370,19 +372,19 @@
 
     // ---- Rating + comments ----
     var rcHtml =
-      '<div class="section-divider"><span>rating</span><hr /></div>' +
+      '<div class="section-divider"><span>your rating</span><hr /></div>' +
       '<div class="rating-widget">' +
         '<div class="rating-stars" id="rating-stars" role="group" aria-label="Rate this agent"></div>' +
         '<span class="rating-count" id="rating-count">not yet rated</span>' +
       '</div>' +
-      '<div class="section-divider"><span>comments</span><hr /></div>' +
+      '<div class="section-divider"><span>your notes</span><hr /></div>' +
       '<div class="comments-section">' +
         '<div class="comment-list" id="comment-list">' +
-          '<div class="comments-empty" id="comments-empty">No comments yet. Be the first.</div>' +
+          '<div class="comments-empty" id="comments-empty">No notes yet. Notes stay in this browser.</div>' +
         '</div>' +
         '<div class="comment-input-row">' +
-          '<input class="comment-input" id="comment-input" type="text" placeholder="Leave a note…" maxlength="280" />' +
-          '<button class="comment-submit" id="comment-submit" type="button">post</button>' +
+          '<input class="comment-input" id="comment-input" type="text" placeholder="Add a private note…" maxlength="280" />' +
+          '<button class="comment-submit" id="comment-submit" type="button">save</button>' +
         '</div>' +
       '</div>';
     var rcDiv = document.createElement('div');

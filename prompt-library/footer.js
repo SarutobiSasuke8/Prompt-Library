@@ -10,6 +10,17 @@
   if (!mount) return;
 
   var extras = mount.innerHTML || "";
+  var year   = new Date().getFullYear();
+
+  // The X profile does not exist yet. Set X_URL to the real profile to bring
+  // the CTA back; leaving it empty renders nothing rather than a dead href="#".
+  var X_URL   = "";
+  var socialX = X_URL
+    ? '<a class="cta social-x" href="' + X_URL + '" target="_blank" rel="noopener" aria-label="Follow on X">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' +
+        'follow on X' +
+      '</a>'
+    : "";
 
   var html =
     '<footer class="site-footer">' +
@@ -27,15 +38,12 @@
           '<a href="privacy.html">privacy</a>' +
           '<span style="color:var(--border-2);">|</span>' +
           '<a href="https://github.com/SarutobiSasuke8/Prompt-Library" target="_blank" rel="noopener">github</a>' +
-          '<a class="cta social-x" href="#" target="_blank" rel="noopener" aria-label="Follow on X">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px; margin-right:6px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' +
-            'follow on X' +
-          '</a>' +
+          socialX +
           '<a class="cta" href="https://github.com/SarutobiSasuke8/Prompt-Library/blob/main/prompt-library/CONTRIBUTING.md" target="_blank" rel="noopener">contribute a prompt</a>' +
           extras +
         '</div>' +
       '</div>' +
-      '<div class="footer-copy">&copy; 2025 prompt-library &middot; MIT license</div>' +
+      '<div class="footer-copy">&copy; ' + year + ' prompt-library &middot; MIT license</div>' +
     '</footer>';
 
   mount.outerHTML = html;

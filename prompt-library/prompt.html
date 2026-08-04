@@ -228,12 +228,12 @@
 
   <div id="site-nav" data-active="library" data-sub="prompt"></div>
 
-  <div class="pd-wrap" id="pd-wrap">
+  <main class="pd-wrap" id="pd-wrap">
     <div class="pd-404 hidden" id="pd-404">
       <strong>Prompt not found</strong>
       <a href="index.html" style="color:var(--accent);">Browse all prompts</a>
     </div>
-  </div>
+  </main>
 
   <div class="toast" id="pd-toast"></div>
   <div id="site-footer"></div>
@@ -340,7 +340,7 @@
     });
     meta.appendChild(bkBtn);
 
-    var title = el("h2", "pd-title", esc(p.title));
+    var title = el("h1", "pd-title", esc(p.title));
     var purpose = el("p", "pd-purpose", esc(p.purpose));
 
     var header = el("div", "pd-header");
@@ -567,13 +567,15 @@
     }
 
     // ---- ratings + copy count ----
+    // Both are per-browser localStorage values, so the copy must never imply a
+    // community aggregate. See the v1 contract in README.md.
     var socialSection = el("div", "pd-section");
     var socialRow = el("div", "pd-social");
 
     var ratingDiv = el("div", "");
-    var ratingLabel = el("div", "pd-section-title", "Rating");
+    var ratingLabel = el("div", "pd-section-title", "Your rating");
     var starsDiv = el("div", "pd-stars");
-    var ratingText = el("div", "", "be the first to rate");
+    var ratingText = el("div", "", "not yet rated");
     ratingText.style.cssText = "font-family:var(--mono); font-size:10px; color:var(--text-faint); margin-top:4px;";
     ratingDiv.appendChild(ratingLabel);
     ratingDiv.appendChild(starsDiv);
@@ -581,7 +583,7 @@
 
     var copyCountDiv = el("div", "");
     copyCountDiv.style.textAlign = "right";
-    var copyCountLabel = el("div", "pd-section-title", "Times copied");
+    var copyCountLabel = el("div", "pd-section-title", "Times you copied");
     var copyCountNum = el("div", "", "");
     copyCountNum.id = "pd-copy-count";
     copyCountNum.style.cssText = "font-family:var(--mono); font-size:22px; font-weight:600; color:var(--accent); line-height:1;";
@@ -593,11 +595,10 @@
     socialSection.appendChild(socialRow);
 
     function renderStars(myRating) {
-      var ratingKey = "pl_rating_" + p.id;
-      var allRatings = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
-      var vals = Object.values(allRatings[p.id] || {});
-      var avg = vals.length ? (vals.reduce(function (a, b) { return a + b; }, 0) / vals.length).toFixed(1) : null;
-      ratingText.textContent = avg ? "\u2605 " + avg + " avg" : "be the first to rate";
+      // There is no aggregate to average \u2014 this browser is the only rater.
+      ratingText.textContent = myRating
+        ? "\u2605 " + myRating + " \u00b7 saved in this browser"
+        : "not yet rated";
       starsDiv.innerHTML = "";
       for (var i = 1; i <= 5; i++) {
         (function (idx) {
@@ -611,10 +612,6 @@
           star.addEventListener("mouseleave", function () { highlightStars(myRating); });
           star.addEventListener("click", function () {
             localStorage.setItem("pl_rating_" + p.id, idx);
-            var all = JSON.parse(localStorage.getItem("pl_ratings_all") || "{}");
-            if (!all[p.id]) all[p.id] = {};
-            all[p.id]["local"] = idx;
-            localStorage.setItem("pl_ratings_all", JSON.stringify(all));
             renderStars(idx);
             showToast("Rating saved");
           });
@@ -635,11 +632,11 @@
 
     // ---- comments ----
     var commentsSection = el("div", "pd-section");
-    commentsSection.appendChild(el("div", "pd-section-title", "Comments"));
+    commentsSection.appendChild(el("div", "pd-section-title", "Your notes"));
     var commentsList = el("div", "pd-comments-list");
     var commentInputRow = el("div", "comment-input-row",
-      '<input type="text" id="pd-comment-input" placeholder="Add a comment…" maxlength="300" autocomplete="off" />' +
-      '<button type="button" class="comment-submit" id="pd-comment-submit">Post</button>'
+      '<input type="text" id="pd-comment-input" placeholder="Add a private note…" maxlength="300" autocomplete="off" />' +
+      '<button type="button" class="comment-submit" id="pd-comment-submit">Save</button>'
     );
     commentsSection.appendChild(commentsList);
     commentsSection.appendChild(commentInputRow);
@@ -650,7 +647,7 @@
     function renderComments() {
       var comments = getComments();
       if (!comments.length) {
-        commentsList.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No comments yet. Be the first.</div>';
+        commentsList.innerHTML = '<div style="font-family:var(--mono); font-size:12px; color:var(--text-faint); padding:8px 0;">No notes yet. Notes stay in this browser.</div>';
         return;
       }
       commentsList.innerHTML = comments.map(function (c) {

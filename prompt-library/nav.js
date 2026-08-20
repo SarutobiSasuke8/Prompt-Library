@@ -26,7 +26,13 @@
         { key: "agents",      href: "agents.html",      label: "agents" },
         { key: "collections", href: "collections.html", label: "collections" },
         { key: "playground",  href: "playground.html",  label: "playground" },
-        { key: "methodology", href: "learn.html",        label: "articles" }
+        { key: "methodology", href: "learn.html",        label: "articles" },
+        {
+          key: "extension",
+          href: "https://github.com/SarutobiSasuke8/Prompt-Library/tree/main/extension",
+          label: "extension",
+          external: true
+        }
       ]
     },
     { key: "about", href: "about.html", label: "about" }
@@ -44,7 +50,8 @@
       var isChildActive = l.items.some(function (i) { return i.key === active; });
       var items = l.items.map(function (i) {
         var cls = "nav-dd-item" + (i.key === active ? " current" : "");
-        return '<a href="' + esc(i.href) + '" class="' + cls + '">' + esc(i.label) + '</a>';
+        var attrs = i.external ? ' target="_blank" rel="noopener"' : "";
+        return '<a href="' + esc(i.href) + '" class="' + cls + '"' + attrs + '>' + esc(i.label) + '</a>';
       }).join("");
       return (
         '<div class="nav-dropdown">' +
@@ -95,7 +102,8 @@
       drawerHTML += '<div class="drawer-group-label">' + esc(l.label) + '</div>';
       l.items.forEach(function (i) {
         var cls = (i.key === active) ? ' class="active"' : "";
-        drawerHTML += '<a href="' + esc(i.href) + '"' + cls +
+        var attrs = i.external ? ' target="_blank" rel="noopener"' : "";
+        drawerHTML += '<a href="' + esc(i.href) + '"' + cls + attrs +
                       ' style="padding-left:24px;">' + esc(i.label) + '</a>';
       });
     } else {

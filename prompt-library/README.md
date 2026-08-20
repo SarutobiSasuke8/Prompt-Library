@@ -267,6 +267,18 @@ profile. Ratings and notes stay private to your browser either way —
 they are labelled "your rating" and "your notes" because that is
 literally what they are. See [the v1 contract](#the-v1-contract).
 
+### A browser extension
+
+A Chrome MV3 extension in [`extension/`](../extension) at the repo root.
+Type `//` (or `Ctrl+Shift+P`) in any textarea, input, or contenteditable
+field on the web to open a fuzzy-search picker and insert a saved prompt
+or snippet directly, without switching tabs. Tested against ChatGPT,
+claude.ai, and Gemini. v0 stores its items locally via
+`chrome.storage.sync` — it does not yet pull from the library on this
+site, see [the roadmap](ROADMAP.md#browser-extension--v0-shipped-v05-scope)
+for that. Load-unpacked install only for now; see
+[`extension/README.md`](../extension/README.md).
+
 ### An in-browser playground
 
 A scratchpad for composing and iterating on a prompt before copying it
@@ -418,9 +430,6 @@ The library becomes part of the fabric of AI-native workflows.
   becomes a template engine for your prompts.
 - **Prompt versioning.** Track how a prompt evolves. Pin a version in a
   collection. Diff against the latest.
-- **Browser extension.** Access the library from inside Claude,
-  ChatGPT, Cursor, or anywhere else. Bookmark things from the outside
-  in.
 - **CLI.** `npx prompt-lib get token-research | pbcopy`. The library
   is now terminal-native. Pipelines compose against it.
 - **API.** `GET /api/prompts`. Other tools consume the library as a

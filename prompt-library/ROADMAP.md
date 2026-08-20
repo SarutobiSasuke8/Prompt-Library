@@ -9,12 +9,45 @@ Don't build anything in here until v1 has real users and real signal.
 
 From a cynical outside review. These are ship-the-last-mile items, not new scope.
 
-- [ ] **Commit and push the pending working-tree changes.** ~850 lines of finished content work from the 2026-08-17 session (mds.js, prompts.js, three persona files, validator update) are sitting uncommitted. The session report records `commit_count: 0`. Ship it.
-- [ ] **Surface the browser extension.** `extension/` is a real, working MV3 extension (// trigger overlay, contenteditable support, React input handling) and it is mentioned nowhere: not in the README, not on the site. Link it from the site nav and root README.
+- [x] **Commit and push the pending working-tree changes.** ~850 lines of finished content work from the 2026-08-17 session (mds.js, prompts.js, three persona files, validator update) were sitting uncommitted. The session report recorded `commit_count: 0`. Pushed 2026-08-20.
+- [x] **Surface the browser extension.** `extension/` is a real, working MV3 extension (// trigger overlay, contenteditable support, React input handling) and was mentioned nowhere: not in the README, not on the site. Linked from the site nav and root README 2026-08-20; see the "Browser extension" section below for the full v0.5+ scope.
 - [ ] **Wire the extension to the library.** It currently stores snippets in `chrome.storage.sync` with zero connection to the 65 prompts in `prompts.js`. Ship a bundled seed set from `prompts.js` plus a "fetch latest" call against the Pages site. This is the most differentiated asset in the repo.
 - [ ] **Cut the root README to ~150 lines.** It is 856 lines of narrative for a static site. Move "The bet" / "The endgame" / "Principles" into a single `VISION.md`.
 - [ ] **Decide the fate of the fake interactions.** Ratings and comments are localStorage-only (already parked below). Either wire them to the existing `supabase/schema.sql` or remove the stars and comment threads; UI that pretends to persist is worse than no UI.
 - [ ] **Resolve `agents.js`.** Two entries advertising a full directory. Fold into `tools.js` and delete `agents.html` / `agent.html`, per the existing build-out note.
+
+---
+
+## Browser extension — v0 shipped, v0.5+ scope
+
+`extension/` (repo root, sibling of this folder) is a real, working MV3
+extension, not a future item — the v2/v3 lists below and elsewhere in this
+file described it as speculative before 2026-08-20; that was wrong and has
+been corrected. What v0 does today: `//`-trigger and `Ctrl+Shift+P` picker
+in any textarea/input/contenteditable, add/edit/delete/search items in the
+popup, JSON import/export, tested against ChatGPT/claude.ai/Gemini. See
+`extension/README.md` for the full v0 feature list and known limitations
+(no icons yet, `chrome.storage.sync`'s 100KB cap, load-unpacked only — not
+published to the Chrome Web Store).
+
+Its only defect is that it is orphaned from the rest of the project: it
+stores items independently in `chrome.storage.sync` with no connection to
+the 64 prompts in `prompts.js`, and nothing on the site or in the root
+README told anyone it existed until this section.
+
+- [x] Link the extension from the site and root README (2026-08-20).
+- [ ] **v0.5 — library sync.** Bundle a seed set exported from `prompts.js`
+  at build time, plus a "refresh from prompt-library.xyz" action in the
+  options page that re-fetches the current registry. This is the feature
+  that turns it from a private snippet tool into an actual extension of
+  the library.
+- [ ] **v1 — icons + Chrome Web Store listing.** Currently load-unpacked
+  only, which caps the audience at people willing to enable developer
+  mode.
+- [ ] **v1.5 — "Use in →" tier-1 targets from the site itself**, once the
+  deep-link work in build-out opportunity #2 below is wired — the
+  extension and the site's own "Use in ▾" control should end up sharing
+  the same target list.
 
 ---
 
@@ -259,9 +292,6 @@ Speculative. Park them; don't plan yet.
 
 - Prompt versioning — track edits, diff history, let users "fork" a prompt
 - Prompt chaining builder — visual flow to stitch prompts together
-- Browser extension — right-click any input on Claude/ChatGPT/Gemini to paste
-  a prompt from your library without switching tabs. The "killer app" version
-  of the tool track; do once deep-links + variable slots have usage signal.
 - CLI / API — `npx prompt-lib get token-research | pbcopy`. Unlocks dev
   workflows (Cursor, Claude Code users) that live in a terminal.
 - In-site "try this prompt" — run a prompt against a free model without leaving the page.
@@ -271,7 +301,6 @@ Speculative. Park them; don't plan yet.
   their own quota). Do NOT put an API key directly in frontend JS.
 - Model benchmarks — same prompt, compared outputs across models
 - API — `GET /api/prompts` so other tools can consume the library
-- Browser extension — copy any prompt from the library into ChatGPT/Claude
 - Paid tier — gated pro prompts, private folders, team workspaces
 
 ---

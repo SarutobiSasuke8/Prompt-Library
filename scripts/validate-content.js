@@ -14,6 +14,12 @@
 //   - every collection promptId resolves to a prompt
 //   - every MD `file` / `files[].file` path exists on disk
 //   - every article body block uses a known block type
+//   - no two entries in a registry share a title (near-duplicate content)
+//
+// Checks, per page:
+//   - every inline <script> in every .html page parses. A stray unescaped
+//     quote in md.html shipped a dead detail page for every MD doc and was
+//     invisible to the registry checks, because the data was fine.
 //
 // Runs in CI before deploy and locally with: node scripts/validate-content.js
 // No npm, no package.json, no dependencies — by design (see CLAUDE.md).
@@ -96,6 +102,20 @@ function fileExists(rel) {
   try { return fs.statSync(path.join(SITE, rel)).isFile(); } catch (_) { return false; }
 }
 
+// Same title twice in one registry means someone added a prompt that already
+// existed under a slightly different name. Cheap check, catches real drift.
+function checkTitles(label, entries) {
+  const seen = new Map();
+  entries.forEach((entry, i) => {
+    const key = String(entry.title || "").trim().toLowerCase();
+    if (!key) return;
+    if (seen.has(key)) {
+      fail(label + "[" + i + "] (id " + entry.id + "): duplicate title '" +
+        entry.title + "' (also at index " + seen.get(key) + ")");
+    } else seen.set(key, i);
+  });
+}
+
 // --- prompts ---------------------------------------------------------------
 let promptIds = new Set();
 try {
@@ -114,6 +134,7 @@ try {
     },
     optionalStrings: ["chaining", "notes"]
   });
+  checkTitles("prompt", PROMPTS);
   promptIds = new Set(PROMPTS.map((p) => p.id));
   summary.push(PROMPTS.length + " prompts / " + cats.size + " categories");
 } catch (e) {
@@ -276,6 +297,37 @@ try {
   summary.push(COLLECTIONS.length + " collections");
 } catch (e) {
   fail("FATAL: could not evaluate collections.js — " + e.message);
+}
+
+// --- inline page scripts ---------------------------------------------------
+// The registries can be perfectly valid while the page that renders them is
+// dead. Parse every inline <script> on every page so a stray quote cannot ship.
+try {
+  const vm = require("vm");
+  const pages = fs.readdirSync(SITE).filter((f) => f.endsWith(".html"));
+  let scripts = 0;
+  pages.forEach((page) => {
+    const html = fs.readFileSync(path.join(SITE, page), "utf8");
+    const inline = html.matchAll(/<script(?![^>]*\ssrc=)([^>]*)>([\s\S]*?)<\/script>/g);
+    for (const [, attrs, body] of inline) {
+      const type = /type\s*=\s*"([^"]*)"/.exec(attrs);
+      const isModule = type && type[1] === "module";
+      // Skip templates and JSON-LD; only real JS is parseable here.
+      if (type && !isModule && !/^(text|application)\/javascript$/.test(type[1])) continue;
+      scripts++;
+      try {
+        new vm.Script(body, { filename: page });
+      } catch (e) {
+        // A module's top-level import/export is a parse error for vm.Script,
+        // not a bug in the page.
+        if (isModule && /\b(import|export)\b/.test(e.message)) continue;
+        fail(page + ": inline script does not parse — " + e.message);
+      }
+    }
+  });
+  summary.push(scripts + " inline scripts / " + pages.length + " pages");
+} catch (e) {
+  fail("FATAL: could not scan page scripts — " + e.message);
 }
 
 // --- report ----------------------------------------------------------------

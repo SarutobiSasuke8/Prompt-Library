@@ -86,6 +86,7 @@ deserves its own note.
 | 2026-05-07 | [[2026-05-07-session-report-prompt-library-workflow-polish\|Auth QA and prompt workflow polish — PKM prompts + methodology articles]] | `main` | active |
 | 2026-07-12 | [[2026-07-12-session-report-prompt-library\|Strategic product and technical audit]] | `main` | parked |
 | 2026-08-04 | [[2026-08-04-session-report-prompt-library\|Trust alignment + vault content sync — v1 contract, 10 tools, content validator]] | `claude/vault-sync-and-trust-fixes` | active |
+| 2026-08-17 | [[2026-08-17-session-report-prompt-library\|Content expansion — 6 prompts, 3 MD personas, dead MD detail page fixed, page-script validation]] | `main` | active |
 
 ## Past work — reconstructed from git log
 

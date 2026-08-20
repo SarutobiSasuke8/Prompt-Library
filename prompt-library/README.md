@@ -176,7 +176,7 @@ you will be. This library is built to still make sense to you when you are.
 The site is live, read-only, and already load-bearing in real practitioner
 workflows. What's shipped right now:
 
-### A library of 54 prompts across 9 categories
+### A library of 64 prompts across 9 categories
 
 Web3, AI agents, software dev, business & BD, marketing, PKM, strategy,
 gaming, evaluation. Each prompt is a real tool, not a template. Each one:

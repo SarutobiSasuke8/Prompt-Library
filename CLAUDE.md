@@ -51,7 +51,7 @@ long-lived feature branch exists.
 ## Current state at a glance
 
 - Shipping on `main` via GitHub Pages.
-- 54 prompts across all 9 categories. Launch content target met.
+- All 9 categories populated. Launch content target met.
 - Full v1 surface: prompts / articles / tools / agents / md repo / user
   profile, with standardised bookmarks and localStorage-backed ratings
   + comments on every detail page. Backend wire-up is parked in

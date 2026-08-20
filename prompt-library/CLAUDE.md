@@ -494,8 +494,8 @@ Run these locally (open `index.html` in a browser) before any PR:
 ## Session history (what Claude has built so far)
 
 1. **Phase 1** — scaffolding: folder + 7 empty files committed
-2. **Phase 2** — library content filled to 54 prompts spanning all 9
-   categories. Launch target met. Per-category distribution lives in the
+2. **Phase 2** — library content filled out across all 9 categories.
+   Launch target met. Counts and per-category distribution live in the
    data; don't restate numbers here (they go stale fast).
 3. **Phase 3 + 4** — `index.html` + `style.css` + `add-prompt.html` built,
    data-driven category chips, keyboard shortcuts, modal, clipboard.

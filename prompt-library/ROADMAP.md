@@ -5,6 +5,19 @@ Don't build anything in here until v1 has real users and real signal.
 
 ---
 
+## External review actions — 2026-08-20
+
+From a cynical outside review. These are ship-the-last-mile items, not new scope.
+
+- [ ] **Commit and push the pending working-tree changes.** ~850 lines of finished content work from the 2026-08-17 session (mds.js, prompts.js, three persona files, validator update) are sitting uncommitted. The session report records `commit_count: 0`. Ship it.
+- [ ] **Surface the browser extension.** `extension/` is a real, working MV3 extension (// trigger overlay, contenteditable support, React input handling) and it is mentioned nowhere: not in the README, not on the site. Link it from the site nav and root README.
+- [ ] **Wire the extension to the library.** It currently stores snippets in `chrome.storage.sync` with zero connection to the 65 prompts in `prompts.js`. Ship a bundled seed set from `prompts.js` plus a "fetch latest" call against the Pages site. This is the most differentiated asset in the repo.
+- [ ] **Cut the root README to ~150 lines.** It is 856 lines of narrative for a static site. Move "The bet" / "The endgame" / "Principles" into a single `VISION.md`.
+- [ ] **Decide the fate of the fake interactions.** Ratings and comments are localStorage-only (already parked below). Either wire them to the existing `supabase/schema.sql` or remove the stars and comment threads; UI that pretends to persist is worse than no UI.
+- [ ] **Resolve `agents.js`.** Two entries advertising a full directory. Fold into `tools.js` and delete `agents.html` / `agent.html`, per the existing build-out note.
+
+---
+
 ## Parked / revisit soon
 
 Short-term items explicitly deferred during v1 polish. Revisit once the
@@ -33,6 +46,82 @@ bookmark + item-page standardisation work lands.
   (and the equivalent inline code in `prompt.html`) with the real API.
   Keep the same key format so historical local data can be migrated if
   useful.
+
+---
+
+## Build-out opportunities — identified 2026-08-17
+
+A content-addition pass surfaced gaps that are cheap to close and need no
+backend. Ordered by ratio of value to effort. Every number below came from
+`node scripts/validate-content.js` and the registry files; re-derive before
+acting, don't trust the figure here.
+
+### 1. `agents.js` is the thinnest surface on the site
+
+Two entries (`openclaw`, `hermes`) fill three declared groups
+(`framework`, `model`, `archetype`) and a full listing page + detail page.
+Every other registry carries 10–60 entries. `agents.html` currently
+advertises a directory that is nearly empty.
+
+Either populate it to roughly a dozen — the framework and archetype groups
+are the obvious holes — or fold agents into `tools.js` as a group and drop
+the separate surface. Leaving it as-is is the worst of the three.
+
+### 2. The "Use in X" deep-link feature is 3% wired
+
+`deepLink` breakdown: 57 `none`, 3 `planned`, 2 `supported`. The tool track
+in v2.5 assumes this works. Wiring the tier-1 targets (ChatGPT, Claude,
+Perplexity, Gemini) is a per-tool URL template plus the length guard already
+scoped below — no new architecture. Until then the "Use in ▾" control on
+every prompt page is mostly a copy button with extra steps.
+
+### 3. Variable slots exist but almost nothing uses them
+
+4 of 64 prompts contain `{{VARIABLE}}` slots, though `playground.html`
+renders them. Retrofitting the flagship prompts in each category is pure
+content work and makes the playground meaningfully better. The v2.5 entry
+below already specifies the schema — this is execution, not design.
+
+### 4. A third of the library is unreachable by browsing
+
+29 of 64 prompts belong to no collection, and `vibe-coding-generalist-template`
+is a repo-type collection with zero prompts. Collections are the only
+curated path into the library; search and category chips are the rest.
+Two or three new packs (an evaluation/agent-QA pack, a
+research-and-analysis pack) would cover most of the orphans.
+
+### 5. Articles are single-type
+
+All 11 articles are `articleType: "methodology"`, and the field exists to
+distinguish types. Nothing in the schema is broken; the surface is just
+narrower than it was designed for. Candidate second type: a short
+case-study or teardown format that references specific prompt ids, which
+also links the articles surface to the library surface.
+
+### 6. Content checks now cover schema, not quality
+
+`scripts/validate-content.js` caught nothing when a near-duplicate prompt
+was added in this session (a second pre-mortem prompt alongside id 37) —
+it validates shape, not overlap. A duplicate-title check landed on
+2026-08-17; a tag-overlap or purpose-similarity warning is the natural next
+step, and would have flagged all three duplicates found by hand.
+
+### 7. Pages were never syntax-checked before deploy
+
+`md.html` shipped an unescaped quote in its inline script that killed the
+detail page for **every** MD doc. The registries validated clean the whole
+time, because the data was fine. A parse check over every inline `<script>`
+landed on 2026-08-17 and now runs in CI. Worth extending to a smoke check
+that each detail page renders a known id — that class of failure is still
+invisible to a parser.
+
+### 8. `prompts.js` is 6k+ lines in one file
+
+Not urgent, and splitting it conflicts with "browsable by hand". Noted only
+so the next person who notices doesn't rediscover it as a surprise. If it
+is ever split, split by category with an index file — and update
+`add-prompt.html`, `validate-content.js`, and the CLAUDE.md schema section
+together.
 
 ---
 

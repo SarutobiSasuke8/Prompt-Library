@@ -11,7 +11,7 @@ A static, dark-themed, mobile-first web app serving a curated library of
 production-ready system prompts for people building with AI. No frameworks,
 no npm, no build step — three files and a browser tab.
 
-- **Live site:** https://sarutobisasuke8.github.io/prompt-library/ *(active once Pages is enabled)*
+- **Live site:** https://sarutobisasuke8.github.io/Prompt-Library/ (case-sensitive; the lowercase URL 404s)
 - **Docs:** [`prompt-library/README.md`](./prompt-library/README.md)
 - **Dev context:** [`prompt-library/CLAUDE.md`](./prompt-library/CLAUDE.md)
 - **Contributing:** [`prompt-library/CONTRIBUTING.md`](./prompt-library/CONTRIBUTING.md)

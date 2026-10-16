@@ -1,0 +1,20 @@
+{
+  "name": "prompt-library-checks",
+  "private": true,
+  "description": "Dev-only checks for the static site in ../prompt-library. Nothing here ships: the Pages deploy publishes prompt-library/ only.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "test": "npm run test:content && npm run test:site",
+    "test:content": "node ../scripts/validate-content.js",
+    "test:site": "node check-site.mjs",
+    "test:a11y": "node a11y-smoke.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "html-validate": "11.16.1",
+    "playwright": "1.63.0"
+  }
+}

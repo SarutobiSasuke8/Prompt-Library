@@ -47,6 +47,10 @@ long-lived feature branch exists.
 - `prompt-library/CONTRIBUTING.md` — schema + quality bar + PR flow
 - `prompt-library/ROADMAP.md`  — v2 backend features parked here
 - `.github/workflows/deploy.yml` — Pages deploy (lives at repo root, not under prompt-library/)
+- `.github/workflows/checks.yml` — PR and main checks (content, HTML, links, prompts, axe)
+- `tests/` — dev-only check scripts with their own pinned `package.json`.
+  Not shipped (Pages uploads `prompt-library/` only), so the site keeps its
+  no-npm contract. Run `cd tests && npm ci && npm test`.
 
 ## Current state at a glance
 

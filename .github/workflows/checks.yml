@@ -1,0 +1,86 @@
+# ============================================================
+# Site checks for prompt-library/ — dev-only, nothing here ships.
+#
+# Runs on every pull request and on push to main. It is separate from
+# deploy.yml on purpose: deploy behaviour (trigger paths, permissions,
+# the Pages upload of prompt-library/) is unchanged by this workflow.
+#
+#   content + site  scripts/validate-content.js (registry schema),
+#                   tests/check-site.mjs (html-validate, internal links
+#                   and anchors, prompt required fields + unique ids)
+#   a11y            tests/a11y-smoke.mjs (axe-core WCAG 2.1 A/AA on
+#                   index.html at 375px and 1280px)
+#
+# Actions are pinned to full commit SHAs; the tag is in the comment.
+# ============================================================
+
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: tests
+
+jobs:
+  site:
+    name: Content, HTML and links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install dev dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Validate content registries
+        run: npm run test:content
+
+      - name: HTML, links and prompt entries
+        run: npm run test:site
+
+  a11y:
+    name: Accessibility smoke (axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install dev dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps --only-shell chromium
+
+      - name: axe smoke on index.html
+        run: npm run test:a11y

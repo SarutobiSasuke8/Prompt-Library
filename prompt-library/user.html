@@ -1652,7 +1652,7 @@
             list.style.cssText = "display:flex; flex-direction:column; gap:8px;";
             items.forEach((p) => {
               const row = document.createElement("a");
-              row.href = "index.html#prompt-" + p.id;
+              row.href = "prompt.html?id=" + p.id;
               row.style.cssText = "display:flex; justify-content:space-between; gap:10px; background:var(--bg-2); border:1px solid var(--border); padding:10px 12px; border-radius:var(--radius); color:var(--text); text-decoration:none;";
               row.innerHTML =
                 '<span style="font-size:13px; font-weight:600;">' + escapeHtml(p.title) + '</span>' +
